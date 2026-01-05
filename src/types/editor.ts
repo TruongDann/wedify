@@ -1,0 +1,133 @@
+export interface Position {
+  x: number;
+  y: number;
+}
+
+export interface Size {
+  width: number;
+  height: number;
+}
+
+export interface BaseElement {
+  id: string;
+  type: "text" | "image" | "shape" | "sticker";
+  position: Position;
+  size: Size;
+  rotation: number;
+  opacity: number;
+  zIndex: number;
+  locked: boolean;
+}
+
+export interface TextElement extends BaseElement {
+  type: "text";
+  content: string;
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: number;
+  fontStyle: "normal" | "italic";
+  textDecoration: "none" | "underline" | "line-through";
+  textAlign: "left" | "center" | "right";
+  color: string;
+  backgroundColor: string;
+  lineHeight: number;
+  letterSpacing: number;
+  // Padding
+  padding: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  // Border
+  border: {
+    width: number;
+    color: string;
+    style: "solid" | "dashed" | "dotted" | "none";
+    position: "all" | "top" | "bottom" | "left" | "right";
+  };
+  // Border Radius
+  borderRadius: {
+    topLeft: number;
+    topRight: number;
+    bottomLeft: number;
+    bottomRight: number;
+  };
+  // Shadow
+  shadow: {
+    enabled: boolean;
+    x: number;
+    y: number;
+    blur: number;
+    color: string;
+  };
+  // Link
+  hyperlink: string;
+  // Animation
+  animation: {
+    enabled: boolean;
+    continuous: boolean;
+    type: "none" | "fadeIn" | "slideIn" | "bounce" | "pulse" | "shake" | "zoom";
+  };
+}
+
+export interface ImageElement extends BaseElement {
+  type: "image";
+  src: string;
+  alt: string;
+  objectFit: "cover" | "contain" | "fill";
+  borderRadius: number;
+  border: {
+    width: number;
+    color: string;
+    style: "solid" | "dashed" | "dotted";
+  };
+  shadow: {
+    x: number;
+    y: number;
+    blur: number;
+    color: string;
+  };
+}
+
+export interface ShapeElement extends BaseElement {
+  type: "shape";
+  shapeType: "rectangle" | "circle" | "triangle" | "heart" | "star" | "line";
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
+}
+
+export interface StickerElement extends BaseElement {
+  type: "sticker";
+  src: string;
+  category: string;
+}
+
+export type EditorElement =
+  | TextElement
+  | ImageElement
+  | ShapeElement
+  | StickerElement;
+
+export interface CanvasSettings {
+  width: number;
+  height: number;
+  backgroundColor: string;
+  backgroundImage: string | null;
+  backgroundSize: "cover" | "contain" | "fill";
+}
+
+export interface Template {
+  id: string;
+  name: string;
+  thumbnail: string;
+  category: string;
+  canvasSettings: CanvasSettings;
+  elements: EditorElement[];
+}
+
+export interface HistoryState {
+  elements: EditorElement[];
+  canvasSettings: CanvasSettings;
+}
