@@ -1120,7 +1120,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
         <div className="border-b border-gray-100">
           <SectionHeader title="Hiệu ứng chuyển động" sectionKey="animation" />
           {expandedSections.includes("animation") && (
-            <SectionContent className="px-4 pb-4 space-y-3">
+            <div className="px-4 pb-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Bật hiệu ứng</span>
                 <Switch
