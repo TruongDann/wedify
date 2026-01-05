@@ -33,6 +33,12 @@ import {
   LinkOutlined,
   CheckCircleOutlined,
   CaretDownOutlined,
+  FontColorsOutlined,
+  BorderOuterOutlined,
+  RadiusSettingOutlined,
+  BoxPlotOutlined,
+  DragOutlined,
+  PlayCircleOutlined,
 } from "@ant-design/icons";
 import { useEditorStore } from "@/store/editorStore";
 import {
@@ -177,15 +183,20 @@ const RightPanel: React.FC<RightPanelProps> = ({
   const SectionHeader = ({
     title,
     sectionKey,
+    icon,
   }: {
     title: string;
     sectionKey: string;
+    icon?: React.ReactNode;
   }) => (
     <div
-      className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 font-medium text-sm"
+      className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 font-medium text-sm ${expandedSections.includes(sectionKey) ? "border-b border-gray-100" : ""}`}
       onClick={() => toggleSection(sectionKey)}
     >
-      <span>{title}</span>
+      <div className="flex items-center gap-2">
+        {icon && <span className="text-gray-500">{icon}</span>}
+        <span>{title}</span>
+      </div>
       {expandedSections.includes(sectionKey) ? (
         <DownOutlined className="text-xs" />
       ) : (
@@ -601,12 +612,12 @@ const RightPanel: React.FC<RightPanelProps> = ({
     };
 
     return (
-      <>
+      <div className="p-3 space-y-3">
         {/* Kiểu chữ */}
-        <div className="border-b border-gray-100">
-          <SectionHeader title="Kiểu chữ" sectionKey="style" />
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader title="Kiểu chữ" sectionKey="style" icon={<FontColorsOutlined />} />
           {expandedSections.includes("style") && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pt-3 pb-4">
               <TextStyleButtons element={element} />
 
               <PropertyRow label="Căn chỉnh">
@@ -705,10 +716,10 @@ const RightPanel: React.FC<RightPanelProps> = ({
         </div>
 
         {/* Khoảng đệm (Padding) */}
-        <div className="border-b border-gray-100">
-          <SectionHeader title="Khoảng đệm" sectionKey="padding" />
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader title="Khoảng đệm" sectionKey="padding" icon={<BoxPlotOutlined />} />
           {expandedSections.includes("padding") && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pt-3 pb-4">
               <div className="mb-3">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs text-gray-500">
@@ -851,10 +862,10 @@ const RightPanel: React.FC<RightPanelProps> = ({
         </div>
 
         {/* Đường viền (Border) */}
-        <div className="border-b border-gray-100">
-          <SectionHeader title="Đường viền" sectionKey="border" />
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader title="Đường viền" sectionKey="border" icon={<BorderOuterOutlined />} />
           {expandedSections.includes("border") && (
-            <div className="px-4 pb-4 space-y-3">
+            <div className="px-4 pt-3 pb-4 space-y-3">
               <PropertyRow label="Size">
                 <input
                   type="number"
@@ -916,10 +927,10 @@ const RightPanel: React.FC<RightPanelProps> = ({
         </div>
 
         {/* Bo góc (Border Radius) */}
-        <div className="border-b border-gray-100">
-          <SectionHeader title="Bo góc" sectionKey="borderRadius" />
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader title="Bo góc" sectionKey="borderRadius" icon={<RadiusSettingOutlined />} />
           {expandedSections.includes("borderRadius") && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pt-3 pb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-gray-500">Bo góc</span>
                 <button
@@ -1017,10 +1028,10 @@ const RightPanel: React.FC<RightPanelProps> = ({
         </div>
 
         {/* Đổ bóng (Shadow) */}
-        <div className="border-b border-gray-100">
-          <SectionHeader title="Đổ bóng" sectionKey="shadow" />
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader title="Đổ bóng" sectionKey="shadow" icon={<CopyOutlined />} />
           {expandedSections.includes("shadow") && (
-            <div className="px-4 pb-4 space-y-3">
+            <div className="px-4 pt-3 pb-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Đổ bóng</span>
                 <Switch
@@ -1097,10 +1108,10 @@ const RightPanel: React.FC<RightPanelProps> = ({
         </div>
 
         {/* Liên kết (Hyperlink) */}
-        <div className="border-b border-gray-100">
-          <SectionHeader title="Liên kết" sectionKey="link" />
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader title="Liên kết" sectionKey="link" icon={<LinkOutlined />} />
           {expandedSections.includes("link") && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pt-3 pb-4">
               <div className="mb-2">
                 <span className="text-xs text-gray-500">
                   Hyperlink (Tùy chọn)
@@ -1117,10 +1128,10 @@ const RightPanel: React.FC<RightPanelProps> = ({
         </div>
 
         {/* Hiệu ứng chuyển động (Animation) */}
-        <div className="border-b border-gray-100">
-          <SectionHeader title="Hiệu ứng chuyển động" sectionKey="animation" />
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader title="Hiệu ứng chuyển động" sectionKey="animation" icon={<PlayCircleOutlined />} />
           {expandedSections.includes("animation") && (
-            <div className="px-4 pb-4 space-y-3">
+            <div className="px-4 pt-3 pb-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Bật hiệu ứng</span>
                 <Switch
@@ -1175,10 +1186,10 @@ const RightPanel: React.FC<RightPanelProps> = ({
         </div>
 
         {/* Position */}
-        <div className="border-b border-gray-100">
-          <SectionHeader title="Vị trí & Kích thước" sectionKey="position" />
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader title="Vị trí & Kích thước" sectionKey="position" icon={<DragOutlined />} />
           {expandedSections.includes("position") && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pt-3 pb-4">
               <PositionGrid position={element.position} size={element.size} />
               <PropertyRow label="Xoay">
                 <Slider
@@ -1197,7 +1208,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
         </div>
 
         {/* Delete Button */}
-        <div className="p-4">
+        <div className="pt-1">
           <Button
             danger
             block
@@ -1207,7 +1218,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
             Xóa phần tử
           </Button>
         </div>
-      </>
+      </div>
     );
   };
 
