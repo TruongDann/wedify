@@ -190,7 +190,9 @@ const RightPanel: React.FC<RightPanelProps> = ({
     icon?: React.ReactNode;
   }) => (
     <div
-      className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 font-medium text-sm ${expandedSections.includes(sectionKey) ? "border-b border-gray-100" : ""}`}
+      className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 font-medium text-sm ${
+        expandedSections.includes(sectionKey) ? "border-b border-gray-100" : ""
+      }`}
       onClick={() => toggleSection(sectionKey)}
     >
       <div className="flex items-center gap-2">
@@ -615,7 +617,11 @@ const RightPanel: React.FC<RightPanelProps> = ({
       <div className="p-3 space-y-3">
         {/* Kiểu chữ */}
         <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <SectionHeader title="Kiểu chữ" sectionKey="style" icon={<FontColorsOutlined />} />
+          <SectionHeader
+            title="Kiểu chữ"
+            sectionKey="style"
+            icon={<FontColorsOutlined />}
+          />
           {expandedSections.includes("style") && (
             <div className="px-4 pt-3 pb-4">
               <TextStyleButtons element={element} />
@@ -717,7 +723,11 @@ const RightPanel: React.FC<RightPanelProps> = ({
 
         {/* Khoảng đệm (Padding) */}
         <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <SectionHeader title="Khoảng đệm" sectionKey="padding" icon={<BoxPlotOutlined />} />
+          <SectionHeader
+            title="Khoảng đệm"
+            sectionKey="padding"
+            icon={<BoxPlotOutlined />}
+          />
           {expandedSections.includes("padding") && (
             <div className="px-4 pt-3 pb-4">
               <div className="mb-3">
@@ -861,9 +871,13 @@ const RightPanel: React.FC<RightPanelProps> = ({
           )}
         </div>
 
-        {/* Đường viền (Border) */}
+        {/* Đường viền */}
         <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <SectionHeader title="Đường viền" sectionKey="border" icon={<BorderOuterOutlined />} />
+          <SectionHeader
+            title="Đường viền"
+            sectionKey="border"
+            icon={<BorderOuterOutlined />}
+          />
           {expandedSections.includes("border") && (
             <div className="px-4 pt-3 pb-4 space-y-3">
               <PropertyRow label="Size">
@@ -922,114 +936,113 @@ const RightPanel: React.FC<RightPanelProps> = ({
                   <Option value="right">Phải</Option>
                 </Select>
               </PropertyRow>
-            </div>
-          )}
-        </div>
 
-        {/* Bo góc (Border Radius) */}
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <SectionHeader title="Bo góc" sectionKey="borderRadius" icon={<RadiusSettingOutlined />} />
-          {expandedSections.includes("borderRadius") && (
-            <div className="px-4 pt-3 pb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-gray-500">Bo góc</span>
-                <button
-                  className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
-                    borderRadiusLinked
-                      ? "bg-primary/10 text-primary border border-primary"
-                      : "bg-gray-100 text-gray-500 border border-gray-200"
-                  }`}
-                  onClick={() => setBorderRadiusLinked(!borderRadiusLinked)}
-                  title={borderRadiusLinked ? "Đồng bộ: BẬT" : "Đồng bộ: TẮT"}
-                >
-                  <LinkOutlined />
-                  <span>{borderRadiusLinked ? "Đồng bộ" : "Riêng"}</span>
-                </button>
+              {/* Bo góc */}
+              <div className="pt-2 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Bo góc</span>
+                  <button
+                    className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
+                      borderRadiusLinked
+                        ? "bg-primary/10 text-primary border border-primary"
+                        : "bg-gray-100 text-gray-500 border border-gray-200"
+                    }`}
+                    onClick={() => setBorderRadiusLinked(!borderRadiusLinked)}
+                    title={borderRadiusLinked ? "Đồng bộ: BẬT" : "Đồng bộ: TẮT"}
+                  >
+                    <LinkOutlined />
+                    <span>{borderRadiusLinked ? "Đồng bộ" : "Riêng"}</span>
+                  </button>
+                </div>
+
+                {borderRadiusLinked ? (
+                  // Single input for all corners
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400">Tất cả</span>
+                    <input
+                      type="number"
+                      className="flex-1 h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                      value={borderRadius.topLeft}
+                      min={0}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        handleUpdate({
+                          borderRadius: {
+                            topLeft: val,
+                            topRight: val,
+                            bottomLeft: val,
+                            bottomRight: val,
+                          },
+                        });
+                      }}
+                    />
+                  </div>
+                ) : (
+                  // Individual inputs
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      {
+                        label: "TL",
+                        key: "topLeft",
+                        value: borderRadius.topLeft,
+                      },
+                      {
+                        label: "TR",
+                        key: "topRight",
+                        value: borderRadius.topRight,
+                      },
+                      {
+                        label: "BL",
+                        key: "bottomLeft",
+                        value: borderRadius.bottomLeft,
+                      },
+                      {
+                        label: "BR",
+                        key: "bottomRight",
+                        value: borderRadius.bottomRight,
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.key}
+                        className="flex flex-col items-center gap-1"
+                      >
+                        <span className="text-xs text-gray-400">
+                          {item.label}
+                        </span>
+                        <input
+                          type="number"
+                          className="w-full h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                          value={item.value}
+                          min={0}
+                          onChange={(e) => {
+                            const newValue = Number(e.target.value) || 0;
+                            handleUpdate({
+                              borderRadius: {
+                                topLeft: borderRadius.topLeft,
+                                topRight: borderRadius.topRight,
+                                bottomLeft: borderRadius.bottomLeft,
+                                bottomRight: borderRadius.bottomRight,
+                                [item.key]: newValue,
+                              },
+                            });
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-
-              {borderRadiusLinked ? (
-                // Single input for all corners
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">Tất cả</span>
-                  <input
-                    type="number"
-                    className="flex-1 h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                    value={borderRadius.topLeft}
-                    min={0}
-                    onChange={(e) => {
-                      const val = Number(e.target.value) || 0;
-                      handleUpdate({
-                        borderRadius: {
-                          topLeft: val,
-                          topRight: val,
-                          bottomLeft: val,
-                          bottomRight: val,
-                        },
-                      });
-                    }}
-                  />
-                </div>
-              ) : (
-                // Individual inputs
-                <div className="grid grid-cols-4 gap-2">
-                  {[
-                    {
-                      label: "TL",
-                      key: "topLeft",
-                      value: borderRadius.topLeft,
-                    },
-                    {
-                      label: "TR",
-                      key: "topRight",
-                      value: borderRadius.topRight,
-                    },
-                    {
-                      label: "BL",
-                      key: "bottomLeft",
-                      value: borderRadius.bottomLeft,
-                    },
-                    {
-                      label: "BR",
-                      key: "bottomRight",
-                      value: borderRadius.bottomRight,
-                    },
-                  ].map((item) => (
-                    <div
-                      key={item.key}
-                      className="flex flex-col items-center gap-1"
-                    >
-                      <span className="text-xs text-gray-400">
-                        {item.label}
-                      </span>
-                      <input
-                        type="number"
-                        className="w-full h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                        value={item.value}
-                        min={0}
-                        onChange={(e) => {
-                          const newValue = Number(e.target.value) || 0;
-                          handleUpdate({
-                            borderRadius: {
-                              topLeft: borderRadius.topLeft,
-                              topRight: borderRadius.topRight,
-                              bottomLeft: borderRadius.bottomLeft,
-                              bottomRight: borderRadius.bottomRight,
-                              [item.key]: newValue,
-                            },
-                          });
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
         </div>
 
         {/* Đổ bóng (Shadow) */}
         <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <SectionHeader title="Đổ bóng" sectionKey="shadow" icon={<CopyOutlined />} />
+          <SectionHeader
+            title="Đổ bóng"
+            sectionKey="shadow"
+            icon={<CopyOutlined />}
+          />
           {expandedSections.includes("shadow") && (
             <div className="px-4 pt-3 pb-4 space-y-3">
               <div className="flex items-center justify-between">
@@ -1109,7 +1122,11 @@ const RightPanel: React.FC<RightPanelProps> = ({
 
         {/* Liên kết (Hyperlink) */}
         <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <SectionHeader title="Liên kết" sectionKey="link" icon={<LinkOutlined />} />
+          <SectionHeader
+            title="Liên kết"
+            sectionKey="link"
+            icon={<LinkOutlined />}
+          />
           {expandedSections.includes("link") && (
             <div className="px-4 pt-3 pb-4">
               <div className="mb-2">
@@ -1129,7 +1146,11 @@ const RightPanel: React.FC<RightPanelProps> = ({
 
         {/* Hiệu ứng chuyển động (Animation) */}
         <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <SectionHeader title="Hiệu ứng chuyển động" sectionKey="animation" icon={<PlayCircleOutlined />} />
+          <SectionHeader
+            title="Hiệu ứng chuyển động"
+            sectionKey="animation"
+            icon={<PlayCircleOutlined />}
+          />
           {expandedSections.includes("animation") && (
             <div className="px-4 pt-3 pb-4 space-y-3">
               <div className="flex items-center justify-between">
@@ -1187,7 +1208,11 @@ const RightPanel: React.FC<RightPanelProps> = ({
 
         {/* Position */}
         <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <SectionHeader title="Vị trí & Kích thước" sectionKey="position" icon={<DragOutlined />} />
+          <SectionHeader
+            title="Vị trí & Kích thước"
+            sectionKey="position"
+            icon={<DragOutlined />}
+          />
           {expandedSections.includes("position") && (
             <div className="px-4 pt-3 pb-4">
               <PositionGrid position={element.position} size={element.size} />
