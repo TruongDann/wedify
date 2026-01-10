@@ -141,6 +141,12 @@ const TextElementComponent: React.FC<TextElementProps> = ({
   const hasBorder = border.width > 0 && border.style !== "none";
   const hasShadow = shadow.enabled;
 
+  // Smart Shadow Logic
+  // If box has background or border, shadow applies to the box (Rect)
+  // If box is transparent/invisible, shadow applies to the text (Text)
+  const applyShadowToBox = hasShadow && (hasBackground || hasBorder);
+  const applyShadowToText = hasShadow && !hasBackground && !hasBorder;
+
   // Calculate total size including padding
   const totalWidth = element.size.width + padding.left + padding.right;
   const totalHeight = element.size.height + padding.top + padding.bottom;
@@ -186,12 +192,11 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         }
         strokeWidth={hasBorder && border.position === "all" ? border.width : 0}
         dash={borderDash}
-        shadowEnabled={hasShadow}
-        shadowColor={hasShadow ? shadow.color : undefined}
-        shadowBlur={hasShadow ? shadow.blur : 0}
-        shadowOffsetX={hasShadow ? shadow.x : 0}
-        shadowOffsetY={hasShadow ? shadow.y : 0}
-        shadowOpacity={hasShadow ? 0.5 : 0}
+        shadowEnabled={applyShadowToBox}
+        shadowColor={applyShadowToBox ? shadow.color : undefined}
+        shadowBlur={applyShadowToBox ? shadow.blur : 0}
+        shadowOffsetX={applyShadowToBox ? shadow.x : 0}
+        shadowOffsetY={applyShadowToBox ? shadow.y : 0}
       />
 
       {/* Partial Borders */}
@@ -255,6 +260,11 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         lineHeight={element.lineHeight}
         letterSpacing={element.letterSpacing}
         wrap="word"
+        shadowEnabled={applyShadowToText}
+        shadowColor={applyShadowToText ? shadow.color : undefined}
+        shadowBlur={applyShadowToText ? shadow.blur : 0}
+        shadowOffsetX={applyShadowToText ? shadow.x : 0}
+        shadowOffsetY={applyShadowToText ? shadow.y : 0}
       />
     </Group>
   );
