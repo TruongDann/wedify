@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useMemo } from "react";
-import { Text, Group, Rect } from "react-konva";
+import { Text, Group, Rect, Line } from "react-konva";
 import Konva from "konva";
 import { TextElement } from "@/types/editor";
 import { useEditorStore } from "@/store/editorStore";
@@ -173,7 +173,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
       onDragEnd={onDragEnd}
       onTransformEnd={onTransformEnd}
     >
-      {/* Background Rect with shadow, border, and fill */}
+      {/* Background Rect with shadow, border (if all), and fill */}
       <Rect
         x={0}
         y={0}
@@ -181,8 +181,10 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         height={totalHeight}
         fill={hasBackground ? element.backgroundColor : "transparent"}
         cornerRadius={cornerRadiusArray}
-        stroke={hasBorder ? border.color : undefined}
-        strokeWidth={hasBorder ? border.width : 0}
+        stroke={
+          hasBorder && border.position === "all" ? border.color : undefined
+        }
+        strokeWidth={hasBorder && border.position === "all" ? border.width : 0}
         dash={borderDash}
         shadowEnabled={hasShadow}
         shadowColor={hasShadow ? shadow.color : undefined}
@@ -191,6 +193,40 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         shadowOffsetY={hasShadow ? shadow.y : 0}
         shadowOpacity={hasShadow ? 0.5 : 0}
       />
+
+      {/* Partial Borders */}
+      {hasBorder && border.position === "top" && (
+        <Line
+          points={[0, 0, totalWidth, 0]}
+          stroke={border.color}
+          strokeWidth={border.width}
+          dash={borderDash}
+        />
+      )}
+      {hasBorder && border.position === "bottom" && (
+        <Line
+          points={[0, totalHeight, totalWidth, totalHeight]}
+          stroke={border.color}
+          strokeWidth={border.width}
+          dash={borderDash}
+        />
+      )}
+      {hasBorder && border.position === "left" && (
+        <Line
+          points={[0, 0, 0, totalHeight]}
+          stroke={border.color}
+          strokeWidth={border.width}
+          dash={borderDash}
+        />
+      )}
+      {hasBorder && border.position === "right" && (
+        <Line
+          points={[totalWidth, 0, totalWidth, totalHeight]}
+          stroke={border.color}
+          strokeWidth={border.width}
+          dash={borderDash}
+        />
+      )}
 
       {/* Text - Konva Text supports:
           - align: "left" | "center" | "right" (horizontal within width)
