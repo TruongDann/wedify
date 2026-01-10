@@ -39,6 +39,7 @@ import {
   BoxPlotOutlined,
   DragOutlined,
   PlayCircleOutlined,
+  ExportOutlined,
 } from "@ant-design/icons";
 import { useEditorStore } from "@/store/editorStore";
 import {
@@ -1134,12 +1135,20 @@ const RightPanel: React.FC<RightPanelProps> = ({
                   Hyperlink (Tùy chọn)
                 </span>
               </div>
-              <Input
-                value={hyperlink}
-                onChange={(e) => handleUpdate({ hyperlink: e.target.value })}
-                placeholder="https://example.com"
-                prefix={<LinkOutlined className="text-gray-400" />}
-              />
+              <div className="flex gap-2">
+                <Input
+                  value={hyperlink}
+                  onChange={(e) => handleUpdate({ hyperlink: e.target.value })}
+                  placeholder="https://example.com"
+                  prefix={<LinkOutlined className="text-gray-400" />}
+                />
+                <Button
+                  icon={<ExportOutlined />}
+                  disabled={!hyperlink}
+                  onClick={() => window.open(hyperlink, "_blank")}
+                  title="Mở liên kết"
+                />
+              </div>
             </div>
           )}
         </div>

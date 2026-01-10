@@ -63,6 +63,16 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     }
   }, [border.style]);
 
+  const handleClick = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
+    // Cast to any to access ctrlKey safely as it might not be present on TouchEvent
+    const evt = e.evt as any;
+    if ((evt.ctrlKey || evt.metaKey) && element.hyperlink) {
+      window.open(element.hyperlink, "_blank");
+      return;
+    }
+    onSelect();
+  };
+
   const handleDblClick = () => {
     if (!textRef.current || !groupRef.current) return;
 
@@ -172,8 +182,8 @@ const TextElementComponent: React.FC<TextElementProps> = ({
       rotation={element.rotation}
       opacity={element.opacity}
       draggable={!element.locked}
-      onClick={onSelect}
-      onTap={onSelect}
+      onClick={handleClick}
+      onTap={handleClick}
       onDblClick={handleDblClick}
       onDblTap={handleDblClick}
       onDragEnd={onDragEnd}
