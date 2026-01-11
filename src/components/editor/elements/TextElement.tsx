@@ -6,6 +6,9 @@ import Konva from "konva";
 import { TextElement } from "@/types/editor";
 import { useEditorStore } from "@/store/editorStore";
 
+/**
+ * Props của TextElement
+ */
 interface TextElementProps {
   element: TextElement;
   isSelected: boolean;
@@ -14,6 +17,13 @@ interface TextElementProps {
   onTransformEnd: (e: Konva.KonvaEventObject<Event>) => void;
 }
 
+/**
+ * Component hiển thị Text trên Canvas
+ * - Hỗ trợ style cơ bản (font, màu, size...)
+ * - Nền, viền, đổ bóng
+ * - Chỉnh sửa văn bản trực tiếp (Double click)
+ * - Kéo thả, xoay, animation
+ */
 const TextElementComponent: React.FC<TextElementProps> = ({
   element,
   onSelect,
@@ -24,7 +34,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
   const textRef = useRef<Konva.Text>(null);
   const { updateElement } = useEditorStore();
 
-  // Get default values for new properties
+  // Lấy giá trị mặc định nếu chưa có
   const padding = element.padding || { top: 0, right: 0, bottom: 0, left: 0 };
   const border = element.border || {
     width: 0,
@@ -40,7 +50,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     color: "rgba(0,0,0,0.2)",
   };
 
-  // Calculate corner radius array for Konva [topLeft, topRight, bottomRight, bottomLeft]
+  // Tính mảng bo góc cho Konva [topLeft, topRight, bottomRight, bottomLeft]
   const cornerRadiusArray = useMemo(() => {
     const br = element.borderRadius || {
       topLeft: 0,
@@ -51,7 +61,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     return [br.topLeft, br.topRight, br.bottomRight, br.bottomLeft];
   }, [element.borderRadius]);
 
-  // Calculate border dash pattern based on style
+  // Tính kiểu nét đứt (dash) cho viền
   const borderDash = useMemo(() => {
     switch (border.style) {
       case "dashed":
@@ -73,6 +83,10 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     onSelect();
   };
 
+  /**
+   * Xử lý double click để sửa văn bản trực tiếp.
+   * Tạo một textarea tạm thời đè lên canvas để người dùng nhập liệu.
+   */
   const handleDblClick = () => {
     if (!textRef.current || !groupRef.current) return;
 
@@ -80,17 +94,19 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     const stage = groupNode.getStage();
     if (!stage) return;
 
-    // Hide group
+    // Ẩn element trên canvas khi đang sửa
     groupNode.hide();
 
-    // Create textarea over canvas
+    // Tính vị trí tương đối so với viewport
     const absPos = groupNode.absolutePosition();
     const stageBox = stage.container().getBoundingClientRect();
     const scale = stage.scaleX();
 
+    // Tạo và thêm textarea vào DOM
     const textarea = document.createElement("textarea");
     document.body.appendChild(textarea);
 
+    // Style textarea giống hệt text element
     textarea.value = element.content;
     textarea.style.position = "absolute";
     textarea.style.top = `${stageBox.top + absPos.y * scale}px`;
@@ -103,7 +119,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     textarea.style.fontStyle = element.fontStyle;
     textarea.style.color = element.color;
     textarea.style.textAlign = element.textAlign;
-    textarea.style.border = "2px solid #ec4899";
+    textarea.style.border = "2px solid #ec4899"; // Viền hồng để biết đang sửa
     textarea.style.padding = `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`;
     textarea.style.margin = "0px";
     textarea.style.overflow = "hidden";
@@ -120,20 +136,24 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     textarea.style.zIndex = "1000";
     textarea.style.boxSizing = "border-box";
 
+    // Focus và chọn toàn bộ text để sửa ngay
     textarea.focus();
     textarea.select();
 
+    // Hàm dọn dẹp: Xóa textarea và hiện lại text gốc
     const removeTextarea = () => {
       textarea.remove();
       groupNode.show();
       stage.batchDraw();
     };
 
+    // Lưu khi blur
     textarea.addEventListener("blur", () => {
       updateElement(element.id, { content: textarea.value });
       removeTextarea();
     });
 
+    // Lưu khi nhấn Enter (trừ khi giữ Shift), Hủy khi nhấn Escape
     textarea.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         removeTextarea();
@@ -145,41 +165,40 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     });
   };
 
-  // Check if background should be visible
+  // Kiểm tra xem có cần hiển thị nền không
+  // Xác định xem box element (nền/viền) có hiển thị không
   const hasBackground =
     element.backgroundColor && element.backgroundColor !== "transparent";
   const hasBorder = border.width > 0 && border.style !== "none";
   const hasShadow = shadow.enabled;
 
-  // Smart Shadow Logic
-  // If box has background or border, shadow applies to the box (Rect)
-  // If box is transparent/invisible, shadow applies to the text (Text)
+  /**
+   * Logic đổ bóng:
+   * - Nếu khung có nền hoặc viền: Đổ bóng cho khung (Box Shadow).
+   * - Nếu khung trong suốt: Đổ bóng cho chữ (Text Shadow).
+   */
   const applyShadowToBox = hasShadow && (hasBackground || hasBorder);
   const applyShadowToText = hasShadow && !hasBackground && !hasBorder;
 
-  // Calculate total size including padding
+  // Tính tổng kích thước bao gồm padding
   const totalWidth = element.size.width + padding.left + padding.right;
   const totalHeight = element.size.height + padding.top + padding.bottom;
 
-  // Content area (where text lives) = original element size
+  // Vùng nội dung (nơi chứa text) = kích thước gốc của element
   const contentWidth = element.size.width;
   const contentHeight = element.size.height;
 
-  // Text is positioned at padding offset
-  // The align property will handle horizontal alignment WITHIN the text box
-  // verticalAlign handles vertical alignment WITHIN the text box
-  // Text is positioned at padding offset
-  // The align property will handle horizontal alignment WITHIN the text box
-  // verticalAlign handles vertical alignment WITHIN the text box
+  // Text được đặt tại vị trí padding
+  // Thuộc tính align xử lý căn lề ngang/dọc bên trong text box
   const textX = padding.left;
   const textY = padding.top;
 
-  // Animation Logic
+  // Xử lý Hiệu ứng (Animation)
   React.useEffect(() => {
     const node = groupRef.current;
     if (!node) return;
 
-    // Reset initial state
+    // Reset trạng thái ban đầu
     node.opacity(element.opacity);
     node.scale({ x: 1, y: 1 });
     node.rotation(element.rotation);
@@ -193,7 +212,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     let anim: Konva.Animation | null = null;
     let tween: Konva.Tween | null = null;
 
-    // Entry Animations (Play once)
+    // Hiệu ứng xuất hiện (Chạy 1 lần)
     if (!animConfig.continuous) {
       switch (animConfig.type) {
         case "fadeIn":
@@ -230,7 +249,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
           });
           tween.play();
           break;
-        case "bounce": // Single bounce
+        case "bounce":
           const startY = element.position.y;
           node.y(startY - 30);
           tween = new Konva.Tween({
@@ -243,7 +262,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
           break;
       }
     } else {
-      // Continuous Animations (Loop)
+      // Hiệu ứng liên tục (Lặp lại)
       switch (animConfig.type) {
         case "pulse":
           anim = new Konva.Animation((frame) => {
@@ -271,7 +290,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
           }, node.getLayer());
           anim.start();
           break;
-        case "fadeIn": // Pulsing fade
+        case "fadeIn":
           anim = new Konva.Animation((frame) => {
             if (!frame) return;
             const mobileOpacity =
@@ -287,7 +306,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     return () => {
       if (anim) anim.stop();
       if (tween) tween.destroy();
-      // Reset state on cleanup to avoid getting stuck in transformed state
+      // Reset trạng thái khi cleanup
       if (node) {
         node.opacity(element.opacity);
         node.scale({ x: 1, y: 1 });
@@ -315,7 +334,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
       onDragEnd={onDragEnd}
       onTransformEnd={onTransformEnd}
     >
-      {/* Background Rect with shadow, border (if all), and fill */}
+      {/* Nền (Rect) với đổ bóng, viền (nếu là all), và màu nền */}
       <Rect
         x={0}
         y={0}
@@ -335,7 +354,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         shadowOffsetY={applyShadowToBox ? shadow.y : 0}
       />
 
-      {/* Partial Borders */}
+      {/* Viền từng phần (Partial Borders) */}
       {hasBorder && border.position === "top" && (
         <Line
           points={[0, 0, totalWidth, 0]}
@@ -369,10 +388,11 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         />
       )}
 
-      {/* Text - Konva Text supports:
-          - align: "left" | "center" | "right" (horizontal within width)
-          - verticalAlign: "top" | "middle" | "bottom" (vertical within height)
-      */}
+      {/* 
+        Text - Konva Text hỗ trợ:
+        - align: canh ngang
+        - verticalAlign: canh dọc
+       */}
       <Text
         ref={textRef}
         x={textX}

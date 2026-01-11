@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Search, Type } from "lucide-react";
 import { Button, Upload, Input, ColorPicker } from "antd";
 import {
   UploadOutlined,
@@ -19,40 +20,6 @@ import {
   createShapeElement,
 } from "@/store/editorStore";
 import { ShapeElement } from "@/types/editor";
-
-// Text presets
-const TEXT_PRESETS = [
-  {
-    content: "SAVE THE DATE",
-    fontSize: 32,
-    fontFamily: "Playfair Display",
-    fontWeight: 700,
-  },
-  {
-    content: "Wedding Invitation",
-    fontSize: 28,
-    fontFamily: "Great Vibes",
-    fontWeight: 400,
-  },
-  {
-    content: "Trân trọng kính mời",
-    fontSize: 24,
-    fontFamily: "Dancing Script",
-    fontWeight: 500,
-  },
-  {
-    content: "Cô dâu & Chú rể",
-    fontSize: 36,
-    fontFamily: "Great Vibes",
-    fontWeight: 400,
-  },
-  {
-    content: "Ngày...Tháng...Năm...",
-    fontSize: 20,
-    fontFamily: "Montserrat",
-    fontWeight: 400,
-  },
-];
 
 // Shapes
 const SHAPES: {
@@ -129,19 +96,14 @@ interface LeftPanelProps {
 const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
   const { addElement, setCanvasSettings, canvasSettings } = useEditorStore();
 
-  const handleAddText = (preset?: (typeof TEXT_PRESETS)[0]) => {
-    addElement(
-      createTextElement(
-        preset
-          ? {
-              content: preset.content,
-              fontSize: preset.fontSize,
-              fontFamily: preset.fontFamily,
-              fontWeight: preset.fontWeight,
-            }
-          : undefined
-      )
-    );
+  const handleAddText = (
+    options: {
+      fontSize?: number;
+      fontWeight?: number;
+      content?: string;
+    } = {}
+  ) => {
+    addElement(createTextElement(options));
   };
 
   const handleAddShape = (shapeType: ShapeElement["shapeType"]) => {
@@ -219,35 +181,86 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
 
   const renderTextTab = () => (
     <>
-      <Section>
+      <div className="p-4 space-y-4">
+        {/* Search Bar */}
+        {/* Search Bar */}
+        <div className="relative group">
+          <Input
+            prefix={<Search size={18} className="text-gray-400" />}
+            placeholder="Tìm kiếm font và mẫu..."
+            className="rounded-xl !py-2 !px-3 !border-gray-200"
+            style={{ backgroundColor: "white" }}
+          />
+        </div>
+
+        {/* Main Add Button */}
         <Button
           type="primary"
           block
           size="large"
           onClick={() => handleAddText()}
-          className="mb-4"
+          className="!font-medium !text-sm !rounded-md flex items-center justify-center bg-[#8b3dff] hover:!bg-[#7a35e0]"
+          icon={<Type size={18} className="mr-1" />}
         >
-          + Thêm văn bản
+          Thêm hộp văn bản
         </Button>
-      </Section>
 
-      <Section title="Mẫu văn bản">
-        <div className="space-y-2">
-          {TEXT_PRESETS.map((preset, index) => (
+        {/* Default Text Styles */}
+        <div className="mt-6">
+          <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
+            Kiểu mặc định
+          </h3>
+          <div className="space-y-3">
+            {/* Heading */}
             <div
-              key={index}
-              className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-transparent hover:border-primary/30"
-              onClick={() => handleAddText(preset)}
-              style={{
-                fontFamily: preset.fontFamily,
-                fontSize: Math.min(preset.fontSize, 18),
-              }}
+              className="bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center"
+              onClick={() =>
+                handleAddText({
+                  content: "Thêm tiêu đề",
+                  fontSize: 32,
+                  fontWeight: 700,
+                })
+              }
             >
-              {preset.content}
+              <h1 className="text-3xl font-bold text-gray-800 w-full">
+                Thêm tiêu đề
+              </h1>
             </div>
-          ))}
+
+            {/* Subheading */}
+            <div
+              className="bg-gray-50 hover:bg-gray-100 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center"
+              onClick={() =>
+                handleAddText({
+                  content: "Thêm tiêu đề phụ",
+                  fontSize: 24,
+                  fontWeight: 600,
+                })
+              }
+            >
+              <h2 className="text-xl font-semibold text-gray-700 w-full">
+                Thêm tiêu đề phụ
+              </h2>
+            </div>
+
+            {/* Body Text */}
+            <div
+              className="bg-gray-50 hover:bg-gray-100 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center"
+              onClick={() =>
+                handleAddText({
+                  content: "Thêm văn bản nội dung",
+                  fontSize: 16,
+                  fontWeight: 400,
+                })
+              }
+            >
+              <p className="text-sm text-gray-600 w-full">
+                Thêm văn bản nội dung
+              </p>
+            </div>
+          </div>
         </div>
-      </Section>
+      </div>
     </>
   );
 
@@ -489,27 +502,8 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
     }
   };
 
-  const getTitle = () => {
-    const titles: Record<string, string> = {
-      text: "Văn bản",
-      image: "Hình ảnh",
-      stock: "Stock",
-      background: "Nền",
-      music: "Âm nhạc",
-      widget: "Tiện ích",
-      template: "Mẫu",
-      effect: "Hiệu ứng",
-    };
-    return titles[activeTab] || "Công cụ";
-  };
-
   return (
     <div className="w-72 bg-white border-r border-gray-200 flex flex-col shrink-0 overflow-hidden">
-      {/* Header */}
-      <div className="h-12 px-4 border-b border-gray-200 flex items-center shrink-0">
-        <span className="font-semibold text-sm">{getTitle()}</span>
-      </div>
-
       {/* Content */}
       <div className="flex-1 overflow-y-auto">{renderContent()}</div>
     </div>
