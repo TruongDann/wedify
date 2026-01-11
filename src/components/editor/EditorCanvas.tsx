@@ -144,6 +144,27 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     }
   };
 
+  // Hydration fix: only render stage on client
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <div className="flex items-center justify-center">
+        <div
+          className="bg-white shadow-lg rounded-sm overflow-hidden"
+          style={{
+            width: canvasSettings.width,
+            height: effectiveHeight,
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center justify-center">
       <div
