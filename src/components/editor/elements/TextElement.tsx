@@ -168,8 +168,134 @@ const TextElementComponent: React.FC<TextElementProps> = ({
   // Text is positioned at padding offset
   // The align property will handle horizontal alignment WITHIN the text box
   // verticalAlign handles vertical alignment WITHIN the text box
+  // Text is positioned at padding offset
+  // The align property will handle horizontal alignment WITHIN the text box
+  // verticalAlign handles vertical alignment WITHIN the text box
   const textX = padding.left;
   const textY = padding.top;
+
+  // Animation Logic
+  React.useEffect(() => {
+    const node = groupRef.current;
+    if (!node) return;
+
+    // Reset initial state
+    node.opacity(element.opacity);
+    node.scale({ x: 1, y: 1 });
+    node.rotation(element.rotation);
+    node.position(element.position);
+
+    const animConfig = element.animation;
+    if (!animConfig || !animConfig.enabled || animConfig.type === "none") {
+      return;
+    }
+
+    let anim: Konva.Animation | null = null;
+    let tween: Konva.Tween | null = null;
+
+    // Entry Animations (Play once)
+    if (!animConfig.continuous) {
+      switch (animConfig.type) {
+        case "fadeIn":
+          node.opacity(0);
+          tween = new Konva.Tween({
+            node: node,
+            opacity: element.opacity,
+            duration: 1,
+            easing: Konva.Easings.EaseInOut,
+          });
+          tween.play();
+          break;
+        case "slideIn":
+          const originalY = element.position.y;
+          node.y(originalY + 50);
+          node.opacity(0);
+          tween = new Konva.Tween({
+            node: node,
+            y: originalY,
+            opacity: element.opacity,
+            duration: 0.8,
+            easing: Konva.Easings.BackEaseOut,
+          });
+          tween.play();
+          break;
+        case "zoom":
+          node.scale({ x: 0, y: 0 });
+          tween = new Konva.Tween({
+            node: node,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 0.6,
+            easing: Konva.Easings.BackEaseOut,
+          });
+          tween.play();
+          break;
+        case "bounce": // Single bounce
+          const startY = element.position.y;
+          node.y(startY - 30);
+          tween = new Konva.Tween({
+            node: node,
+            y: startY,
+            duration: 1,
+            easing: Konva.Easings.BounceEaseOut,
+          });
+          tween.play();
+          break;
+      }
+    } else {
+      // Continuous Animations (Loop)
+      switch (animConfig.type) {
+        case "pulse":
+          anim = new Konva.Animation((frame) => {
+            if (!frame) return;
+            const scale = 1 + Math.sin(frame.time * 0.005) * 0.05;
+            node.scale({ x: scale, y: scale });
+          }, node.getLayer());
+          anim.start();
+          break;
+        case "shake":
+          const baseRot = element.rotation;
+          anim = new Konva.Animation((frame) => {
+            if (!frame) return;
+            const rot = baseRot + Math.sin(frame.time * 0.01) * 5;
+            node.rotation(rot);
+          }, node.getLayer());
+          anim.start();
+          break;
+        case "bounce":
+          const baseY = element.position.y;
+          anim = new Konva.Animation((frame) => {
+            if (!frame) return;
+            const y = baseY + Math.sin(frame.time * 0.005) * 10;
+            node.y(y);
+          }, node.getLayer());
+          anim.start();
+          break;
+        case "fadeIn": // Pulsing fade
+          anim = new Konva.Animation((frame) => {
+            if (!frame) return;
+            const mobileOpacity =
+              element.opacity *
+              (0.5 + Math.abs(Math.sin(frame.time * 0.002)) * 0.5);
+            node.opacity(mobileOpacity);
+          }, node.getLayer());
+          anim.start();
+          break;
+      }
+    }
+
+    return () => {
+      if (anim) anim.stop();
+      if (tween) tween.destroy();
+      // Reset state on cleanup to avoid getting stuck in transformed state
+      if (node) {
+        node.opacity(element.opacity);
+        node.scale({ x: 1, y: 1 });
+        node.rotation(element.rotation);
+        node.position(element.position);
+      }
+    };
+  }, [element.animation, element.position, element.rotation, element.opacity]);
 
   return (
     <Group
