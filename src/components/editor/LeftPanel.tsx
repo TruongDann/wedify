@@ -179,10 +179,27 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
     </div>
   );
 
+  // Text Templates with explicit types
+  const TEXT_TEMPLATES: {
+    id: string;
+    label: string;
+    previewContent: React.ReactNode;
+    elementOptions: {
+      content: string;
+      fontFamily?: string;
+      fontSize?: number;
+      fontWeight?: number;
+      fontStyle?: "normal" | "italic";
+      color?: string;
+      textAlign?: "left" | "center" | "right";
+    };
+  }[] = [
+   
+  ];
+
   const renderTextTab = () => (
     <>
-      <div className="p-4 space-y-4">
-        {/* Search Bar */}
+      <div className="p-4 space-y-6">
         {/* Search Bar */}
         <div className="relative group">
           <Input
@@ -199,21 +216,21 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
           block
           size="large"
           onClick={() => handleAddText()}
-          className="!font-medium !text-sm !rounded-md flex items-center justify-center bg-[#8b3dff] hover:!bg-[#7a35e0]"
+          className="!font-medium !text-sm !rounded-md flex items-center justify-center bg-[#8b3dff] hover:!bg-[#7a35e0] h-10 shadow-sm"
           icon={<Type size={18} className="mr-1" />}
         >
           Thêm hộp văn bản
         </Button>
 
         {/* Default Text Styles */}
-        <div className="mt-6">
+        <div>
           <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
             Kiểu mặc định
           </h3>
           <div className="space-y-3">
             {/* Heading */}
             <div
-              className="bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center"
+              className="bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center group"
               onClick={() =>
                 handleAddText({
                   content: "Thêm tiêu đề",
@@ -222,14 +239,14 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
                 })
               }
             >
-              <h1 className="text-3xl font-bold text-gray-800 w-full">
+              <h1 className="text-2xl font-bold text-gray-800 w-full group-hover:text-black transition-colors">
                 Thêm tiêu đề
               </h1>
             </div>
 
             {/* Subheading */}
             <div
-              className="bg-gray-50 hover:bg-gray-100 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center"
+              className="bg-gray-50 hover:bg-gray-100 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center group"
               onClick={() =>
                 handleAddText({
                   content: "Thêm tiêu đề phụ",
@@ -238,14 +255,14 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
                 })
               }
             >
-              <h2 className="text-xl font-semibold text-gray-700 w-full">
+              <h2 className="text-lg font-semibold text-gray-700 w-full group-hover:text-black transition-colors">
                 Thêm tiêu đề phụ
               </h2>
             </div>
 
             {/* Body Text */}
             <div
-              className="bg-gray-50 hover:bg-gray-100 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center"
+              className="bg-gray-50 hover:bg-gray-100 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center group"
               onClick={() =>
                 handleAddText({
                   content: "Thêm văn bản nội dung",
@@ -254,10 +271,29 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
                 })
               }
             >
-              <p className="text-sm text-gray-600 w-full">
+              <p className="text-sm text-gray-600 w-full group-hover:text-gray-900 transition-colors">
                 Thêm văn bản nội dung
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Text Templates */}
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
+            Mẫu văn bản
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            {TEXT_TEMPLATES.map((template) => (
+              <div
+                key={template.id}
+                className="aspect-[4/3] rounded-xl cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all overflow-hidden border border-gray-100 hover:shadow-md"
+                onClick={() => handleAddText(template.elementOptions)}
+                title={template.label}
+              >
+                {template.previewContent}
+              </div>
+            ))}
           </div>
         </div>
       </div>
