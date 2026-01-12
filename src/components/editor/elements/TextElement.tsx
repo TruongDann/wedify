@@ -18,8 +18,20 @@ interface TextElementProps {
 }
 
 /**
+ * Tính offset dựa trên direction (góc độ)
+ */
+const calculateOffset = (offset: number, direction: number) => {
+  const radians = (direction * Math.PI) / 180;
+  return {
+    x: Math.cos(radians) * offset,
+    y: Math.sin(radians) * offset,
+  };
+};
+
+/**
  * Component hiển thị Text trên Canvas
  * - Hỗ trợ style cơ bản (font, màu, size...)
+ * - Hỗ trợ các hiệu ứng Canva: Shadow, Lift, Hollow, Splice, Outline, Echo, Glitch, Neon, Background
  * - Nền, viền, đổ bóng
  * - Chỉnh sửa văn bản trực tiếp (Double click)
  * - Kéo thả, xoay, animation
@@ -48,6 +60,19 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     y: 4,
     blur: 8,
     color: "rgba(0,0,0,0.2)",
+  };
+
+  // Text Effect defaults
+  const textEffect = element.textEffect || {
+    type: "none",
+    offset: 50,
+    direction: -45,
+    blur: 0,
+    transparency: 40,
+    color: "#000000",
+    intensity: 50,
+    spread: 50,
+    curveAmount: 0,
   };
 
   // Tính mảng bo góc cho Konva [topLeft, topRight, bottomRight, bottomLeft]
@@ -193,6 +218,295 @@ const TextElementComponent: React.FC<TextElementProps> = ({
   const textX = padding.left;
   const textY = padding.top;
 
+  // Base text style
+  const baseTextStyle =
+    `${element.fontWeight >= 700 ? "bold" : ""} ${
+      element.fontStyle === "italic" ? "italic" : ""
+    }`.trim() || "normal";
+
+  const baseTextDecoration =
+    element.textDecoration !== "none" ? element.textDecoration : "";
+
+  /**
+   * Render các hiệu ứng text theo loại
+   * Mỗi hiệu ứng render các layer text khác nhau
+   */
+  const renderTextEffects = () => {
+    const effectOffset = calculateOffset(
+      textEffect.offset,
+      textEffect.direction
+    );
+    const effectOpacity = 1 - textEffect.transparency / 100;
+
+    // Base text component props
+    const baseTextProps = {
+      width: contentWidth,
+      height: contentHeight,
+      text: element.content,
+      fontFamily: element.fontFamily,
+      fontSize: element.fontSize,
+      fontStyle: baseTextStyle,
+      textDecoration: baseTextDecoration,
+      align: element.textAlign as "left" | "center" | "right",
+      verticalAlign: "middle" as const,
+      lineHeight: element.lineHeight,
+      letterSpacing: element.letterSpacing,
+      wrap: "word" as const,
+    };
+
+    switch (textEffect.type) {
+      case "shadow":
+        const shadowOffsetScale = textEffect.offset / 50;
+        const shadowOffset = calculateOffset(
+          shadowOffsetScale,
+          textEffect.direction
+        );
+        const scaledBlur = textEffect.blur / 20;
+        return (
+          <Text
+            ref={textRef}
+            {...baseTextProps}
+            x={textX}
+            y={textY}
+            fill={element.color}
+            shadowEnabled={true}
+            shadowColor={textEffect.color}
+            shadowBlur={scaledBlur}
+            shadowOffsetX={shadowOffset.x}
+            shadowOffsetY={shadowOffset.y}
+            shadowOpacity={effectOpacity}
+          />
+        );
+
+      case "lift":
+        const liftIntensity = textEffect.intensity / 100;
+        const liftBlur = 1 + liftIntensity * 5;
+        const liftYOffset = 0;
+        const liftShadowOpacity = 0.3 + liftIntensity * 0.7;
+        return (
+          <Text
+            ref={textRef}
+            {...baseTextProps}
+            x={textX}
+            y={textY}
+            fill={element.color}
+            shadowEnabled={true}
+            shadowColor="rgba(0,0,0,0.6)"
+            shadowBlur={liftBlur}
+            shadowOffsetX={0}
+            shadowOffsetY={liftYOffset}
+            shadowOpacity={liftShadowOpacity}
+          />
+        );
+
+      case "hollow":
+        return (
+          <Text
+            ref={textRef}
+            {...baseTextProps}
+            x={textX}
+            y={textY}
+            fill="transparent"
+            stroke={element.color}
+            strokeWidth={Math.max(1, textEffect.intensity / 25)}
+          />
+        );
+
+      case "splice":
+        return (
+          <>
+            <Text
+              {...baseTextProps}
+              x={textX + effectOffset.x * 0.1}
+              y={textY + effectOffset.y * 0.1}
+              fill={textEffect.color}
+              opacity={effectOpacity}
+            />
+            <Text
+              ref={textRef}
+              {...baseTextProps}
+              x={textX}
+              y={textY}
+              fill={element.color}
+              stroke={textEffect.color}
+              strokeWidth={Math.max(0.5, textEffect.intensity / 50)}
+            />
+          </>
+        );
+
+      case "outline":
+        return (
+          <>
+            <Text
+              {...baseTextProps}
+              x={textX}
+              y={textY}
+              fill="transparent"
+              stroke={textEffect.color}
+              strokeWidth={Math.max(2, textEffect.intensity / 15)}
+            />
+            <Text
+              ref={textRef}
+              {...baseTextProps}
+              x={textX}
+              y={textY}
+              fill={element.color}
+            />
+          </>
+        );
+
+      case "echo":
+        return (
+          <>
+            {[3, 2, 1].map((i) => (
+              <Text
+                key={i}
+                {...baseTextProps}
+                x={textX + effectOffset.x * i * 0.15}
+                y={textY + effectOffset.y * i * 0.15}
+                fill={element.color}
+                opacity={effectOpacity * (0.3 / i)}
+              />
+            ))}
+            <Text
+              ref={textRef}
+              {...baseTextProps}
+              x={textX}
+              y={textY}
+              fill={element.color}
+            />
+          </>
+        );
+
+      case "glitch":
+        return (
+          <>
+            <Text
+              {...baseTextProps}
+              x={textX - textEffect.offset * 0.03}
+              y={textY}
+              fill="rgba(255,0,0,0.7)"
+              opacity={effectOpacity}
+            />
+            <Text
+              {...baseTextProps}
+              x={textX + textEffect.offset * 0.03}
+              y={textY}
+              fill="rgba(0,0,255,0.7)"
+              opacity={effectOpacity}
+            />
+            <Text
+              ref={textRef}
+              {...baseTextProps}
+              x={textX}
+              y={textY}
+              fill={element.color}
+            />
+          </>
+        );
+
+      case "neon":
+        return (
+          <>
+            {[4, 3, 2, 1].map((i) => (
+              <Text
+                key={i}
+                {...baseTextProps}
+                x={textX}
+                y={textY}
+                fill={textEffect.color}
+                opacity={effectOpacity * (0.2 / i)}
+                shadowEnabled={true}
+                shadowBlur={textEffect.blur * i + 5}
+                shadowColor={textEffect.color}
+              />
+            ))}
+            <Text
+              ref={textRef}
+              {...baseTextProps}
+              x={textX}
+              y={textY}
+              fill={element.color}
+              shadowEnabled={true}
+              shadowBlur={textEffect.blur + 10}
+              shadowColor={textEffect.color}
+            />
+          </>
+        );
+
+      case "background":
+        return (
+          <>
+            {/* Background rect for text */}
+            <Rect
+              x={textX - 5}
+              y={
+                textY +
+                (contentHeight - element.fontSize * element.lineHeight) / 2 -
+                5
+              }
+              width={contentWidth + 10}
+              height={element.fontSize * element.lineHeight + 10}
+              fill={textEffect.color}
+              cornerRadius={5}
+              opacity={effectOpacity}
+            />
+            <Text
+              ref={textRef}
+              {...baseTextProps}
+              x={textX}
+              y={textY}
+              fill={element.color}
+            />
+          </>
+        );
+
+      case "curve":
+        return (
+          <Text
+            ref={textRef}
+            {...baseTextProps}
+            x={textX}
+            y={textY}
+            fill={element.color}
+            shadowEnabled={applyShadowToText}
+            shadowColor={applyShadowToText ? shadow.color : undefined}
+            shadowBlur={applyShadowToText ? shadow.blur : 0}
+            shadowOffsetX={applyShadowToText ? shadow.x : 0}
+            shadowOffsetY={applyShadowToText ? shadow.y : 0}
+          />
+        );
+
+      case "none":
+      default:
+        return (
+          <Text
+            ref={textRef}
+            x={textX}
+            y={textY}
+            width={contentWidth}
+            height={contentHeight}
+            text={element.content}
+            fontFamily={element.fontFamily}
+            fontSize={element.fontSize}
+            fontStyle={baseTextStyle}
+            textDecoration={baseTextDecoration}
+            fill={element.color}
+            align={element.textAlign}
+            verticalAlign="middle"
+            lineHeight={element.lineHeight}
+            letterSpacing={element.letterSpacing}
+            wrap="word"
+            shadowEnabled={applyShadowToText}
+            shadowColor={applyShadowToText ? shadow.color : undefined}
+            shadowBlur={applyShadowToText ? shadow.blur : 0}
+            shadowOffsetX={applyShadowToText ? shadow.x : 0}
+            shadowOffsetY={applyShadowToText ? shadow.y : 0}
+          />
+        );
+    }
+  };
+
   // Xử lý Hiệu ứng (Animation)
   React.useEffect(() => {
     const node = groupRef.current;
@@ -334,7 +648,6 @@ const TextElementComponent: React.FC<TextElementProps> = ({
       onDragEnd={onDragEnd}
       onTransformEnd={onTransformEnd}
     >
-      {/* Nền (Rect) với đổ bóng, viền (nếu là all), và màu nền */}
       <Rect
         x={0}
         y={0}
@@ -354,7 +667,6 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         shadowOffsetY={applyShadowToBox ? shadow.y : 0}
       />
 
-      {/* Viền từng phần (Partial Borders) */}
       {hasBorder && border.position === "top" && (
         <Line
           points={[0, 0, totalWidth, 0]}
@@ -388,40 +700,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         />
       )}
 
-      {/* 
-        Text - Konva Text hỗ trợ:
-        - align: canh ngang
-        - verticalAlign: canh dọc
-       */}
-      <Text
-        ref={textRef}
-        x={textX}
-        y={textY}
-        width={contentWidth}
-        height={contentHeight}
-        text={element.content}
-        fontFamily={element.fontFamily}
-        fontSize={element.fontSize}
-        fontStyle={
-          `${element.fontWeight >= 700 ? "bold" : ""} ${
-            element.fontStyle === "italic" ? "italic" : ""
-          }`.trim() || "normal"
-        }
-        textDecoration={
-          element.textDecoration !== "none" ? element.textDecoration : ""
-        }
-        fill={element.color}
-        align={element.textAlign}
-        verticalAlign="middle"
-        lineHeight={element.lineHeight}
-        letterSpacing={element.letterSpacing}
-        wrap="word"
-        shadowEnabled={applyShadowToText}
-        shadowColor={applyShadowToText ? shadow.color : undefined}
-        shadowBlur={applyShadowToText ? shadow.blur : 0}
-        shadowOffsetX={applyShadowToText ? shadow.x : 0}
-        shadowOffsetY={applyShadowToText ? shadow.y : 0}
-      />
+      {renderTextEffects()}
     </Group>
   );
 };
