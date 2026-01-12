@@ -69,6 +69,29 @@ export interface TextElement extends BaseElement {
     continuous: boolean;
     type: "none" | "fadeIn" | "slideIn" | "bounce" | "pulse" | "shake" | "zoom";
   };
+  // Text Effects
+  textEffect: {
+    type:
+      | "none"
+      | "shadow"
+      | "lift"
+      | "hollow"
+      | "splice"
+      | "outline"
+      | "echo"
+      | "glitch"
+      | "neon"
+      | "background"
+      | "curve";
+    offset: number;
+    direction: number;
+    blur: number;
+    transparency: number;
+    color: string;
+    intensity: number;
+    spread: number;
+    curveAmount: number;
+  };
 }
 
 export interface ImageElement extends BaseElement {
