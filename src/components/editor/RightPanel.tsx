@@ -101,6 +101,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
   const { elements, selectedElementId, updateElement, deleteElement } =
     useEditorStore();
   const [expandedSections, setExpandedSections] = useState<string[]>([
+    "textEffect",
     "style",
     "padding",
     "border",
@@ -613,9 +614,421 @@ const RightPanel: React.FC<RightPanelProps> = ({
       continuous: false,
       type: "none" as const,
     };
+    const textEffect = element.textEffect || {
+      type: "none" as const,
+      offset: 50,
+      direction: -45,
+      blur: 0,
+      transparency: 40,
+      color: "#000000",
+      intensity: 50,
+      spread: 50,
+      curveAmount: 0,
+    };
+
+    // Text effect presets
+    const TEXT_EFFECT_STYLES = [
+      { type: "none", label: "Không", preview: "Ag" },
+      { type: "shadow", label: "Shadow", preview: "Ag" },
+      { type: "lift", label: "Lift", preview: "Ag" },
+    ] as const;
+
+    const TEXT_EFFECT_COLORS = [
+      { type: "hollow", label: "Hollow", preview: "Ag" },
+      { type: "splice", label: "Splice", preview: "Ag" },
+      { type: "outline", label: "Outline", preview: "Ag" },
+    ] as const;
+
+    const TEXT_EFFECT_SPECIAL = [
+      { type: "echo", label: "Echo", preview: "Ag" },
+      { type: "glitch", label: "Glitch", preview: "Ag" },
+      { type: "neon", label: "Neon", preview: "Ag" },
+    ] as const;
 
     return (
       <div className="p-3 space-y-3">
+        {/* Hiệu ứng chữ (Text Effects) - Canva Style */}
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader
+            title="Hiệu ứng chữ"
+            sectionKey="textEffect"
+            icon={<ThunderboltOutlined />}
+          />
+          {expandedSections.includes("textEffect") && (
+            <div className="px-4 pt-3 pb-4">
+              {/* Style section */}
+              <div className="mb-4">
+                <span className="text-xs text-gray-500 mb-2 block">Kiểu</span>
+                <div className="grid grid-cols-3 gap-2">
+                  {TEXT_EFFECT_STYLES.map((effect) => (
+                    <button
+                      key={effect.type}
+                      className={`relative h-16 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${
+                        textEffect.type === effect.type
+                          ? "border-primary bg-primary/5"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      onClick={() =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, type: effect.type },
+                        })
+                      }
+                    >
+                      <span
+                        className="text-2xl font-bold"
+                        style={{
+                          textShadow:
+                            effect.type === "shadow"
+                              ? "2px 2px 4px rgba(0,0,0,0.3)"
+                              : effect.type === "lift"
+                              ? "0 4px 8px rgba(0,0,0,0.2)"
+                              : "none",
+                        }}
+                      >
+                        {effect.preview}
+                      </span>
+                      <span className="text-xs text-gray-500 mt-1">
+                        {effect.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Settings for Shadow effect */}
+              {textEffect.type === "shadow" && (
+                <div className="space-y-3 mb-4 pt-3 border-t border-gray-100">
+                  <PropertyRow label="Offset">
+                    <Slider
+                      value={textEffect.offset}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, offset: value },
+                        })
+                      }
+                      min={0}
+                      max={100}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.offset}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            offset: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+
+                  <PropertyRow label="Hướng">
+                    <Slider
+                      value={textEffect.direction}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, direction: value },
+                        })
+                      }
+                      min={-180}
+                      max={180}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.direction}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            direction: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+
+                  <PropertyRow label="Blur">
+                    <Slider
+                      value={textEffect.blur}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, blur: value },
+                        })
+                      }
+                      min={0}
+                      max={100}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.blur}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            blur: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+
+                  <PropertyRow label="Độ mờ">
+                    <Slider
+                      value={textEffect.transparency}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, transparency: value },
+                        })
+                      }
+                      min={0}
+                      max={100}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.transparency}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            transparency: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+                </div>
+              )}
+
+              {/* Settings for Lift effect - only Intensity */}
+              {textEffect.type === "lift" && (
+                <div className="space-y-3 mb-4 pt-3 border-t border-gray-100">
+                  <PropertyRow label="Intensity">
+                    <Slider
+                      value={textEffect.intensity}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, intensity: value },
+                        })
+                      }
+                      min={0}
+                      max={100}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.intensity}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            intensity: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+                </div>
+              )}
+
+              {/* Color section */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-gray-500">Màu</span>
+                  <ColorPicker
+                    value={textEffect.color}
+                    onChange={(color) =>
+                      handleUpdate({
+                        textEffect: {
+                          ...textEffect,
+                          color: color.toHexString(),
+                        },
+                      })
+                    }
+                    size="small"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {TEXT_EFFECT_COLORS.map((effect) => (
+                    <button
+                      key={effect.type}
+                      className={`relative h-16 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${
+                        textEffect.type === effect.type
+                          ? "border-primary bg-primary/5"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      onClick={() =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, type: effect.type },
+                        })
+                      }
+                    >
+                      <span
+                        className="text-2xl font-bold"
+                        style={{
+                          color:
+                            effect.type === "hollow"
+                              ? "transparent"
+                              : effect.type === "splice"
+                              ? "#7c3aed"
+                              : "#000",
+                          WebkitTextStroke:
+                            effect.type === "hollow"
+                              ? "1px #000"
+                              : effect.type === "outline"
+                              ? "2px #7c3aed"
+                              : "none",
+                          textShadow:
+                            effect.type === "splice"
+                              ? "2px 2px 0 #000"
+                              : "none",
+                        }}
+                      >
+                        {effect.preview}
+                      </span>
+                      <span className="text-xs text-gray-500 mt-1">
+                        {effect.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Special effects section */}
+              <div className="mb-4">
+                <div className="grid grid-cols-3 gap-2">
+                  {TEXT_EFFECT_SPECIAL.map((effect) => (
+                    <button
+                      key={effect.type}
+                      className={`relative h-16 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${
+                        textEffect.type === effect.type
+                          ? "border-primary bg-primary/5"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      onClick={() =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, type: effect.type },
+                        })
+                      }
+                    >
+                      <span
+                        className="text-2xl font-bold"
+                        style={{
+                          color:
+                            effect.type === "neon"
+                              ? "#00ff88"
+                              : effect.type === "glitch"
+                              ? "#ff0066"
+                              : "#000",
+                          textShadow:
+                            effect.type === "echo"
+                              ? "2px 2px 0 rgba(0,0,0,0.2), 4px 4px 0 rgba(0,0,0,0.1)"
+                              : effect.type === "neon"
+                              ? "0 0 10px #00ff88, 0 0 20px #00ff88"
+                              : "none",
+                        }}
+                      >
+                        {effect.preview}
+                      </span>
+                      <span className="text-xs text-gray-500 mt-1">
+                        {effect.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Background effect */}
+              <div className="mb-4">
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    className={`h-16 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${
+                      textEffect.type === "background"
+                        ? "border-primary bg-primary/5"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() =>
+                      handleUpdate({
+                        textEffect: { ...textEffect, type: "background" },
+                      })
+                    }
+                  >
+                    <span
+                      className="text-2xl font-bold p-1 rounded leading-none flex items-center justify-center"
+                      style={{
+                        backgroundColor: textEffect.color,
+                        color: "#fff",
+                      }}
+                    >
+                      Ag
+                    </span>
+                    <span className="text-xs text-gray-500 mt-1">
+                      Background
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Shape section */}
+              <div>
+                <span className="text-xs text-gray-500 mb-2 block">
+                  Hình dạng
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    className={`h-14 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${
+                      textEffect.type !== "curve"
+                        ? "border-primary bg-primary/5"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() =>
+                      handleUpdate({
+                        textEffect: { ...textEffect, type: "none" },
+                      })
+                    }
+                  >
+                    <span className="text-lg font-bold tracking-wide">
+                      ABCD
+                    </span>
+                    <span className="text-xs text-gray-500">Thẳng</span>
+                  </button>
+                  <button
+                    className={`h-14 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${
+                      textEffect.type === "curve"
+                        ? "border-primary bg-primary/5"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() =>
+                      handleUpdate({
+                        textEffect: { ...textEffect, type: "curve" },
+                      })
+                    }
+                  >
+                    <span
+                      className="text-lg font-bold tracking-wide"
+                      style={{
+                        transform: "perspective(100px) rotateX(-10deg)",
+                      }}
+                    >
+                      ABCD
+                    </span>
+                    <span className="text-xs text-gray-500">Cong</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Kiểu chữ */}
         <div className="border border-gray-200 rounded-lg overflow-hidden">
           <SectionHeader
