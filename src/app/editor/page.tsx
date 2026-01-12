@@ -162,13 +162,13 @@ const EditorPage: React.FC = () => {
     >
       <div className="flex flex-col h-screen overflow-hidden bg-gray-100">
         {/* Header - Navbar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center px-3 gap-2 z-50 fixed top-0 left-0 right-0">
+        <header className="h-14 bg-white border-b border-gray-200 flex items-center px-3 gap-2 z-50 fixed top-0 left-0 right-0">
           {/* Left: Menu + Logo */}
           <Button type="text" icon={<MenuOutlined />} className="px-3 py-2" />
 
           <Link href="/" className="flex items-center gap-2 ml-2">
             <Image
-              src="/logo.png"
+              src="/logo-web.png"
               alt="Logo"
               width={100}
               height={28}
@@ -176,6 +176,9 @@ const EditorPage: React.FC = () => {
               priority
             />
           </Link>
+
+          {/* Divider */}
+          <div className="h-6 w-px bg-gray-200 mx-2" />
 
           {/* Actions: Undo, Redo, Security */}
           <div className="flex items-center gap-1 flex-1">
@@ -195,6 +198,8 @@ const EditorPage: React.FC = () => {
                 disabled={historyIndex >= history.length - 1}
               />
             </Tooltip>
+            {/* Divider */}
+            <div className="h-6 w-px bg-gray-200 mx-2" />
             <Tooltip title="Kiểm tra bảo mật">
               <Button
                 type="text"
@@ -206,10 +211,26 @@ const EditorPage: React.FC = () => {
           {/* Right side */}
           <div className="flex items-center gap-2">
             {/* Save status */}
-            <Button type="text" className="flex items-center gap-1">
-              <SaveOutlined className="text-green-500" />
-              <span className="text-green-500 text-sm">Đã lưu thay đổi</span>
-            </Button>
+            <Tooltip title="Tất cả thay đổi đã được lưu lên cloud">
+              <div className="flex items-center gap-1.5 px-2 py-1 text-gray-500 hover:bg-gray-50 rounded cursor-default transition-colors">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M6.5 19a4.5 4.5 0 0 1-.42-8.98A6 6 0 0 1 18 10a4 4 0 0 1-.18 8H6.5Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="m9 12 2 2 4-4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className="text-xs">Đã lưu</span>
+              </div>
+            </Tooltip>
 
             {/* Preview button */}
             <Button icon={<EyeOutlined />}>Xem trước</Button>
@@ -222,12 +243,20 @@ const EditorPage: React.FC = () => {
             </Dropdown>
 
             {/* User avatar */}
-            <div className="w-9 h-9 rounded-full bg-gray-200 cursor-pointer hover:bg-gray-300 transition-colors" />
+            <div className="w-9 h-9 rounded-full overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+              <Image
+                src="/avatar.jpg"
+                alt="Avatar"
+                width={36}
+                height={36}
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </header>
 
         {/* Body */}
-        <div className="flex flex-1 mt-16 overflow-hidden">
+        <div className="flex flex-1 mt-14 overflow-hidden">
           {/* Left Sidebar - Toolbox with vertical tabs */}
           <div className="w-18 bg-white border-r border-gray-200 flex flex-col shrink-0">
             <div className="flex-1 flex flex-col py-2">
