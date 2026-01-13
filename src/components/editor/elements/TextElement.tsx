@@ -371,16 +371,21 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         );
 
       case "echo":
+        const echoOffsetScale = textEffect.offset / 50;
+        const echoOffset = calculateOffset(
+          echoOffsetScale,
+          textEffect.direction
+        );
         return (
           <>
-            {[3, 2, 1].map((i) => (
+            {[2, 1].map((i) => (
               <Text
                 key={i}
                 {...baseTextProps}
-                x={textX + effectOffset.x * i * 0.15}
-                y={textY + effectOffset.y * i * 0.15}
+                x={textX + echoOffset.x * i}
+                y={textY + echoOffset.y * i}
                 fill={element.color}
-                opacity={effectOpacity * (0.3 / i)}
+                opacity={effectOpacity * (0.4 / i)}
               />
             ))}
             <Text

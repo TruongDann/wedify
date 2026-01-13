@@ -990,6 +990,65 @@ const RightPanel: React.FC<RightPanelProps> = ({
                 </div>
               )}
 
+              {/* Settings for Echo effect - Offset, Direction */}
+              {textEffect.type === "echo" && (
+                <div className="space-y-3 mb-4 pt-3 border-t border-gray-100">
+                  <PropertyRow label="Offset">
+                    <Slider
+                      value={textEffect.offset}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, offset: value },
+                        })
+                      }
+                      min={0}
+                      max={100}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.offset}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            offset: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+
+                  <PropertyRow label="Direction">
+                    <Slider
+                      value={textEffect.direction}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, direction: value },
+                        })
+                      }
+                      min={-180}
+                      max={180}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.direction}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            direction: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+                </div>
+              )}
+
               {/* Color section */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
