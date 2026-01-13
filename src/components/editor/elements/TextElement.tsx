@@ -300,6 +300,8 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         );
 
       case "hollow":
+        const hollowScale = Math.max(0.3, element.fontSize / 60);
+        const hollowStroke = (0.5 + textEffect.intensity / 40) * hollowScale;
         return (
           <Text
             ref={textRef}
@@ -308,33 +310,46 @@ const TextElementComponent: React.FC<TextElementProps> = ({
             y={textY}
             fill="transparent"
             stroke={element.color}
-            strokeWidth={Math.max(1, textEffect.intensity / 25)}
+            strokeWidth={hollowStroke}
           />
         );
 
       case "splice":
+        // Thickness: scale with fontSize like Hollow - áp dụng cho chữ chính
+        const spliceScale = Math.max(0.3, element.fontSize / 60);
+        const spliceStroke = (0.5 + textEffect.intensity / 40) * spliceScale;
+        // Offset & Direction: scale like Shadow - áp dụng cho chữ phụ
+        const spliceOffsetScale = textEffect.offset / 50;
+        const spliceOffset = calculateOffset(
+          spliceOffsetScale,
+          textEffect.direction
+        );
         return (
           <>
+            {/* Chữ offset phía sau - chỉ fill màu, offset, direction */}
             <Text
               {...baseTextProps}
-              x={textX + effectOffset.x * 0.1}
-              y={textY + effectOffset.y * 0.1}
+              x={textX + spliceOffset.x}
+              y={textY + spliceOffset.y}
               fill={textEffect.color}
               opacity={effectOpacity}
             />
+            {/* Chữ chính phía trước - có stroke (Thickness) */}
             <Text
               ref={textRef}
               {...baseTextProps}
               x={textX}
               y={textY}
-              fill={element.color}
-              stroke={textEffect.color}
-              strokeWidth={Math.max(0.5, textEffect.intensity / 50)}
+              fill="transparent"
+              stroke={element.color}
+              strokeWidth={spliceStroke}
             />
           </>
         );
 
       case "outline":
+        const outlineScale = Math.max(0.3, element.fontSize / 60);
+        const outlineStroke = (0.8 + textEffect.intensity / 25) * outlineScale;
         return (
           <>
             <Text
@@ -343,7 +358,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
               y={textY}
               fill="transparent"
               stroke={textEffect.color}
-              strokeWidth={Math.max(2, textEffect.intensity / 15)}
+              strokeWidth={outlineStroke}
             />
             <Text
               ref={textRef}
@@ -356,16 +371,21 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         );
 
       case "echo":
+        const echoOffsetScale = textEffect.offset / 50;
+        const echoOffset = calculateOffset(
+          echoOffsetScale,
+          textEffect.direction
+        );
         return (
           <>
-            {[3, 2, 1].map((i) => (
+            {[2, 1].map((i) => (
               <Text
                 key={i}
                 {...baseTextProps}
-                x={textX + effectOffset.x * i * 0.15}
-                y={textY + effectOffset.y * i * 0.15}
+                x={textX + echoOffset.x * i}
+                y={textY + echoOffset.y * i}
                 fill={element.color}
-                opacity={effectOpacity * (0.3 / i)}
+                opacity={effectOpacity * (0.4 / i)}
               />
             ))}
             <Text
