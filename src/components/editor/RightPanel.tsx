@@ -840,9 +840,8 @@ const RightPanel: React.FC<RightPanelProps> = ({
                 </div>
               )}
 
-              {/* Settings for Hollow, Outline effects - Thickness only */}
-              {(textEffect.type === "hollow" ||
-                textEffect.type === "outline") && (
+              {/* Settings for Hollow - Thickness only */}
+              {textEffect.type === "hollow" && (
                 <div className="space-y-3 mb-4 pt-3 border-t border-gray-100">
                   <PropertyRow label="Thickness">
                     <Slider
@@ -854,6 +853,38 @@ const RightPanel: React.FC<RightPanelProps> = ({
                       }
                       min={0}
                       max={100}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.intensity}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            intensity: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+                </div>
+              )}
+
+              {/* Settings for Outline - Thickness (max 200) + Color */}
+              {textEffect.type === "outline" && (
+                <div className="space-y-3 mb-4 pt-3 border-t border-gray-100">
+                  <PropertyRow label="Thickness">
+                    <Slider
+                      value={textEffect.intensity}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, intensity: value },
+                        })
+                      }
+                      min={0}
+                      max={200}
                       className="flex-1"
                     />
                     <input
