@@ -339,7 +339,6 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         );
 
       case "outline":
-        // Scale strokeWidth based on fontSize
         const outlineScale = Math.max(0.3, element.fontSize / 60);
         const outlineStroke = (0.8 + textEffect.intensity / 25) * outlineScale;
         return (
