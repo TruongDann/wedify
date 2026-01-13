@@ -315,24 +315,33 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         );
 
       case "splice":
+        // Thickness: scale with fontSize like Hollow - áp dụng cho chữ chính
         const spliceScale = Math.max(0.3, element.fontSize / 60);
-        const spliceStroke = (0.5 + textEffect.intensity / 50) * spliceScale;
+        const spliceStroke = (0.5 + textEffect.intensity / 40) * spliceScale;
+        // Offset & Direction: scale like Shadow - áp dụng cho chữ phụ
+        const spliceOffsetScale = textEffect.offset / 50;
+        const spliceOffset = calculateOffset(
+          spliceOffsetScale,
+          textEffect.direction
+        );
         return (
           <>
+            {/* Chữ offset phía sau - chỉ fill màu, offset, direction */}
             <Text
               {...baseTextProps}
-              x={textX + effectOffset.x * 0.1}
-              y={textY + effectOffset.y * 0.1}
+              x={textX + spliceOffset.x}
+              y={textY + spliceOffset.y}
               fill={textEffect.color}
               opacity={effectOpacity}
             />
+            {/* Chữ chính phía trước - có stroke (Thickness) */}
             <Text
               ref={textRef}
               {...baseTextProps}
               x={textX}
               y={textY}
-              fill={element.color}
-              stroke={textEffect.color}
+              fill="transparent"
+              stroke={element.color}
               strokeWidth={spliceStroke}
             />
           </>
