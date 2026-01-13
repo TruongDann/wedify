@@ -840,6 +840,40 @@ const RightPanel: React.FC<RightPanelProps> = ({
                 </div>
               )}
 
+              {/* Settings for Hollow, Splice, Outline effects - Thickness */}
+              {(textEffect.type === "hollow" ||
+                textEffect.type === "splice" ||
+                textEffect.type === "outline") && (
+                <div className="space-y-3 mb-4 pt-3 border-t border-gray-100">
+                  <PropertyRow label="Thickness">
+                    <Slider
+                      value={textEffect.intensity}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, intensity: value },
+                        })
+                      }
+                      min={0}
+                      max={100}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.intensity}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            intensity: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+                </div>
+              )}
+
               {/* Color section */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">

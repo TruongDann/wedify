@@ -300,6 +300,8 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         );
 
       case "hollow":
+        const hollowScale = Math.max(0.3, element.fontSize / 60);
+        const hollowStroke = (0.5 + textEffect.intensity / 40) * hollowScale;
         return (
           <Text
             ref={textRef}
@@ -308,11 +310,13 @@ const TextElementComponent: React.FC<TextElementProps> = ({
             y={textY}
             fill="transparent"
             stroke={element.color}
-            strokeWidth={Math.max(1, textEffect.intensity / 25)}
+            strokeWidth={hollowStroke}
           />
         );
 
       case "splice":
+        const spliceScale = Math.max(0.3, element.fontSize / 60);
+        const spliceStroke = (0.5 + textEffect.intensity / 50) * spliceScale;
         return (
           <>
             <Text
@@ -329,12 +333,15 @@ const TextElementComponent: React.FC<TextElementProps> = ({
               y={textY}
               fill={element.color}
               stroke={textEffect.color}
-              strokeWidth={Math.max(0.5, textEffect.intensity / 50)}
+              strokeWidth={spliceStroke}
             />
           </>
         );
 
       case "outline":
+        // Scale strokeWidth based on fontSize
+        const outlineScale = Math.max(0.3, element.fontSize / 60);
+        const outlineStroke = (0.8 + textEffect.intensity / 25) * outlineScale;
         return (
           <>
             <Text
@@ -343,7 +350,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
               y={textY}
               fill="transparent"
               stroke={textEffect.color}
-              strokeWidth={Math.max(2, textEffect.intensity / 15)}
+              strokeWidth={outlineStroke}
             />
             <Text
               ref={textRef}
