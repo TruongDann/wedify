@@ -433,6 +433,12 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         );
 
       case "neon":
+        const neonIntensity = textEffect.intensity / 100;
+        const r = Math.round(neonIntensity * 255);
+        const g = Math.round(neonIntensity * 255);
+        const b = Math.round(neonIntensity * 255);
+        const interpolatedColor = `rgb(${r},${g},${b})`;
+
         return (
           <>
             {[4, 3, 2, 1].map((i) => (
@@ -453,7 +459,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
               {...baseTextProps}
               x={textX}
               y={textY}
-              fill={element.color}
+              fill={interpolatedColor}
               shadowEnabled={true}
               shadowBlur={textEffect.blur + 10}
               shadowColor={textEffect.color}
