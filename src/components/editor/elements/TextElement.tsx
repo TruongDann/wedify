@@ -399,22 +399,29 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         );
 
       case "glitch":
+        const glitchOffsetScale = textEffect.offset / 50;
+        const glitchOffset = calculateOffset(
+          glitchOffsetScale,
+          textEffect.direction
+        );
         return (
           <>
             <Text
               {...baseTextProps}
-              x={textX - textEffect.offset * 0.03}
-              y={textY}
+              x={textX - glitchOffset.x}
+              y={textY - glitchOffset.y}
               fill="rgba(255,0,0,0.7)"
               opacity={effectOpacity}
             />
+            {/* Blue channel - positive offset */}
             <Text
               {...baseTextProps}
-              x={textX + textEffect.offset * 0.03}
-              y={textY}
+              x={textX + glitchOffset.x}
+              y={textY + glitchOffset.y}
               fill="rgba(0,0,255,0.7)"
               opacity={effectOpacity}
             />
+            {/* Main text */}
             <Text
               ref={textRef}
               {...baseTextProps}
