@@ -90,6 +90,7 @@ export interface TextElement extends BaseElement {
     color: string;
     intensity: number;
     spread: number;
+    roundness: number;
     curveAmount: number;
   };
 }

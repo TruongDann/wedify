@@ -399,22 +399,29 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         );
 
       case "glitch":
+        const glitchOffsetScale = textEffect.offset / 50;
+        const glitchOffset = calculateOffset(
+          glitchOffsetScale,
+          textEffect.direction
+        );
         return (
           <>
             <Text
               {...baseTextProps}
-              x={textX - textEffect.offset * 0.03}
-              y={textY}
+              x={textX - glitchOffset.x}
+              y={textY - glitchOffset.y}
               fill="rgba(255,0,0,0.7)"
               opacity={effectOpacity}
             />
+            {/* Blue channel - positive offset */}
             <Text
               {...baseTextProps}
-              x={textX + textEffect.offset * 0.03}
-              y={textY}
+              x={textX + glitchOffset.x}
+              y={textY + glitchOffset.y}
               fill="rgba(0,0,255,0.7)"
               opacity={effectOpacity}
             />
+            {/* Main text */}
             <Text
               ref={textRef}
               {...baseTextProps}
@@ -426,6 +433,12 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         );
 
       case "neon":
+        const neonIntensity = textEffect.intensity / 100;
+        const r = Math.round(neonIntensity * 255);
+        const g = Math.round(neonIntensity * 255);
+        const b = Math.round(neonIntensity * 255);
+        const interpolatedColor = `rgb(${r},${g},${b})`;
+
         return (
           <>
             {[4, 3, 2, 1].map((i) => (
@@ -446,37 +459,10 @@ const TextElementComponent: React.FC<TextElementProps> = ({
               {...baseTextProps}
               x={textX}
               y={textY}
-              fill={element.color}
+              fill={interpolatedColor}
               shadowEnabled={true}
               shadowBlur={textEffect.blur + 10}
               shadowColor={textEffect.color}
-            />
-          </>
-        );
-
-      case "background":
-        return (
-          <>
-            {/* Background rect for text */}
-            <Rect
-              x={textX - 5}
-              y={
-                textY +
-                (contentHeight - element.fontSize * element.lineHeight) / 2 -
-                5
-              }
-              width={contentWidth + 10}
-              height={element.fontSize * element.lineHeight + 10}
-              fill={textEffect.color}
-              cornerRadius={5}
-              opacity={effectOpacity}
-            />
-            <Text
-              ref={textRef}
-              {...baseTextProps}
-              x={textX}
-              y={textY}
-              fill={element.color}
             />
           </>
         );

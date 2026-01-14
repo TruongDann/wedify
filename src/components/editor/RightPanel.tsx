@@ -1049,6 +1049,124 @@ const RightPanel: React.FC<RightPanelProps> = ({
                 </div>
               )}
 
+              {/* Settings for Glitch effect - Offset, Direction */}
+              {textEffect.type === "glitch" && (
+                <div className="space-y-3 mb-4 pt-3 border-t border-gray-100">
+                  <PropertyRow label="Offset">
+                    <Slider
+                      value={textEffect.offset}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, offset: value },
+                        })
+                      }
+                      min={0}
+                      max={100}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.offset}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            offset: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+
+                  <PropertyRow label="Direction">
+                    <Slider
+                      value={textEffect.direction}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, direction: value },
+                        })
+                      }
+                      min={-180}
+                      max={180}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.direction}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            direction: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+                </div>
+              )}
+
+              {/* Settings for Neon effect - Intensity, Blur */}
+              {textEffect.type === "neon" && (
+                <div className="space-y-3 mb-4 pt-3 border-t border-gray-100">
+                  <PropertyRow label="Intensity">
+                    <Slider
+                      value={textEffect.intensity}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, intensity: value },
+                        })
+                      }
+                      min={0}
+                      max={100}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.intensity}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            intensity: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+
+                  <PropertyRow label="Blur">
+                    <Slider
+                      value={textEffect.blur}
+                      onChange={(value) =>
+                        handleUpdate({
+                          textEffect: { ...textEffect, blur: value },
+                        })
+                      }
+                      min={0}
+                      max={100}
+                      className="flex-1"
+                    />
+                    <input
+                      type="number"
+                      className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                      value={textEffect.blur}
+                      onChange={(e) =>
+                        handleUpdate({
+                          textEffect: {
+                            ...textEffect,
+                            blur: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </PropertyRow>
+                </div>
+              )}
+
               {/* Color section */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
@@ -1153,37 +1271,6 @@ const RightPanel: React.FC<RightPanelProps> = ({
                       </span>
                     </button>
                   ))}
-                </div>
-              </div>
-
-              {/* Background effect */}
-              <div className="mb-4">
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    className={`h-16 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${
-                      textEffect.type === "background"
-                        ? "border-primary bg-primary/5"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                    onClick={() =>
-                      handleUpdate({
-                        textEffect: { ...textEffect, type: "background" },
-                      })
-                    }
-                  >
-                    <span
-                      className="text-2xl font-bold p-1 rounded leading-none flex items-center justify-center"
-                      style={{
-                        backgroundColor: textEffect.color,
-                        color: "#fff",
-                      }}
-                    >
-                      Ag
-                    </span>
-                    <span className="text-xs text-gray-500 mt-1">
-                      Background
-                    </span>
-                  </button>
                 </div>
               </div>
 
