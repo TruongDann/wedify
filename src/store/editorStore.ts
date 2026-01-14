@@ -313,7 +313,7 @@ export const createTextElement = (
   shadow: { enabled: false, x: 0, y: 4, blur: 8, color: "rgba(0,0,0,0.2)" },
   hyperlink: "",
   animation: { enabled: false, continuous: false, type: "none" },
-  // Text Effects 
+  // Text Effects
   textEffect: {
     type: "none",
     offset: 50,
@@ -323,6 +323,7 @@ export const createTextElement = (
     color: "#000000",
     intensity: 50,
     spread: 50,
+    roundness: 50,
     curveAmount: 0,
   },
   ...overrides,

@@ -467,33 +467,6 @@ const TextElementComponent: React.FC<TextElementProps> = ({
           </>
         );
 
-      case "background":
-        return (
-          <>
-            {/* Background rect for text */}
-            <Rect
-              x={textX - 5}
-              y={
-                textY +
-                (contentHeight - element.fontSize * element.lineHeight) / 2 -
-                5
-              }
-              width={contentWidth + 10}
-              height={element.fontSize * element.lineHeight + 10}
-              fill={textEffect.color}
-              cornerRadius={5}
-              opacity={effectOpacity}
-            />
-            <Text
-              ref={textRef}
-              {...baseTextProps}
-              x={textX}
-              y={textY}
-              fill={element.color}
-            />
-          </>
-        );
-
       case "curve":
         return (
           <Text

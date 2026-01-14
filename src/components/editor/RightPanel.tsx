@@ -1274,37 +1274,6 @@ const RightPanel: React.FC<RightPanelProps> = ({
                 </div>
               </div>
 
-              {/* Background effect */}
-              <div className="mb-4">
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    className={`h-16 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${
-                      textEffect.type === "background"
-                        ? "border-primary bg-primary/5"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                    onClick={() =>
-                      handleUpdate({
-                        textEffect: { ...textEffect, type: "background" },
-                      })
-                    }
-                  >
-                    <span
-                      className="text-2xl font-bold p-1 rounded leading-none flex items-center justify-center"
-                      style={{
-                        backgroundColor: textEffect.color,
-                        color: "#fff",
-                      }}
-                    >
-                      Ag
-                    </span>
-                    <span className="text-xs text-gray-500 mt-1">
-                      Background
-                    </span>
-                  </button>
-                </div>
-              </div>
-
               {/* Shape section */}
               <div>
                 <span className="text-xs text-gray-500 mb-2 block">
