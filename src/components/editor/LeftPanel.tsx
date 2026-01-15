@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import { Search, Type } from "lucide-react";
-import { Button, Upload, Input, ColorPicker } from "antd";
+import React, { useState } from "react";
+import { Search, Type, MoreHorizontal, Video } from "lucide-react";
+import { Button, Upload, Input, ColorPicker, Tabs } from "antd";
 import {
   UploadOutlined,
   PictureOutlined,
@@ -12,6 +12,8 @@ import {
   CustomerServiceOutlined,
   CalendarOutlined,
   ThunderboltOutlined,
+  FolderOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import {
   useEditorStore,
@@ -95,6 +97,8 @@ interface LeftPanelProps {
 
 const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
   const { addElement, setCanvasSettings, canvasSettings } = useEditorStore();
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [imageSubTab, setImageSubTab] = useState<string>("images");
 
   const handleAddText = (
     options: {
@@ -301,59 +305,157 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
   );
 
   const renderImageTab = () => (
-    <>
-      <Section>
-        <Upload.Dragger
+    <div className="flex flex-col h-full">
+      {/* Search Bar */}
+      <div className="p-4 pb-3">
+        <Input
+          prefix={<Search size={18} className="text-gray-400" />}
+          placeholder="Tìm kiếm từ khóa, thẻ, màu sắc"
+          className="rounded-full !py-2 !px-4 !border-gray-200"
+          style={{ backgroundColor: "white" }}
+        />
+      </div>
+
+      {/* Upload Button */}
+      <div className="px-4 pb-2">
+        <Upload
           accept="image/*"
           showUploadList={false}
-          beforeUpload={handleImageUpload}
-          className="bg-gray-50! border-dashed! border-gray-300! hover:border-primary!"
+          beforeUpload={(file) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const src = e.target?.result as string;
+              setUploadedImages((prev) => [src, ...prev]);
+            };
+            reader.readAsDataURL(file);
+            return false;
+          }}
+          className="block w-full [&_.ant-upload]:w-full"
         >
-          <div className="py-4">
-            <UploadOutlined className="text-3xl text-gray-400 mb-2" />
-            <p className="text-sm text-gray-600 mb-1">
-              Kéo thả hoặc click để tải ảnh
-            </p>
-            <p className="text-xs text-gray-400">Hỗ trợ JPG, PNG, GIF</p>
+          <Button
+            type="primary"
+            size="large"
+            className="!font-medium !text-sm !rounded-lg flex items-center justify-center bg-[#8b3dff] hover:!bg-[#7a35e0] h-11 !w-full"
+          >
+            Tải lên tệp
+          </Button>
+        </Upload>
+      </div>
+
+      {/* Record Yourself Button */}
+      <div className="px-4 pb-3">
+        <Button
+          block
+          size="large"
+          className="!font-medium !text-sm !rounded-lg h-11 flex items-center justify-center"
+        >
+          Tự quay video
+        </Button>
+      </div>
+
+      {/* Tabs: Images, Designs, Folders */}
+      <div className="px-4 border-b border-gray-100">
+        <Tabs
+          activeKey={imageSubTab}
+          onChange={setImageSubTab}
+          items={[
+            {
+              key: "images",
+              label: (
+                <span className="flex items-center gap-1">
+                  <PictureOutlined />
+                  Hình ảnh
+                </span>
+              ),
+            },
+            {
+              key: "designs",
+              label: (
+                <span className="flex items-center gap-1">
+                  <AppstoreOutlined />
+                  Thiết kế
+                </span>
+              ),
+            },
+            {
+              key: "folders",
+              label: (
+                <span className="flex items-center gap-1">
+                  <FolderOutlined />
+                  Thư mục
+                </span>
+              ),
+            },
+          ]}
+          className="!mb-0"
+          size="small"
+        />
+      </div>
+
+      {/* Content based on sub-tab */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {imageSubTab === "images" && (
+          <>
+            {/* Uploaded Images Grid */}
+            {uploadedImages.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2">
+                {uploadedImages.map((src, index) => (
+                  <div
+                    key={index}
+                    className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary transition-colors bg-gray-100"
+                    onClick={() => handleImageUpload2(src)}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={src}
+                      alt={`Uploaded ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                <PictureOutlined className="text-4xl mb-3" />
+                <p className="text-sm text-center">
+                  Tải lên hình ảnh để xem tại đây
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {imageSubTab === "designs" && (
+          <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+            <AppstoreOutlined className="text-4xl mb-3" />
+            <p className="text-sm text-center">Thiết kế của bạn sẽ hiển thị tại đây</p>
           </div>
-        </Upload.Dragger>
-      </Section>
+        )}
 
-      <Section title="Sticker cưới">
-        <div className="grid grid-cols-4 gap-2">
-          {STICKERS.map((sticker) => (
-            <div
-              key={sticker.id}
-              className="aspect-square bg-gray-50 rounded-lg p-2 cursor-pointer hover:bg-gray-100 transition-colors border border-transparent hover:border-primary/30 flex items-center justify-center"
-              onClick={() => handleAddSticker(sticker.src)}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={sticker.src}
-                alt="sticker"
-                className="w-10 h-10 object-contain"
-              />
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Hình khối">
-        <div className="grid grid-cols-6 gap-2">
-          {SHAPES.map((shape) => (
-            <div
-              key={shape.type}
-              className="aspect-square bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border border-transparent hover:border-primary/30 flex items-center justify-center text-lg"
-              onClick={() => handleAddShape(shape.type)}
-              title={shape.label}
-            >
-              {shape.icon}
-            </div>
-          ))}
-        </div>
-      </Section>
-    </>
+        {imageSubTab === "folders" && (
+          <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+            <FolderOutlined className="text-4xl mb-3" />
+            <p className="text-sm text-center">
+              Sắp xếp tệp của bạn vào thư mục
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
   );
+
+  // Helper function to add uploaded image to canvas
+  const handleImageUpload2 = (src: string) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxWidth = 300;
+      const ratio = img.width / img.height;
+      const width = Math.min(img.width, maxWidth);
+      const height = width / ratio;
+      addElement(createImageElement(src, { size: { width, height } }));
+    };
+    img.src = src;
+  };
 
   const renderStockTab = () => (
     <>
