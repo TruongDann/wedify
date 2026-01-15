@@ -197,9 +197,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
       color?: string;
       textAlign?: "left" | "center" | "right";
     };
-  }[] = [
-   
-  ];
+  }[] = [];
 
   const renderTextTab = () => (
     <>
@@ -428,7 +426,9 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
         {imageSubTab === "designs" && (
           <div className="flex flex-col items-center justify-center py-12 text-gray-400">
             <AppstoreOutlined className="text-4xl mb-3" />
-            <p className="text-sm text-center">Thiết kế của bạn sẽ hiển thị tại đây</p>
+            <p className="text-sm text-center">
+              Thiết kế của bạn sẽ hiển thị tại đây
+            </p>
           </div>
         )}
 
