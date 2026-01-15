@@ -45,6 +45,16 @@ body {
   background: #a8a8a8;
 }
 
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Custom components that need specific styling */
 .canvas-wrapper {
   @apply bg-white shadow-lg rounded-sm;
