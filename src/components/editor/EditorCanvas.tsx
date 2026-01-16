@@ -226,15 +226,18 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               {...gradientProps}
             />
 
-            {/* Background Image */}
+            {/* Background Image - Repeat vertically only */}
             {bgImage && (
-              <KonvaImage
+              <Rect
                 name="background"
-                image={bgImage}
                 x={0}
                 y={0}
                 width={canvasSettings.width}
                 height={effectiveHeight}
+                fillPatternImage={bgImage}
+                fillPatternRepeat="repeat-y"
+                fillPatternScaleX={canvasSettings.width / bgImage.width}
+                fillPatternScaleY={canvasSettings.width / bgImage.width}
               />
             )}
 
