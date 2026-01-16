@@ -119,6 +119,33 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
 
   const sortedElements = [...elements].sort((a, b) => a.zIndex - b.zIndex);
 
+  const parseGradient = (gradientString: string) => {
+    if (!gradientString?.startsWith("linear-gradient")) return null;
+
+    const colorRegex = /#[A-Fa-f0-9]{6}|#[A-Fa-f0-9]{3}/g;
+    const colors = gradientString.match(colorRegex);
+
+    if (!colors || colors.length < 2) return null;
+
+    const angleMatch = gradientString.match(/(\d+)deg/);
+    const angle = angleMatch ? parseInt(angleMatch[1]) : 135;
+
+    const angleRad = (angle - 90) * (Math.PI / 180);
+    const width = canvasSettings.width;
+    const height = effectiveHeight;
+
+    return {
+      fillLinearGradientStartPoint: { x: 0, y: 0 },
+      fillLinearGradientEndPoint: { x: width, y: height },
+      fillLinearGradientColorStops: colors.flatMap((color, index) => [
+        index / (colors.length - 1),
+        color,
+      ]),
+    };
+  };
+
+  const gradientProps = parseGradient(canvasSettings.backgroundColor);
+
   const renderElement = (element: EditorElement) => {
     const isSelected = selectedElementId === element.id;
     const commonProps = {
@@ -189,18 +216,28 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               y={0}
               width={canvasSettings.width}
               height={effectiveHeight}
-              fill={canvasSettings.backgroundColor}
+              fill={
+                gradientProps
+                  ? undefined
+                  : canvasSettings.backgroundColor === "transparent"
+                  ? undefined
+                  : canvasSettings.backgroundColor
+              }
+              {...gradientProps}
             />
 
-            {/* Background Image */}
+            {/* Background Image - Repeat vertically only */}
             {bgImage && (
-              <KonvaImage
+              <Rect
                 name="background"
-                image={bgImage}
                 x={0}
                 y={0}
                 width={canvasSettings.width}
                 height={effectiveHeight}
+                fillPatternImage={bgImage}
+                fillPatternRepeat="repeat-y"
+                fillPatternScaleX={canvasSettings.width / bgImage.width}
+                fillPatternScaleY={canvasSettings.width / bgImage.width}
               />
             )}
 
