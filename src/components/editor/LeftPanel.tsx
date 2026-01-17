@@ -1,24 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Search,
-  Type,
-  MoreHorizontal,
-  Video,
-  Play,
-  X,
-  Crown,
-  Music,
-  Trash2,
-} from "lucide-react";
+import { Search, Type, Play, X, Crown, Music, Trash2 } from "lucide-react";
 import { Button, Upload, Input, Tabs } from "antd";
 import { HexColorPicker, HexColorInput } from "react-colorful";
 import {
   PictureOutlined,
-  HeartOutlined,
-  StarOutlined,
-  BorderOutlined,
   CalendarOutlined,
   ThunderboltOutlined,
   FolderOutlined,
@@ -33,22 +20,9 @@ import {
 import { ShapeElement } from "@/types/editor";
 import { preloadCommonFonts } from "@/utils/fontLoader";
 import { MUSIC_LIBRARY } from "@/constants/music";
-import { STICKERS, STOCK_IMAGES, SHAPES_CONFIG } from "@/constants/assets";
+import { STICKERS, STOCK_IMAGES } from "@/constants/assets";
 import { COLOR_PALETTE, GRADIENT_PALETTE } from "@/constants/colors";
-
-// Shapes with icons (needs to stay local for React components)
-const SHAPES: {
-  type: ShapeElement["shapeType"];
-  icon: React.ReactNode;
-  label: string;
-}[] = [
-  { type: "rectangle", icon: <BorderOutlined />, label: "Chữ nhật" },
-  { type: "circle", icon: "○", label: "Tròn" },
-  { type: "triangle", icon: "△", label: "Tam giác" },
-  { type: "heart", icon: <HeartOutlined />, label: "Tim" },
-  { type: "star", icon: <StarOutlined />, label: "Sao" },
-  { type: "line", icon: "—", label: "Đường" },
-];
+import { SHAPES } from "@/constants/shapes";
 
 interface LeftPanelProps {
   activeTab: string;
@@ -71,7 +45,6 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
     { id: string; name: string; src: string; duration: string }[]
   >([]);
 
-  // Preload common fonts when component mounts
   useEffect(() => {
     preloadCommonFonts();
   }, []);
@@ -276,6 +249,30 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
         </div>
       </div>
     </>
+  );
+
+  const renderShapesTab = () => (
+    <div className="p-4">
+      <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
+        Hình dạng
+      </h3>
+      <div className="grid grid-cols-3 gap-3">
+        {SHAPES.map((shape) => (
+          <button
+            key={shape.type}
+            onClick={() => handleAddShape(shape.type)}
+            className="aspect-square rounded-lg border-2 border-gray-200 hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 p-4 group"
+          >
+            <div className="text-3xl text-gray-600 group-hover:text-primary transition-colors">
+              {shape.icon}
+            </div>
+            <span className="text-xs text-gray-600 group-hover:text-primary transition-colors">
+              {shape.label}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 
   const renderImageTab = () => (
@@ -1032,6 +1029,8 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
     switch (activeTab) {
       case "text":
         return renderTextTab();
+      case "element":
+        return renderShapesTab();
       case "image":
         return renderImageTab();
       case "stock":
