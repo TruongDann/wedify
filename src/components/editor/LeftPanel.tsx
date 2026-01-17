@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   Type,
@@ -31,6 +31,7 @@ import {
   createShapeElement,
 } from "@/store/editorStore";
 import { ShapeElement } from "@/types/editor";
+import { preloadCommonFonts } from "@/utils/fontLoader";
 
 // Music Library
 const MUSIC_LIBRARY = [
@@ -201,6 +202,11 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
   const [uploadedMusic, setUploadedMusic] = useState<
     { id: string; name: string; src: string; duration: string }[]
   >([]);
+
+  // Preload common fonts when component mounts
+  useEffect(() => {
+    preloadCommonFonts();
+  }, []);
 
   const handleAddText = (
     options: {
