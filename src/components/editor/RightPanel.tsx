@@ -49,62 +49,9 @@ import {
   EditorElement,
 } from "@/types/editor";
 import { loadGoogleFont } from "@/utils/fontLoader";
+import { FONTS } from "@/constants/fonts";
 
 const { Option } = Select;
-
-const FONTS = [
-  // Wedding Script Fonts - Font chữ viết tay cho thiệp cưới
-  { name: "Dancing Script", label: "Dancing Script", category: "script" },
-  { name: "Great Vibes", label: "Great Vibes", category: "script" },
-  { name: "Parisienne", label: "Parisienne", category: "script" },
-  { name: "Allura", label: "Allura", category: "script" },
-  { name: "Sacramento", label: "Sacramento", category: "script" },
-  { name: "Alex Brush", label: "Alex Brush", category: "script" },
-  { name: "Tangerine", label: "Tangerine", category: "script" },
-  { name: "Pinyon Script", label: "Pinyon Script", category: "script" },
-  { name: "Satisfy", label: "Satisfy", category: "script" },
-  { name: "Cookie", label: "Cookie", category: "script" },
-  { name: "Kaushan Script", label: "Kaushan Script", category: "script" },
-  { name: "Amatic SC", label: "Amatic SC", category: "script" },
-
-  // Elegant Serif - Font serif sang trọng
-  { name: "Playfair Display", label: "Playfair Display", category: "serif" },
-  {
-    name: "Cormorant Garamond",
-    label: "Cormorant Garamond",
-    category: "serif",
-  },
-  { name: "Lora", label: "Lora", category: "serif" },
-  { name: "Crimson Text", label: "Crimson Text", category: "serif" },
-  { name: "Libre Baskerville", label: "Libre Baskerville", category: "serif" },
-  { name: "EB Garamond", label: "EB Garamond", category: "serif" },
-  { name: "Merriweather", label: "Merriweather", category: "serif" },
-  { name: "Cinzel", label: "Cinzel", category: "serif" },
-  { name: "Cardo", label: "Cardo", category: "serif" },
-
-  // Modern Sans-Serif - Font hiện đại
-  { name: "Montserrat", label: "Montserrat", category: "sans-serif" },
-  { name: "Raleway", label: "Raleway", category: "sans-serif" },
-  { name: "Poppins", label: "Poppins", category: "sans-serif" },
-  { name: "Open Sans", label: "Open Sans", category: "sans-serif" },
-  { name: "Roboto", label: "Roboto", category: "sans-serif" },
-  { name: "Josefin Sans", label: "Josefin Sans", category: "sans-serif" },
-  { name: "Quicksand", label: "Quicksand", category: "sans-serif" },
-
-  // Decorative Fonts - Font trang trí
-  { name: "Lobster", label: "Lobster", category: "decorative" },
-  { name: "Righteous", label: "Righteous", category: "decorative" },
-  { name: "Abril Fatface", label: "Abril Fatface", category: "decorative" },
-
-  // Vietnamese Fonts - Font tiếng Việt
-  { name: "Be Vietnam Pro", label: "Be Vietnam Pro", category: "vietnamese" },
-  { name: "Philosopher", label: "Philosopher", category: "vietnamese" },
-
-  // Classic Fonts - Font hệ thống
-  { name: "Arial", label: "Arial", category: "system" },
-  { name: "Times New Roman", label: "Times New Roman", category: "system" },
-  { name: "Georgia", label: "Georgia", category: "system" },
-];
 
 const CATEGORIES = [
   { value: "wedding", label: "Thiệp cưới" },

@@ -63,10 +63,11 @@ export const loadGoogleFont = async (fontFamily: string): Promise<void> => {
     // Get the properly formatted font name for Google Fonts URL
     const fontUrl = FONT_NAME_MAP[fontFamily] || fontFamily.replace(/ /g, "+");
 
-    // Create link element
+    // Create link element with Vietnamese subset support
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = `https://fonts.googleapis.com/css2?family=${fontUrl}:ital,wght@0,400;0,700;1,400;1,700&display=swap`;
+    // Add Vietnamese subset to ensure all Vietnamese characters display correctly
+    link.href = `https://fonts.googleapis.com/css2?family=${fontUrl}:ital,wght@0,400;0,700;1,400;1,700&subset=latin,vietnamese&display=swap`;
 
     // Add preconnect for faster loading (only once)
     if (!document.querySelector('link[href*="fonts.googleapis.com"]')) {
@@ -83,7 +84,7 @@ export const loadGoogleFont = async (fontFamily: string): Promise<void> => {
     }
 
     // Wait for font to be loaded using Font Loading API
-    if ("fonts" in document) {
+    if ("fonts" in document && (document as any).fonts) {
       link.onload = () => {
         // Use Font Loading API to wait for font
         (document as any).fonts.ready.then(() => {
@@ -93,7 +94,9 @@ export const loadGoogleFont = async (fontFamily: string): Promise<void> => {
             .then(() => {
               loadedFonts.add(fontFamily);
               loadingFonts.delete(fontFamily);
-              console.log(`✓ Font loaded and ready: ${fontFamily}`);
+              console.log(
+                `✓ Font loaded with Vietnamese support: ${fontFamily}`
+              );
               resolve();
             })
             .catch(() => {
