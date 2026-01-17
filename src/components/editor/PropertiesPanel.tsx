@@ -24,20 +24,11 @@ import {
 } from "@ant-design/icons";
 import { useEditorStore } from "@/store/editorStore";
 import { TextElement, ImageElement, ShapeElement } from "@/types/editor";
+import { loadGoogleFont } from "@/utils/fontLoader";
+import { FONTS } from "@/constants/fonts";
 
 const { Panel } = Collapse;
 const { Option } = Select;
-
-const FONTS = [
-  { name: "Dancing Script", label: "Dancing Script" },
-  { name: "Great Vibes", label: "Great Vibes" },
-  { name: "Playfair Display", label: "Playfair Display" },
-  { name: "Cormorant Garamond", label: "Cormorant Garamond" },
-  { name: "Montserrat", label: "Montserrat" },
-  { name: "Lora", label: "Lora" },
-  { name: "Arial", label: "Arial" },
-  { name: "Times New Roman", label: "Times New Roman" },
-];
 
 const PropertiesPanel: React.FC = () => {
   const { elements, selectedElementId, updateElement, deleteElement } =
@@ -73,7 +64,12 @@ const PropertiesPanel: React.FC = () => {
       <Panel header="Font chữ" key="font">
         <Select
           value={element.fontFamily}
-          onChange={(value) => handleUpdate({ fontFamily: value })}
+          onChange={async (value) => {
+            await loadGoogleFont(value);
+            setTimeout(() => {
+              handleUpdate({ fontFamily: value });
+            }, 50);
+          }}
           className="w-full mb-3"
         >
           {FONTS.map((font) => (

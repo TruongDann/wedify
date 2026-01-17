@@ -48,19 +48,10 @@ import {
   ShapeElement,
   EditorElement,
 } from "@/types/editor";
+import { loadGoogleFont } from "@/utils/fontLoader";
+import { FONTS } from "@/constants/fonts";
 
 const { Option } = Select;
-
-const FONTS = [
-  { name: "Dancing Script", label: "Dancing Script" },
-  { name: "Great Vibes", label: "Great Vibes" },
-  { name: "Playfair Display", label: "Playfair Display" },
-  { name: "Cormorant Garamond", label: "Cormorant Garamond" },
-  { name: "Montserrat", label: "Montserrat" },
-  { name: "Lora", label: "Lora" },
-  { name: "Arial", label: "Arial" },
-  { name: "Times New Roman", label: "Times New Roman" },
-];
 
 const CATEGORIES = [
   { value: "wedding", label: "Thiệp cưới" },
@@ -1374,7 +1365,12 @@ const RightPanel: React.FC<RightPanelProps> = ({
               <PropertyRow label="Font">
                 <Select
                   value={element.fontFamily}
-                  onChange={(value) => handleUpdate({ fontFamily: value })}
+                  onChange={async (value) => {
+                    await loadGoogleFont(value);
+                    setTimeout(() => {
+                      handleUpdate({ fontFamily: value });
+                    }, 50);
+                  }}
                   className="flex-1"
                 >
                   {FONTS.map((font) => (

@@ -1,24 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Search,
-  Type,
-  MoreHorizontal,
-  Video,
-  Play,
-  X,
-  Crown,
-  Music,
-  Trash2,
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, Type, Play, X, Crown, Music, Trash2 } from "lucide-react";
 import { Button, Upload, Input, Tabs } from "antd";
 import { HexColorPicker, HexColorInput } from "react-colorful";
 import {
   PictureOutlined,
-  HeartOutlined,
-  StarOutlined,
-  BorderOutlined,
   CalendarOutlined,
   ThunderboltOutlined,
   FolderOutlined,
@@ -31,155 +18,11 @@ import {
   createShapeElement,
 } from "@/store/editorStore";
 import { ShapeElement } from "@/types/editor";
-
-// Music Library
-const MUSIC_LIBRARY = [
-  { id: 1, name: "50 Năm Về Sau", artist: "Unknown", duration: "03:54" },
-  { id: 2, name: "A Little Love", artist: "Unknown", duration: "03:11" },
-  { id: 3, name: "A Thousand Years", artist: "Unknown", duration: "04:48" },
-  { id: 4, name: "All of Me", artist: "Unknown", duration: "04:30" },
-  { id: 5, name: "Beautiful In White", artist: "Unknown", duration: "03:58" },
-  {
-    id: 6,
-    name: "Can't Help Falling In Love",
-    artist: "Unknown",
-    duration: "03:07",
-  },
-  { id: 7, name: "Perfect", artist: "Unknown", duration: "04:23" },
-  { id: 8, name: "Thinking Out Loud", artist: "Unknown", duration: "04:41" },
-];
-
-// Shapes
-const SHAPES: {
-  type: ShapeElement["shapeType"];
-  icon: React.ReactNode;
-  label: string;
-}[] = [
-  { type: "rectangle", icon: <BorderOutlined />, label: "Chữ nhật" },
-  { type: "circle", icon: "○", label: "Tròn" },
-  { type: "triangle", icon: "△", label: "Tam giác" },
-  { type: "heart", icon: <HeartOutlined />, label: "Tim" },
-  { type: "star", icon: <StarOutlined />, label: "Sao" },
-  { type: "line", icon: "—", label: "Đường" },
-];
-
-// Stickers
-const STICKERS = [
-  {
-    id: 1,
-    src: "https://img.icons8.com/color/96/wedding-rings.png",
-    category: "wedding",
-  },
-  {
-    id: 2,
-    src: "https://img.icons8.com/color/96/champagne.png",
-    category: "wedding",
-  },
-  {
-    id: 3,
-    src: "https://img.icons8.com/color/96/wedding-cake.png",
-    category: "wedding",
-  },
-  {
-    id: 4,
-    src: "https://img.icons8.com/color/96/rose-bouquet.png",
-    category: "flowers",
-  },
-  {
-    id: 5,
-    src: "https://img.icons8.com/color/96/flower.png",
-    category: "flowers",
-  },
-  {
-    id: 6,
-    src: "https://img.icons8.com/color/96/butterfly.png",
-    category: "nature",
-  },
-  {
-    id: 7,
-    src: "https://img.icons8.com/color/96/dove.png",
-    category: "nature",
-  },
-  {
-    id: 8,
-    src: "https://img.icons8.com/color/96/sparkling-diamond.png",
-    category: "wedding",
-  },
-];
-
-// Stock images
-const STOCK_IMAGES = [
-  "https://images.unsplash.com/photo-1519741497674-611481863552?w=200",
-  "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=200",
-  "https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=200",
-  "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=200",
-  "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=200",
-  "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=200",
-];
-
-// Color palette for background
-const COLOR_PALETTE = [
-  // Row 1: Transparent, blacks, grays, white
-  { color: "transparent", isTransparent: true },
-  { color: "#000000" },
-  { color: "#4A4A4A" },
-  { color: "#7A7A7A" },
-  { color: "#B8B8B8" },
-  { color: "#FFFFFF" },
-  // Row 2: Vibrant colors
-  { color: "#E53935" },
-  { color: "#8E24AA" },
-  { color: "#1E88E5" },
-  { color: "#00897B" },
-  { color: "#43A047" },
-  { color: "#00ACC1" },
-  // Row 3: Medium tones
-  { color: "#FF5722" },
-  { color: "#7B1FA2" },
-  { color: "#2196F3" },
-  { color: "#26A69A" },
-  { color: "#4CAF50" },
-  { color: "#FF9800" },
-  // Row 4: Lighter vibrant
-  { color: "#F48FB1" },
-  { color: "#CE93D8" },
-  { color: "#90CAF9" },
-  { color: "#80CBC4" },
-  { color: "#C5E1A5" },
-  { color: "#FFEE58" },
-  // Row 5: Pastel colors
-  { color: "#FCE4EC" },
-  { color: "#E1BEE7" },
-  { color: "#B3E5FC" },
-  { color: "#B2DFDB" },
-  { color: "#DCEDC8" },
-  { color: "#FFF9C4" },
-  // Row 6: Very light pastels
-  { color: "#FFF8E1" },
-  { color: "#E0F7FA" },
-  { color: "#F1F8E9" },
-  { color: "#FFFDE7" },
-  { color: "#FBE9E7" },
-  { color: "#F3E5F5" },
-];
-
-// Gradient palette for background
-const GRADIENT_PALETTE = [
-  { gradient: "linear-gradient(135deg, #FF6B6B 0%, #FFA07A 100%)" },
-  { gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" },
-  { gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)" },
-  { gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)" },
-  { gradient: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)" },
-  {
-    gradient: "linear-gradient(135deg, #FF9A8B 0%, #FF6A88 55%, #FF99AC 100%)",
-  },
-  { gradient: "linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)" },
-  { gradient: "linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%)" },
-  { gradient: "linear-gradient(135deg, #4481eb 0%, #04befe 100%)" },
-  { gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" },
-  { gradient: "linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)" },
-  { gradient: "linear-gradient(135deg, #c3cfe2 0%, #c3cfe2 100%)" },
-];
+import { preloadCommonFonts } from "@/utils/fontLoader";
+import { MUSIC_LIBRARY } from "@/constants/music";
+import { STICKERS, STOCK_IMAGES } from "@/constants/assets";
+import { COLOR_PALETTE, GRADIENT_PALETTE } from "@/constants/colors";
+import { SHAPES } from "@/constants/shapes";
 
 interface LeftPanelProps {
   activeTab: string;
@@ -201,6 +44,10 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
   const [uploadedMusic, setUploadedMusic] = useState<
     { id: string; name: string; src: string; duration: string }[]
   >([]);
+
+  useEffect(() => {
+    preloadCommonFonts();
+  }, []);
 
   const handleAddText = (
     options: {
@@ -402,6 +249,30 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
         </div>
       </div>
     </>
+  );
+
+  const renderShapesTab = () => (
+    <div className="p-4">
+      <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
+        Hình dạng
+      </h3>
+      <div className="grid grid-cols-3 gap-3">
+        {SHAPES.map((shape) => (
+          <button
+            key={shape.type}
+            onClick={() => handleAddShape(shape.type)}
+            className="aspect-square rounded-lg border-2 border-gray-200 hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 p-4 group"
+          >
+            <div className="text-3xl text-gray-600 group-hover:text-primary transition-colors">
+              {shape.icon}
+            </div>
+            <span className="text-xs text-gray-600 group-hover:text-primary transition-colors">
+              {shape.label}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 
   const renderImageTab = () => (
@@ -1158,6 +1029,8 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
     switch (activeTab) {
       case "text":
         return renderTextTab();
+      case "element":
+        return renderShapesTab();
       case "image":
         return renderImageTab();
       case "stock":

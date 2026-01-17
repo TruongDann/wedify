@@ -41,6 +41,7 @@ const EditorCanvas = dynamic(() => import("@/components/editor/EditorCanvas"), {
 
 type TabKey =
   | "text"
+  | "element"
   | "image"
   | "stock"
   | "background"
@@ -51,6 +52,7 @@ type TabKey =
 
 const tabs: { key: TabKey; icon: React.ReactNode; label: string }[] = [
   { key: "text", icon: <FontSizeOutlined />, label: "Văn bản" },
+  { key: "element", icon: <BlockOutlined />, label: "Hình dạng" },
   { key: "image", icon: <PictureOutlined />, label: "Hình ảnh" },
   { key: "stock", icon: <AppstoreOutlined />, label: "Stock" },
   { key: "background", icon: <BgColorsOutlined />, label: "Nền" },
