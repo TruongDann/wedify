@@ -40,6 +40,7 @@ import {
   DragOutlined,
   PlayCircleOutlined,
   ExportOutlined,
+  BgColorsOutlined,
 } from "@ant-design/icons";
 import { useEditorStore } from "@/store/editorStore";
 import {
@@ -146,7 +147,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
 
   const toggleSection = (key: string) => {
     setExpandedSections((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
     );
   };
 
@@ -672,8 +673,8 @@ const RightPanel: React.FC<RightPanelProps> = ({
                             effect.type === "shadow"
                               ? "2px 2px 4px rgba(0,0,0,0.3)"
                               : effect.type === "lift"
-                              ? "0 4px 8px rgba(0,0,0,0.2)"
-                              : "none",
+                                ? "0 4px 8px rgba(0,0,0,0.2)"
+                                : "none",
                         }}
                       >
                         {effect.preview}
@@ -1197,14 +1198,14 @@ const RightPanel: React.FC<RightPanelProps> = ({
                             effect.type === "hollow"
                               ? "transparent"
                               : effect.type === "splice"
-                              ? "#7c3aed"
-                              : "#000",
+                                ? "#7c3aed"
+                                : "#000",
                           WebkitTextStroke:
                             effect.type === "hollow"
                               ? "1px #000"
                               : effect.type === "outline"
-                              ? "2px #7c3aed"
-                              : "none",
+                                ? "2px #7c3aed"
+                                : "none",
                           textShadow:
                             effect.type === "splice"
                               ? "2px 2px 0 #000"
@@ -1245,14 +1246,14 @@ const RightPanel: React.FC<RightPanelProps> = ({
                             effect.type === "neon"
                               ? "#00ff88"
                               : effect.type === "glitch"
-                              ? "#ff0066"
-                              : "#000",
+                                ? "#ff0066"
+                                : "#000",
                           textShadow:
                             effect.type === "echo"
                               ? "2px 2px 0 rgba(0,0,0,0.2), 4px 4px 0 rgba(0,0,0,0.1)"
                               : effect.type === "neon"
-                              ? "0 0 10px #00ff88, 0 0 20px #00ff88"
-                              : "none",
+                                ? "0 0 10px #00ff88, 0 0 20px #00ff88"
+                                : "none",
                         }}
                       >
                         {effect.preview}
@@ -2022,7 +2023,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
                     onChange={(e) =>
                       handlePositionUpdate(
                         item.key,
-                        Number(e.target.value) || 0
+                        Number(e.target.value) || 0,
                       )
                     }
                   />
@@ -2089,12 +2090,16 @@ const RightPanel: React.FC<RightPanelProps> = ({
 
   // Render shape element properties
   const renderShapeProperties = (element: ShapeElement) => (
-    <>
+    <div className="p-3 space-y-3">
       {/* Màu sắc */}
-      <div className="border-b border-gray-100">
-        <SectionHeader title="Màu sắc" sectionKey="colors" />
+      <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <SectionHeader
+          title="Màu sắc"
+          sectionKey="colors"
+          icon={<BgColorsOutlined />}
+        />
         {expandedSections.includes("colors") && (
-          <div className="px-4 pb-4">
+          <div className="px-4 pt-3 pb-4">
             <PropertyRow label="Màu nền">
               <ColorPicker
                 value={element.fill}
@@ -2119,16 +2124,119 @@ const RightPanel: React.FC<RightPanelProps> = ({
                 max={20}
                 className="flex-1"
               />
+              <span className="text-xs text-gray-500 w-8">
+                {element.strokeWidth}px
+              </span>
             </PropertyRow>
           </div>
         )}
       </div>
 
+      {/* Đổ bóng (Shadow) */}
+      <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <SectionHeader
+          title="Đổ bóng"
+          sectionKey="shadow"
+          icon={<CopyOutlined />}
+        />
+        {expandedSections.includes("shadow") && (
+          <div className="px-4 pt-3 pb-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Đổ bóng</span>
+              <Switch
+                checked={element.shadow?.enabled || false}
+                onChange={(checked) =>
+                  handleUpdate({
+                    shadow: {
+                      ...element.shadow,
+                      enabled: checked,
+                      x: 0,
+                      y: 4,
+                      blur: 8,
+                      color: "rgba(0,0,0,0.2)",
+                    },
+                  })
+                }
+              />
+            </div>
+
+            {element.shadow?.enabled && (
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-400">X</span>
+                    <input
+                      type="number"
+                      className="w-full h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                      value={element.shadow?.x || 0}
+                      onChange={(e) =>
+                        handleUpdate({
+                          shadow: {
+                            ...element.shadow,
+                            x: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-400">Y</span>
+                    <input
+                      type="number"
+                      className="w-full h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                      value={element.shadow?.y || 0}
+                      onChange={(e) =>
+                        handleUpdate({
+                          shadow: {
+                            ...element.shadow,
+                            y: Number(e.target.value) || 0,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <PropertyRow label="Blur">
+                  <Slider
+                    value={element.shadow?.blur || 0}
+                    onChange={(v) =>
+                      handleUpdate({ shadow: { ...element.shadow, blur: v } })
+                    }
+                    min={0}
+                    max={50}
+                    className="flex-1"
+                  />
+                </PropertyRow>
+
+                <PropertyRow label="Màu">
+                  <ColorPicker
+                    value={element.shadow?.color || "rgba(0,0,0,0.2)"}
+                    onChange={(color) =>
+                      handleUpdate({
+                        shadow: {
+                          ...element.shadow,
+                          color: color.toHexString(),
+                        },
+                      })
+                    }
+                  />
+                </PropertyRow>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Vị trí & Kích thước */}
-      <div className="border-b border-gray-100">
-        <SectionHeader title="Vị trí & Kích thước" sectionKey="position" />
+      <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <SectionHeader
+          title="Vị trí & Kích thước"
+          sectionKey="position"
+          icon={<DragOutlined />}
+        />
         {expandedSections.includes("position") && (
-          <div className="px-4 pb-4">
+          <div className="px-4 pt-3 pb-4">
             <PositionGrid position={element.position} size={element.size} />
             <PropertyRow label="Xoay">
               <Slider
@@ -2151,13 +2259,16 @@ const RightPanel: React.FC<RightPanelProps> = ({
                 step={0.01}
                 className="flex-1"
               />
+              <span className="text-xs text-gray-500 w-10">
+                {element.opacity.toFixed(2)}
+              </span>
             </PropertyRow>
           </div>
         )}
       </div>
 
       {/* Delete Button */}
-      <div className="p-4">
+      <div className="pt-1">
         <Button
           danger
           block
@@ -2167,7 +2278,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
           Xóa phần tử
         </Button>
       </div>
-    </>
+    </div>
   );
 
   const renderProperties = () => {
