@@ -16,9 +16,13 @@ export interface ShapeConfig {
 // Shapes with icons for the editor
 export const SHAPES: ShapeConfig[] = [
   { type: "rectangle", icon: <BorderOutlined />, label: "Chữ nhật" },
-  { type: "circle", icon: <Circle size={28} />, label: "Tròn" },
-  { type: "triangle", icon: <Triangle size={28} />, label: "Tam giác" },
+  { type: "circle", icon: <Circle size={28} strokeWidth={2} />, label: "Tròn" },
+  {
+    type: "triangle",
+    icon: <Triangle size={28} strokeWidth={2} />,
+    label: "Tam giác",
+  },
   { type: "heart", icon: <HeartOutlined />, label: "Tim" },
   { type: "star", icon: <StarOutlined />, label: "Sao" },
-  { type: "line", icon: <Minus size={28} />, label: "Đường" },
+  { type: "line", icon: <Minus size={28} strokeWidth={2} />, label: "Đường" },
 ];

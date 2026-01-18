@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Rect, Circle, Line, Star, Shape } from "react-konva";
+import { Rect, Circle, Ellipse, Line, Star, Shape } from "react-konva";
 import Konva from "konva";
 import { ShapeElement } from "@/types/editor";
 
@@ -48,10 +48,10 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
 
     case "circle":
       return (
-        <Circle
+        <Ellipse
           {...commonProps}
-          x={element.position.x + element.size.width / 2}
-          y={element.position.y + element.size.height / 2}
+          offsetX={-element.size.width / 2}
+          offsetY={-element.size.height / 2}
           radiusX={element.size.width / 2}
           radiusY={element.size.height / 2}
         />
@@ -77,8 +77,8 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
       return (
         <Star
           {...commonProps}
-          x={element.position.x + element.size.width / 2}
-          y={element.position.y + element.size.height / 2}
+          offsetX={-element.size.width / 2}
+          offsetY={-element.size.height / 2}
           numPoints={5}
           innerRadius={element.size.width / 4}
           outerRadius={element.size.width / 2}
@@ -89,32 +89,35 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
       return (
         <Shape
           {...commonProps}
+          width={element.size.width}
+          height={element.size.height}
           sceneFunc={(context, shape) => {
             const width = element.size.width;
             const height = element.size.height;
-            const topCurveHeight = height * 0.3;
 
             context.beginPath();
             context.moveTo(width / 2, height);
 
             // Left side of heart
             context.bezierCurveTo(
+              width / 4,
+              height,
               0,
-              height - topCurveHeight,
+              height * 0.65,
               0,
-              0,
-              width / 2,
-              topCurveHeight
+              height * 0.35,
             );
+            context.bezierCurveTo(0, 0, width / 2, 0, width / 2, height * 0.35);
 
             // Right side of heart
+            context.bezierCurveTo(width / 2, 0, width, 0, width, height * 0.35);
             context.bezierCurveTo(
               width,
-              0,
-              width,
-              height - topCurveHeight,
+              height * 0.65,
+              width * 0.75,
+              height,
               width / 2,
-              height
+              height,
             );
 
             context.closePath();
