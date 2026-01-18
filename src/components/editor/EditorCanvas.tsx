@@ -80,7 +80,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
   }, [selectedElementId, elements]);
 
   const handleStageClick = (
-    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>
+    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
     if (e.target === e.target.getStage() || e.target.name() === "background") {
       selectElement(null);
@@ -149,8 +149,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
   const renderElement = (element: EditorElement) => {
     const isSelected = selectedElementId === element.id;
     const commonProps = {
-      key: element.id,
-      element,
       isSelected,
       onSelect: () => selectElement(element.id),
       onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) =>
@@ -161,11 +159,29 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
 
     switch (element.type) {
       case "text":
-        return <TextElementComponent {...commonProps} element={element} />;
+        return (
+          <TextElementComponent
+            key={element.id}
+            {...commonProps}
+            element={element}
+          />
+        );
       case "image":
-        return <ImageElementComponent {...commonProps} element={element} />;
+        return (
+          <ImageElementComponent
+            key={element.id}
+            {...commonProps}
+            element={element}
+          />
+        );
       case "shape":
-        return <ShapeElementComponent {...commonProps} element={element} />;
+        return (
+          <ShapeElementComponent
+            key={element.id}
+            {...commonProps}
+            element={element}
+          />
+        );
       default:
         return null;
     }
@@ -220,8 +236,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
                 gradientProps
                   ? undefined
                   : canvasSettings.backgroundColor === "transparent"
-                  ? undefined
-                  : canvasSettings.backgroundColor
+                    ? undefined
+                    : canvasSettings.backgroundColor
               }
               {...gradientProps}
             />
@@ -248,7 +264,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
             <Transformer
               ref={transformerRef}
               boundBoxFunc={(oldBox, newBox) => {
-                if (newBox.width < 20 || newBox.height < 20) {
+                // Allow small height for line shapes
+                if (newBox.width < 5) {
+                  return oldBox;
+                }
+                // Only enforce minimum height if it's not a very thin shape (like line)
+                if (newBox.height < 5 && oldBox.height >= 20) {
                   return oldBox;
                 }
                 return newBox;

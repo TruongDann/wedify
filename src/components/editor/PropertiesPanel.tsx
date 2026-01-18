@@ -12,7 +12,6 @@ import {
   Divider,
 } from "antd";
 import {
-  BoldOutlined,
   ItalicOutlined,
   UnderlineOutlined,
   AlignLeftOutlined,

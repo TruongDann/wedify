@@ -116,7 +116,21 @@ export interface ImageElement extends BaseElement {
 
 export interface ShapeElement extends BaseElement {
   type: "shape";
-  shapeType: "rectangle" | "circle" | "triangle" | "heart" | "star" | "line";
+  shapeType:
+    | "rectangle"
+    | "circle"
+    | "triangle"
+    | "heart"
+    | "star"
+    | "line"
+    | "diamond"
+    | "pentagon"
+    | "hexagon"
+    | "arrow"
+    | "cloud"
+    | "speechBubble"
+    | "cross"
+    | "ring";
   fill: string;
   stroke: string;
   strokeWidth: number;
