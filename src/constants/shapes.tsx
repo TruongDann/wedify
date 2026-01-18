@@ -3,8 +3,9 @@
  */
 
 import React from "react";
-import { ShapeElement } from "@/types/editor";
+import { Circle, Triangle, Minus } from "lucide-react";
 import { BorderOutlined, HeartOutlined, StarOutlined } from "@ant-design/icons";
+import { ShapeElement } from "@/types/editor";
 
 export interface ShapeConfig {
   type: ShapeElement["shapeType"];
@@ -15,9 +16,9 @@ export interface ShapeConfig {
 // Shapes with icons for the editor
 export const SHAPES: ShapeConfig[] = [
   { type: "rectangle", icon: <BorderOutlined />, label: "Chữ nhật" },
-  { type: "circle", icon: "○", label: "Tròn" },
-  { type: "triangle", icon: "△", label: "Tam giác" },
+  { type: "circle", icon: <Circle size={28} />, label: "Tròn" },
+  { type: "triangle", icon: <Triangle size={28} />, label: "Tam giác" },
   { type: "heart", icon: <HeartOutlined />, label: "Tim" },
   { type: "star", icon: <StarOutlined />, label: "Sao" },
-  { type: "line", icon: "—", label: "Đường" },
+  { type: "line", icon: <Minus size={28} />, label: "Đường" },
 ];

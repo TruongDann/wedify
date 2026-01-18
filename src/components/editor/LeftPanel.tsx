@@ -167,7 +167,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
           block
           size="large"
           onClick={() => handleAddText()}
-          className="!font-medium !text-sm !rounded-md flex items-center justify-center bg-[#8b3dff] hover:!bg-[#7a35e0] h-10 shadow-sm"
+          className="!font-medium !text-sm !rounded-md flex items-center justify-center h-10 shadow-sm"
           icon={<Type size={18} className="mr-1" />}
         >
           Thêm hộp văn bản
@@ -306,7 +306,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
           <Button
             type="primary"
             size="large"
-            className="!font-medium !text-sm !rounded-lg flex items-center justify-center bg-[#8b3dff] hover:!bg-[#7a35e0] h-11 !w-full"
+            className="!font-medium !text-sm !rounded-lg flex items-center justify-center h-11 !w-full"
           >
             Tải lên tệp
           </Button>
