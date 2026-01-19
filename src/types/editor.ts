@@ -100,17 +100,50 @@ export interface ImageElement extends BaseElement {
   src: string;
   alt: string;
   objectFit: "cover" | "contain" | "fill";
-  borderRadius: number;
+  // Padding
+  padding: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  // Border
   border: {
     width: number;
     color: string;
-    style: "solid" | "dashed" | "dotted";
+    style: "solid" | "dashed" | "dotted" | "none";
+    position: "all" | "top" | "bottom" | "left" | "right";
   };
+  // Border Radius
+  borderRadius: {
+    topLeft: number;
+    topRight: number;
+    bottomLeft: number;
+    bottomRight: number;
+  };
+  // Shadow
   shadow: {
+    enabled: boolean;
     x: number;
     y: number;
     blur: number;
     color: string;
+  };
+  // Link
+  hyperlink: string;
+  // Animation
+  animation: {
+    enabled: boolean;
+    continuous: boolean;
+    type: "none" | "fadeIn" | "slideIn" | "bounce" | "pulse" | "shake" | "zoom";
+  };
+  // Image filters
+  filters: {
+    brightness: number;
+    contrast: number;
+    saturation: number;
+    blur: number;
+    grayscale: number;
   };
 }
 

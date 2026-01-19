@@ -45,7 +45,7 @@ interface EditorStore {
   clearCanvas: () => void;
   loadTemplate: (
     elements: EditorElement[],
-    canvasSettings: CanvasSettings
+    canvasSettings: CanvasSettings,
   ) => void;
 }
 
@@ -90,7 +90,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   updateElement: (id, updates) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? ({ ...el, ...updates } as EditorElement) : el
+        el.id === id ? ({ ...el, ...updates } as EditorElement) : el,
       ),
     }));
     get().saveHistory();
@@ -134,7 +134,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   moveElement: (id, position) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, position } : el
+        el.id === id ? { ...el, position } : el,
       ),
     }));
   },
@@ -142,7 +142,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   resizeElement: (id, size) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, size } : el
+        el.id === id ? { ...el, size } : el,
       ),
     }));
   },
@@ -150,7 +150,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   rotateElement: (id, rotation) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, rotation } : el
+        el.id === id ? { ...el, rotation } : el,
       ),
     }));
   },
@@ -159,7 +159,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const maxZIndex = Math.max(...get().elements.map((e) => e.zIndex));
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, zIndex: maxZIndex + 1 } : el
+        el.id === id ? { ...el, zIndex: maxZIndex + 1 } : el,
       ),
     }));
     get().saveHistory();
@@ -169,7 +169,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const minZIndex = Math.min(...get().elements.map((e) => e.zIndex));
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, zIndex: minZIndex - 1 } : el
+        el.id === id ? { ...el, zIndex: minZIndex - 1 } : el,
       ),
     }));
     get().saveHistory();
@@ -180,11 +180,11 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const element = elements.find((el) => el.id === id);
     if (element) {
       const higherElements = elements.filter(
-        (el) => el.zIndex > element.zIndex
+        (el) => el.zIndex > element.zIndex,
       );
       if (higherElements.length > 0) {
         const nextElement = higherElements.reduce((prev, curr) =>
-          curr.zIndex < prev.zIndex ? curr : prev
+          curr.zIndex < prev.zIndex ? curr : prev,
         );
         set((state) => ({
           elements: state.elements.map((el) => {
@@ -206,7 +206,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       const lowerElements = elements.filter((el) => el.zIndex < element.zIndex);
       if (lowerElements.length > 0) {
         const prevElement = lowerElements.reduce((prev, curr) =>
-          curr.zIndex > prev.zIndex ? curr : prev
+          curr.zIndex > prev.zIndex ? curr : prev,
         );
         set((state) => ({
           elements: state.elements.map((el) => {
@@ -287,7 +287,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
 // Helper functions to create elements
 export const createTextElement = (
-  overrides?: Partial<TextElement>
+  overrides?: Partial<TextElement>,
 ): Omit<TextElement, "id" | "zIndex"> => ({
   type: "text",
   content: "Nhập văn bản",
@@ -331,7 +331,7 @@ export const createTextElement = (
 
 export const createImageElement = (
   src: string,
-  overrides?: Partial<ImageElement>
+  overrides?: Partial<ImageElement>,
 ): Omit<ImageElement, "id" | "zIndex"> => ({
   type: "image",
   src,
@@ -342,24 +342,52 @@ export const createImageElement = (
   opacity: 1,
   locked: false,
   objectFit: "cover",
-  borderRadius: 0,
+  // Padding
+  padding: { top: 0, right: 0, bottom: 0, left: 0 },
+  // Border
   border: {
     width: 0,
     color: "#000000",
     style: "solid",
+    position: "all",
   },
+  // Border Radius
+  borderRadius: {
+    topLeft: 0,
+    topRight: 0,
+    bottomLeft: 0,
+    bottomRight: 0,
+  },
+  // Shadow
   shadow: {
+    enabled: false,
     x: 0,
-    y: 0,
+    y: 4,
+    blur: 8,
+    color: "rgba(0,0,0,0.2)",
+  },
+  // Link
+  hyperlink: "",
+  // Animation
+  animation: {
+    enabled: false,
+    continuous: false,
+    type: "none",
+  },
+  // Filters
+  filters: {
+    brightness: 100,
+    contrast: 100,
+    saturation: 100,
     blur: 0,
-    color: "rgba(0,0,0,0.3)",
+    grayscale: 0,
   },
   ...overrides,
 });
 
 export const createShapeElement = (
   shapeType: ShapeElement["shapeType"],
-  overrides?: Partial<ShapeElement>
+  overrides?: Partial<ShapeElement>,
 ): Omit<ShapeElement, "id" | "zIndex"> => ({
   type: "shape",
   shapeType,
