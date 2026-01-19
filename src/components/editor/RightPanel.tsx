@@ -2679,197 +2679,201 @@ const RightPanel: React.FC<RightPanelProps> = ({
   };
 
   // Render shape element properties
-  const renderShapeProperties = (element: ShapeElement) => (
-    <div className="p-3 space-y-3">
-      {/* Màu sắc */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
-        <SectionHeader
-          title="Màu sắc"
-          sectionKey="colors"
-          icon={<BgColorsOutlined />}
-        />
-        {expandedSections.includes("colors") && (
-          <div className="px-4 pt-3 pb-4">
-            <PropertyRow label="Màu nền">
-              <ColorPicker
-                value={element.fill}
-                onChange={(color) =>
-                  handleUpdate({ fill: color.toHexString() })
-                }
-              />
-            </PropertyRow>
-            <PropertyRow label="Màu viền">
-              <ColorPicker
-                value={element.stroke}
-                onChange={(color) =>
-                  handleUpdate({ stroke: color.toHexString() })
-                }
-              />
-            </PropertyRow>
-            <PropertyRow label="Độ dày viền">
-              <Slider
-                value={element.strokeWidth}
-                onChange={(value) => handleUpdate({ strokeWidth: value })}
-                min={0}
-                max={20}
-                className="flex-1"
-              />
-              <span className="text-xs text-gray-500 w-8">
-                {element.strokeWidth}px
-              </span>
-            </PropertyRow>
-          </div>
-        )}
-      </div>
+  const renderShapeProperties = (element: ShapeElement) => {
+    // Default shadow values
+    const shadow = element.shadow || {
+      enabled: false,
+      x: 0,
+      y: 4,
+      blur: 8,
+      color: "rgba(0,0,0,0.2)",
+    };
 
-      {/* Đổ bóng (Shadow) */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
-        <SectionHeader
-          title="Đổ bóng"
-          sectionKey="shadow"
-          icon={<CopyOutlined />}
-        />
-        {expandedSections.includes("shadow") && (
-          <div className="px-4 pt-3 pb-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Đổ bóng</span>
-              <Switch
-                checked={element.shadow?.enabled || false}
-                onChange={(checked) =>
-                  handleUpdate({
-                    shadow: {
-                      ...element.shadow,
-                      enabled: checked,
-                      x: 0,
-                      y: 4,
-                      blur: 8,
-                      color: "rgba(0,0,0,0.2)",
-                    },
-                  })
-                }
-              />
+    return (
+      <div className="p-3 space-y-3">
+        {/* Màu sắc */}
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader
+            title="Màu sắc"
+            sectionKey="colors"
+            icon={<BgColorsOutlined />}
+          />
+          {expandedSections.includes("colors") && (
+            <div className="px-4 pt-3 pb-4">
+              <PropertyRow label="Màu nền">
+                <ColorPicker
+                  value={element.fill}
+                  onChange={(color) =>
+                    handleUpdate({ fill: color.toHexString() })
+                  }
+                />
+              </PropertyRow>
+              <PropertyRow label="Màu viền">
+                <ColorPicker
+                  value={element.stroke}
+                  onChange={(color) =>
+                    handleUpdate({ stroke: color.toHexString() })
+                  }
+                />
+              </PropertyRow>
+              <PropertyRow label="Độ dày viền">
+                <Slider
+                  value={element.strokeWidth}
+                  onChange={(value) => handleUpdate({ strokeWidth: value })}
+                  min={0}
+                  max={20}
+                  className="flex-1"
+                />
+                <span className="text-xs text-gray-500 w-8">
+                  {element.strokeWidth}px
+                </span>
+              </PropertyRow>
             </div>
+          )}
+        </div>
 
-            {element.shadow?.enabled && (
-              <>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-400">X</span>
-                    <input
-                      type="number"
-                      className="w-full h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                      value={element.shadow?.x || 0}
-                      onChange={(e) =>
+        {/* Đổ bóng (Shadow) */}
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader
+            title="Đổ bóng"
+            sectionKey="shadow"
+            icon={<CopyOutlined />}
+          />
+          {expandedSections.includes("shadow") && (
+            <div className="px-4 pt-3 pb-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Đổ bóng</span>
+                <Switch
+                  checked={shadow.enabled}
+                  onChange={(checked) =>
+                    handleUpdate({
+                      shadow: { ...shadow, enabled: checked },
+                    })
+                  }
+                />
+              </div>
+
+              {shadow.enabled && (
+                <>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-400">X</span>
+                      <input
+                        type="number"
+                        className="w-full h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                        value={shadow.x}
+                        onChange={(e) =>
+                          handleUpdate({
+                            shadow: {
+                              ...shadow,
+                              x: Number(e.target.value) || 0,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-xs text-gray-400">Y</span>
+                      <input
+                        type="number"
+                        className="w-full h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                        value={shadow.y}
+                        onChange={(e) =>
+                          handleUpdate({
+                            shadow: {
+                              ...shadow,
+                              y: Number(e.target.value) || 0,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <PropertyRow label="Blur">
+                    <Slider
+                      value={shadow.blur}
+                      onChange={(v) =>
+                        handleUpdate({ shadow: { ...shadow, blur: v } })
+                      }
+                      min={0}
+                      max={50}
+                      className="flex-1"
+                    />
+                  </PropertyRow>
+
+                  <PropertyRow label="Màu">
+                    <ColorPicker
+                      value={shadow.color}
+                      onChange={(color) =>
                         handleUpdate({
                           shadow: {
-                            ...element.shadow,
-                            x: Number(e.target.value) || 0,
+                            ...shadow,
+                            color: color.toHexString(),
                           },
                         })
                       }
                     />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-400">Y</span>
-                    <input
-                      type="number"
-                      className="w-full h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                      value={element.shadow?.y || 0}
-                      onChange={(e) =>
-                        handleUpdate({
-                          shadow: {
-                            ...element.shadow,
-                            y: Number(e.target.value) || 0,
-                          },
-                        })
-                      }
-                    />
-                  </div>
-                </div>
+                  </PropertyRow>
+                </>
+              )}
+            </div>
+          )}
+        </div>
 
-                <PropertyRow label="Blur">
-                  <Slider
-                    value={element.shadow?.blur || 0}
-                    onChange={(v) =>
-                      handleUpdate({ shadow: { ...element.shadow, blur: v } })
-                    }
-                    min={0}
-                    max={50}
-                    className="flex-1"
-                  />
-                </PropertyRow>
+        {/* Vị trí & Kích thước */}
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <SectionHeader
+            title="Vị trí & Kích thước"
+            sectionKey="position"
+            icon={<DragOutlined />}
+          />
+          {expandedSections.includes("position") && (
+            <div className="px-4 pt-3 pb-4">
+              <PositionGrid position={element.position} size={element.size} />
+              <PropertyRow label="Xoay">
+                <Slider
+                  value={element.rotation}
+                  onChange={(value) => handleUpdate({ rotation: value })}
+                  min={-180}
+                  max={180}
+                  className="flex-1"
+                />
+                <span className="text-sm text-gray-500 w-10">
+                  {element.rotation}°
+                </span>
+              </PropertyRow>
+              <PropertyRow label="Độ mờ">
+                <Slider
+                  value={element.opacity}
+                  onChange={(value) => handleUpdate({ opacity: value })}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  className="flex-1"
+                />
+                <span className="text-xs text-gray-500 w-10">
+                  {element.opacity.toFixed(2)}
+                </span>
+              </PropertyRow>
+            </div>
+          )}
+        </div>
 
-                <PropertyRow label="Màu">
-                  <ColorPicker
-                    value={element.shadow?.color || "rgba(0,0,0,0.2)"}
-                    onChange={(color) =>
-                      handleUpdate({
-                        shadow: {
-                          ...element.shadow,
-                          color: color.toHexString(),
-                        },
-                      })
-                    }
-                  />
-                </PropertyRow>
-              </>
-            )}
-          </div>
-        )}
+        {/* Delete Button */}
+        <div className="pt-1">
+          <Button
+            danger
+            block
+            icon={<DeleteOutlined />}
+            onClick={() => selectedElement && deleteElement(selectedElement.id)}
+          >
+            Xóa phần tử
+          </Button>
+        </div>
       </div>
-
-      {/* Vị trí & Kích thước */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
-        <SectionHeader
-          title="Vị trí & Kích thước"
-          sectionKey="position"
-          icon={<DragOutlined />}
-        />
-        {expandedSections.includes("position") && (
-          <div className="px-4 pt-3 pb-4">
-            <PositionGrid position={element.position} size={element.size} />
-            <PropertyRow label="Xoay">
-              <Slider
-                value={element.rotation}
-                onChange={(value) => handleUpdate({ rotation: value })}
-                min={-180}
-                max={180}
-                className="flex-1"
-              />
-              <span className="text-sm text-gray-500 w-10">
-                {element.rotation}°
-              </span>
-            </PropertyRow>
-            <PropertyRow label="Độ mờ">
-              <Slider
-                value={element.opacity}
-                onChange={(value) => handleUpdate({ opacity: value })}
-                min={0}
-                max={1}
-                step={0.01}
-                className="flex-1"
-              />
-              <span className="text-xs text-gray-500 w-10">
-                {element.opacity.toFixed(2)}
-              </span>
-            </PropertyRow>
-          </div>
-        )}
-      </div>
-
-      {/* Delete Button */}
-      <div className="pt-1">
-        <Button
-          danger
-          block
-          icon={<DeleteOutlined />}
-          onClick={() => selectedElement && deleteElement(selectedElement.id)}
-        >
-          Xóa phần tử
-        </Button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderProperties = () => {
     if (!selectedElement) return renderPageSettings();
