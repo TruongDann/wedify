@@ -167,6 +167,14 @@ export interface ShapeElement extends BaseElement {
   fill: string;
   stroke: string;
   strokeWidth: number;
+  // Shadow
+  shadow?: {
+    enabled: boolean;
+    x: number;
+    y: number;
+    blur: number;
+    color: string;
+  };
 }
 
 export interface StickerElement extends BaseElement {
