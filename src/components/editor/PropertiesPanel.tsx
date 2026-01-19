@@ -182,105 +182,133 @@ const PropertiesPanel: React.FC = () => {
     </>
   );
 
-  const renderImageProperties = (element: ImageElement) => (
-    <>
-      <Panel header="Hiển thị" key="display">
-        <div className="property-row">
-          <span className="property-label">Fit</span>
-          <Select
-            value={element.objectFit}
-            onChange={(value) => handleUpdate({ objectFit: value })}
-            className="flex-1"
-          >
-            <Option value="cover">Cover</Option>
-            <Option value="contain">Contain</Option>
-            <Option value="fill">Fill</Option>
-          </Select>
-        </div>
-      </Panel>
+  const renderImageProperties = (element: ImageElement) => {
+    // Default values for new properties
+    const borderRadius = element.borderRadius || {
+      topLeft: 0,
+      topRight: 0,
+      bottomLeft: 0,
+      bottomRight: 0,
+    };
+    const shadow = element.shadow || {
+      enabled: false,
+      x: 0,
+      y: 4,
+      blur: 8,
+      color: "rgba(0,0,0,0.2)",
+    };
 
-      <Panel header="Bo góc" key="border">
-        <div className="property-row">
-          <span className="property-label">Bán kính</span>
-          <Slider
-            value={element.borderRadius}
-            onChange={(value) => handleUpdate({ borderRadius: value })}
-            min={0}
-            max={100}
-            className="flex-1"
-          />
-        </div>
-
-        <Divider className="my-2" />
-
-        <div className="property-row">
-          <span className="property-label">Viền</span>
-          <InputNumber
-            value={element.border.width}
-            onChange={(value) =>
-              handleUpdate({ border: { ...element.border, width: value || 0 } })
-            }
-            min={0}
-            max={20}
-          />
-        </div>
-
-        {element.border.width > 0 && (
+    return (
+      <>
+        <Panel header="Hiển thị" key="display">
           <div className="property-row">
-            <span className="property-label">Màu viền</span>
-            <ColorPicker
-              value={element.border.color}
-              onChange={(color) =>
+            <span className="property-label">Fit</span>
+            <Select
+              value={element.objectFit}
+              onChange={(value) => handleUpdate({ objectFit: value })}
+              className="flex-1"
+            >
+              <Option value="cover">Cover</Option>
+              <Option value="contain">Contain</Option>
+              <Option value="fill">Fill</Option>
+            </Select>
+          </div>
+        </Panel>
+
+        <Panel header="Bo góc" key="border">
+          <div className="property-row">
+            <span className="property-label">Bán kính</span>
+            <Slider
+              value={borderRadius.topLeft}
+              onChange={(value) =>
                 handleUpdate({
-                  border: { ...element.border, color: color.toHexString() },
+                  borderRadius: {
+                    topLeft: value,
+                    topRight: value,
+                    bottomLeft: value,
+                    bottomRight: value,
+                  },
                 })
               }
-              showText
+              min={0}
+              max={100}
+              className="flex-1"
             />
           </div>
-        )}
-      </Panel>
 
-      <Panel header="Đổ bóng" key="shadow">
-        <div className="property-row">
-          <span className="property-label">Blur</span>
-          <Slider
-            value={element.shadow.blur}
-            onChange={(value) =>
-              handleUpdate({ shadow: { ...element.shadow, blur: value } })
-            }
-            min={0}
-            max={50}
-            className="flex-1"
-          />
-        </div>
-        <div className="property-row">
-          <span className="property-label">X</span>
-          <Slider
-            value={element.shadow.x}
-            onChange={(value) =>
-              handleUpdate({ shadow: { ...element.shadow, x: value } })
-            }
-            min={-20}
-            max={20}
-            className="flex-1"
-          />
-        </div>
-        <div className="property-row">
-          <span className="property-label">Y</span>
-          <Slider
-            value={element.shadow.y}
-            onChange={(value) =>
-              handleUpdate({ shadow: { ...element.shadow, y: value } })
-            }
-            min={-20}
-            max={20}
-            className="flex-1"
-          />
-        </div>
-      </Panel>
-    </>
-  );
+          <Divider className="my-2" />
+
+          <div className="property-row">
+            <span className="property-label">Viền</span>
+            <InputNumber
+              value={element.border.width}
+              onChange={(value) =>
+                handleUpdate({
+                  border: { ...element.border, width: value || 0 },
+                })
+              }
+              min={0}
+              max={20}
+            />
+          </div>
+
+          {element.border.width > 0 && (
+            <div className="property-row">
+              <span className="property-label">Màu viền</span>
+              <ColorPicker
+                value={element.border.color}
+                onChange={(color) =>
+                  handleUpdate({
+                    border: { ...element.border, color: color.toHexString() },
+                  })
+                }
+                showText
+              />
+            </div>
+          )}
+        </Panel>
+
+        <Panel header="Đổ bóng" key="shadow">
+          <div className="property-row">
+            <span className="property-label">Blur</span>
+            <Slider
+              value={shadow.blur}
+              onChange={(value) =>
+                handleUpdate({ shadow: { ...shadow, blur: value } })
+              }
+              min={0}
+              max={50}
+              className="flex-1"
+            />
+          </div>
+          <div className="property-row">
+            <span className="property-label">X</span>
+            <Slider
+              value={shadow.x}
+              onChange={(value) =>
+                handleUpdate({ shadow: { ...shadow, x: value } })
+              }
+              min={-20}
+              max={20}
+              className="flex-1"
+            />
+          </div>
+          <div className="property-row">
+            <span className="property-label">Y</span>
+            <Slider
+              value={shadow.y}
+              onChange={(value) =>
+                handleUpdate({ shadow: { ...shadow, y: value } })
+              }
+              min={-20}
+              max={20}
+              className="flex-1"
+            />
+          </div>
+        </Panel>
+      </>
+    );
+  };
 
   const renderShapeProperties = (element: ShapeElement) => (
     <>
