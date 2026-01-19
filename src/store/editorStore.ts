@@ -399,5 +399,13 @@ export const createShapeElement = (
   fill: "#f472b6",
   stroke: "#ec4899",
   strokeWidth: 2,
+  // Shadow
+  shadow: {
+    enabled: false,
+    x: 0,
+    y: 4,
+    blur: 8,
+    color: "rgba(0,0,0,0.2)",
+  },
   ...overrides,
 });

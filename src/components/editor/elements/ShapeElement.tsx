@@ -20,6 +20,15 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
   onDragEnd,
   onTransformEnd,
 }) => {
+  // Default shadow values
+  const shadow = element.shadow || {
+    enabled: false,
+    x: 0,
+    y: 4,
+    blur: 8,
+    color: "rgba(0,0,0,0.2)",
+  };
+
   const commonProps = {
     id: element.id,
     x: element.position.x,
@@ -34,6 +43,12 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
     fill: element.fill,
     stroke: element.stroke,
     strokeWidth: element.strokeWidth,
+    // Shadow properties
+    shadowEnabled: shadow.enabled,
+    shadowColor: shadow.color,
+    shadowBlur: shadow.blur,
+    shadowOffsetX: shadow.x,
+    shadowOffsetY: shadow.y,
   };
 
   switch (element.shapeType) {
