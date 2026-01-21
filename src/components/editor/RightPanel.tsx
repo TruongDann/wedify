@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   Slider,
   Select,
@@ -9,6 +9,7 @@ import {
   Switch,
   Modal,
   Input,
+  message,
 } from "antd";
 import {
   EditOutlined,
@@ -40,7 +41,10 @@ import {
   PlayCircleOutlined,
   ExportOutlined,
   BgColorsOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
+import Cropper, { ReactCropperElement } from "react-cropper";
+import "cropperjs/dist/cropper.css";
 import { useEditorStore } from "@/store/editorStore";
 import {
   TextElement,
@@ -50,6 +54,7 @@ import {
 } from "@/types/editor";
 import { loadGoogleFont } from "@/utils/fontLoader";
 import { FONTS } from "@/constants/fonts";
+import { CROP_SHAPES, ASPECT_RATIOS } from "@/constants/cropShapes";
 
 const { Option } = Select;
 
@@ -127,7 +132,47 @@ const RightPanel: React.FC<RightPanelProps> = ({
   const [editPreviewImage, setEditPreviewImage] = useState(previewImage);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Crop modal state
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string>("");
+  const [selectedShape, setSelectedShape] = useState<string>("rect");
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState<number | null>(null);
+  const cropperRef = useRef<ReactCropperElement>(null);
+
   const selectedElement = elements.find((el) => el.id === selectedElementId);
+
+  // Open crop modal
+  const openCropModal = useCallback((imageSrc: string) => {
+    setCropImageSrc(imageSrc);
+    setSelectedShape("rect");
+    setSelectedAspectRatio(null);
+    setIsCropModalOpen(true);
+  }, []);
+
+  // Handle crop complete
+  const handleCropComplete = useCallback(() => {
+    const cropper = cropperRef.current?.cropper;
+    if (cropper) {
+      const croppedCanvas = cropper.getCroppedCanvas();
+      if (croppedCanvas) {
+        const croppedImageUrl = croppedCanvas.toDataURL("image/png");
+        if (selectedElement) {
+          updateElement(selectedElement.id, { src: croppedImageUrl });
+        }
+        setIsCropModalOpen(false);
+        message.success("Đã cắt ảnh thành công!");
+      }
+    }
+  }, [selectedElement, updateElement]);
+
+  // Handle aspect ratio change
+  const handleAspectRatioChange = (ratio: number | null) => {
+    setSelectedAspectRatio(ratio);
+    const cropper = cropperRef.current?.cropper;
+    if (cropper) {
+      cropper.setAspectRatio(ratio === null ? NaN : ratio);
+    }
+  };
 
   const openEditModal = () => {
     setEditTitle(cardTitle);
@@ -2023,6 +2068,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
                 type="primary"
                 icon={<CameraOutlined />}
                 className="flex-1"
+                onClick={() => openCropModal(element.src)}
               >
                 Cắt ảnh
               </Button>
@@ -2903,6 +2949,115 @@ const RightPanel: React.FC<RightPanelProps> = ({
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto min-h-0">{renderProperties()}</div>
+
+      {/* Crop Modal */}
+      <Modal
+        title="Cắt ảnh"
+        open={isCropModalOpen}
+        onCancel={() => setIsCropModalOpen(false)}
+        footer={null}
+        width={900}
+        centered
+        styles={{ body: { padding: 0 } }}
+      >
+        <div className="flex flex-row gap-5" style={{ maxHeight: "600px" }}>
+          {/* Left side - Cropper */}
+          <div className="flex-1" style={{ minWidth: 0 }}>
+            <div style={{ width: "100%", height: "60vh", maxHeight: "500px" }}>
+              {cropImageSrc && (
+                <Cropper
+                  ref={cropperRef}
+                  src={cropImageSrc}
+                  style={{ height: "100%", width: "100%" }}
+                  initialAspectRatio={NaN}
+                  guides={true}
+                  viewMode={1}
+                  background={true}
+                  responsive={true}
+                  autoCropArea={0.8}
+                  checkOrientation={false}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Right side - Controls */}
+          <div className="w-64 flex flex-col gap-4 pr-4 py-2">
+            {/* Shape selection */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <span>Hình dạng cắt:</span>
+                {selectedShape !== "rect" && (
+                  <span
+                    className="inline-flex items-center justify-center w-6 h-6 bg-gray-100 rounded cursor-pointer hover:bg-gray-200"
+                    onClick={() => setSelectedShape("rect")}
+                  >
+                    <CloseOutlined className="text-xs text-gray-500" />
+                  </span>
+                )}
+              </h4>
+              <div 
+                className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1"
+                style={{ scrollbarWidth: "thin" }}
+              >
+                {CROP_SHAPES.map((shape) => (
+                  <button
+                    key={shape.id}
+                    className={`w-10 h-10 flex items-center justify-center border rounded text-lg transition-all ${
+                      selectedShape === shape.id
+                        ? "border-blue-500 bg-blue-50 text-blue-600"
+                        : "border-gray-200 hover:border-gray-300 text-gray-500"
+                    }`}
+                    onClick={() => setSelectedShape(shape.id)}
+                    title={shape.name}
+                  >
+                    {shape.icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Aspect ratio selection */}
+            <div>
+              <h4 className="text-sm font-medium text-gray-700 mb-2">
+                Tỷ lệ khung hình
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                {ASPECT_RATIOS.map((ratio) => (
+                  <button
+                    key={ratio.label}
+                    className={`px-3 py-2 text-sm rounded border transition-all ${
+                      selectedAspectRatio === ratio.value
+                        ? "bg-blue-500 text-white border-blue-500"
+                        : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
+                    }`}
+                    onClick={() => handleAspectRatioChange(ratio.value)}
+                  >
+                    {ratio.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex gap-2 mt-auto pt-4 border-t border-gray-200">
+              <Button 
+                onClick={() => setIsCropModalOpen(false)}
+                className="flex-1"
+              >
+                Hủy
+              </Button>
+              <Button 
+                type="primary" 
+                onClick={handleCropComplete}
+                className="flex-1"
+              >
+                Xác nhận
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
