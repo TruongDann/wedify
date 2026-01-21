@@ -135,8 +135,10 @@ const RightPanel: React.FC<RightPanelProps> = ({
   // Crop modal state
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string>("");
-  const [selectedShape, setSelectedShape] = useState<string>("rect");
-  const [selectedAspectRatio, setSelectedAspectRatio] = useState<number | null>(null);
+  const [selectedShape, setSelectedShape] = useState<string>("001");
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState<number | null>(
+    null,
+  );
   const cropperRef = useRef<ReactCropperElement>(null);
 
   const selectedElement = elements.find((el) => el.id === selectedElementId);
@@ -144,7 +146,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
   // Open crop modal
   const openCropModal = useCallback((imageSrc: string) => {
     setCropImageSrc(imageSrc);
-    setSelectedShape("rect");
+    setSelectedShape("001");
     setSelectedAspectRatio(null);
     setIsCropModalOpen(true);
   }, []);
@@ -2987,32 +2989,43 @@ const RightPanel: React.FC<RightPanelProps> = ({
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                 <span>Hình dạng cắt:</span>
-                {selectedShape !== "rect" && (
+                {selectedShape !== "001" && (
                   <span
                     className="inline-flex items-center justify-center w-6 h-6 bg-gray-100 rounded cursor-pointer hover:bg-gray-200"
-                    onClick={() => setSelectedShape("rect")}
+                    style={{
+                      backgroundImage: `url(${CROP_SHAPES.find((s) => s.id === selectedShape)?.image})`,
+                      backgroundSize: "contain",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                    onClick={() => setSelectedShape("001")}
                   >
-                    <CloseOutlined className="text-xs text-gray-500" />
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-gray-500 rounded flex items-center justify-center">
+                      <CloseOutlined
+                        className="text-white"
+                        style={{ fontSize: 8 }}
+                      />
+                    </span>
                   </span>
                 )}
               </h4>
-              <div 
-                className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1"
+              <div
+                className="grid grid-cols-4 gap-1.5 max-h-52 overflow-y-auto pr-1"
                 style={{ scrollbarWidth: "thin" }}
               >
                 {CROP_SHAPES.map((shape) => (
                   <button
                     key={shape.id}
-                    className={`w-10 h-10 flex items-center justify-center border rounded text-lg transition-all ${
+                    className={`w-10 h-10 border rounded transition-all bg-contain bg-center bg-no-repeat ${
                       selectedShape === shape.id
-                        ? "border-blue-500 bg-blue-50 text-blue-600"
-                        : "border-gray-200 hover:border-gray-300 text-gray-500"
+                        ? "border-blue-500 ring-1 ring-blue-500"
+                        : "border-gray-200 hover:border-gray-400"
                     }`}
+                    style={{
+                      backgroundImage: `url(${shape.image})`,
+                    }}
                     onClick={() => setSelectedShape(shape.id)}
-                    title={shape.name}
-                  >
-                    {shape.icon}
-                  </button>
+                  />
                 ))}
               </div>
             </div>
@@ -3041,14 +3054,14 @@ const RightPanel: React.FC<RightPanelProps> = ({
 
             {/* Action buttons */}
             <div className="flex gap-2 mt-auto pt-4 border-t border-gray-200">
-              <Button 
+              <Button
                 onClick={() => setIsCropModalOpen(false)}
                 className="flex-1"
               >
                 Hủy
               </Button>
-              <Button 
-                type="primary" 
+              <Button
+                type="primary"
                 onClick={handleCropComplete}
                 className="flex-1"
               >
