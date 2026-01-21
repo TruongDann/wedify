@@ -102,9 +102,56 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     node.scaleX(1);
     node.scaleY(1);
 
+    const element = elements.find((el) => el.id === id);
+    let newWidth = Math.max(20, node.width() * scaleX);
+    let newHeight = Math.max(20, node.height() * scaleY);
+
+    // For text elements, auto-calculate height based on text content
+    if (element?.type === "text") {
+      const textEl = element as import("@/types/editor").TextElement;
+      const padding = textEl.padding || {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+      };
+
+      // Subtract padding from total dimensions to get content area
+      const contentWidth = Math.max(
+        20,
+        newWidth - padding.left - padding.right,
+      );
+
+      // Create a temporary text node to measure actual text height
+      const tempText = new Konva.Text({
+        text: textEl.content,
+        fontSize: textEl.fontSize,
+        fontFamily: textEl.fontFamily,
+        fontStyle:
+          `${textEl.fontWeight >= 700 ? "bold" : ""} ${textEl.fontStyle === "italic" ? "italic" : ""}`.trim() ||
+          "normal",
+        lineHeight: textEl.lineHeight,
+        letterSpacing: textEl.letterSpacing,
+        width: contentWidth,
+        wrap: "word",
+      });
+
+      // Get the actual text height needed
+      const textHeight = tempText.height();
+      tempText.destroy();
+
+      // Use the larger of: scaled height or calculated text height
+      const minContentHeight = Math.max(textHeight, 20);
+      newWidth = contentWidth;
+      newHeight = Math.max(
+        newHeight - padding.top - padding.bottom,
+        minContentHeight,
+      );
+    }
+
     resizeElement(id, {
-      width: Math.max(20, node.width() * scaleX),
-      height: Math.max(20, node.height() * scaleY),
+      width: newWidth,
+      height: newHeight,
     });
 
     moveElement(id, {
