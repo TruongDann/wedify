@@ -140,6 +140,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
     null,
   );
   const cropperRef = useRef<ReactCropperElement>(null);
+  const shapeImageRef = useRef<HTMLImageElement | null>(null);
 
   const selectedElement = elements.find((el) => el.id === selectedElementId);
 
@@ -151,21 +152,75 @@ const RightPanel: React.FC<RightPanelProps> = ({
     setIsCropModalOpen(true);
   }, []);
 
+  // Apply shape mask to cropped image
+  const applyShapeMask = useCallback(
+    (croppedCanvas: HTMLCanvasElement, shapeId: string): Promise<string> => {
+      return new Promise((resolve) => {
+        // Shape 001 is rectangle, no mask needed
+        if (shapeId === "001") {
+          resolve(croppedCanvas.toDataURL("image/png"));
+          return;
+        }
+
+        const shapeData = CROP_SHAPES.find((s) => s.id === shapeId);
+        if (!shapeData) {
+          resolve(croppedCanvas.toDataURL("image/png"));
+          return;
+        }
+
+        const shapeImg = new Image();
+        shapeImg.crossOrigin = "anonymous";
+        shapeImg.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = croppedCanvas.width;
+          canvas.height = croppedCanvas.height;
+          const ctx = canvas.getContext("2d");
+
+          if (!ctx) {
+            resolve(croppedCanvas.toDataURL("image/png"));
+            return;
+          }
+
+          // Draw shape as mask
+          ctx.drawImage(shapeImg, 0, 0, canvas.width, canvas.height);
+
+          // Use destination-in to apply mask
+          ctx.globalCompositeOperation = "source-in";
+          ctx.drawImage(croppedCanvas, 0, 0);
+
+          resolve(canvas.toDataURL("image/png"));
+        };
+        shapeImg.onerror = () => {
+          resolve(croppedCanvas.toDataURL("image/png"));
+        };
+        shapeImg.src = shapeData.image;
+      });
+    },
+    [],
+  );
+
   // Handle crop complete
-  const handleCropComplete = useCallback(() => {
+  const handleCropComplete = useCallback(async () => {
     const cropper = cropperRef.current?.cropper;
     if (cropper) {
       const croppedCanvas = cropper.getCroppedCanvas();
       if (croppedCanvas) {
-        const croppedImageUrl = croppedCanvas.toDataURL("image/png");
-        if (selectedElement) {
-          updateElement(selectedElement.id, { src: croppedImageUrl });
+        try {
+          const croppedImageUrl = await applyShapeMask(
+            croppedCanvas,
+            selectedShape,
+          );
+          if (selectedElement) {
+            updateElement(selectedElement.id, { src: croppedImageUrl });
+          }
+          setIsCropModalOpen(false);
+          message.success("Đã cắt ảnh thành công!");
+        } catch {
+          message.error("Có lỗi khi cắt ảnh");
         }
-        setIsCropModalOpen(false);
-        message.success("Đã cắt ảnh thành công!");
       }
     }
-  }, [selectedElement, updateElement]);
+  }, [selectedElement, updateElement, selectedShape, applyShapeMask]);
 
   // Handle aspect ratio change
   const handleAspectRatioChange = (ratio: number | null) => {
