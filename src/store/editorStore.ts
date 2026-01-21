@@ -296,7 +296,7 @@ export const createTextElement = (
   rotation: 0,
   opacity: 1,
   locked: false,
-  fontFamily: "Dancing Script",
+  fontFamily: "Times New Roman",
   fontSize: 24,
   fontWeight: 400,
   fontStyle: "normal",

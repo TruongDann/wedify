@@ -70,6 +70,7 @@ const PropertiesPanel: React.FC = () => {
             }, 50);
           }}
           className="w-full mb-3"
+          virtual={false}
         >
           {FONTS.map((font) => (
             <Option key={font.name} value={font.name}>

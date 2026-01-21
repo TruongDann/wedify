@@ -1380,6 +1380,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
                     }, 50);
                   }}
                   className="flex-1"
+                  virtual={false}
                 >
                   {FONTS.map((font) => (
                     <Option key={font.name} value={font.name}>
