@@ -3068,7 +3068,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
                 <span>Hình dạng cắt:</span>
                 {selectedShape !== "001" && (
                   <span
-                    className="inline-flex items-center justify-center w-6 h-6 bg-gray-100 rounded cursor-pointer hover:bg-gray-200"
+                    className="relative inline-flex items-center justify-center w-6 h-6 bg-gray-100 rounded cursor-pointer hover:bg-gray-200"
                     style={{
                       backgroundImage: `url(${CROP_SHAPES.find((s) => s.id === selectedShape)?.image})`,
                       backgroundSize: "contain",
@@ -3077,9 +3077,9 @@ const RightPanel: React.FC<RightPanelProps> = ({
                     }}
                     onClick={() => setSelectedShape("001")}
                   >
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-gray-500 rounded flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
                       <CloseOutlined
-                        className="text-white"
+                        className="!text-white"
                         style={{ fontSize: 8 }}
                       />
                     </span>
