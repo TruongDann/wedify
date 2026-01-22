@@ -82,6 +82,7 @@ interface RightPanelProps {
   onCategoryChange?: (category: string) => void;
   onStatusChange?: (status: string) => void;
   onPreviewImageChange?: (image: string) => void;
+  onSwitchToImageTab?: () => void;
 }
 
 const RightPanel: React.FC<RightPanelProps> = ({
@@ -93,6 +94,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
   onCategoryChange,
   onStatusChange,
   onPreviewImageChange,
+  onSwitchToImageTab,
 }) => {
   const { elements, selectedElementId, updateElement, deleteElement } =
     useEditorStore();
@@ -2129,7 +2131,11 @@ const RightPanel: React.FC<RightPanelProps> = ({
               >
                 Cắt ảnh
               </Button>
-              <Button icon={<CameraOutlined />} className="flex-1">
+              <Button
+                icon={<CameraOutlined />}
+                className="flex-1"
+                onClick={onSwitchToImageTab}
+              >
                 Đổi ảnh
               </Button>
             </div>

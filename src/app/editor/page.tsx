@@ -124,7 +124,7 @@ const EditorPage: React.FC = () => {
 
   const handleExport = async (format: "png" | "jpg") => {
     const canvasElement = document.querySelector(
-      ".canvas-wrapper canvas"
+      ".canvas-wrapper canvas",
     ) as HTMLCanvasElement;
     if (!canvasElement) {
       message.error("Không tìm thấy canvas");
@@ -389,6 +389,7 @@ const EditorPage: React.FC = () => {
             onTitleChange={setCardTitle}
             onCategoryChange={setCardCategory}
             onStatusChange={setCardStatus}
+            onSwitchToImageTab={() => setActiveTab("image")}
           />
         </div>
       </div>
