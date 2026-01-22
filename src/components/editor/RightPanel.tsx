@@ -3017,6 +3017,22 @@ const RightPanel: React.FC<RightPanelProps> = ({
         centered
         styles={{ body: { padding: 0 } }}
       >
+        {/* Dynamic style for crop shape */}
+        <style>
+          {selectedShape !== "001"
+            ? `
+            .cropper-view-box,
+            .cropper-face {
+              -webkit-mask-image: url(${CROP_SHAPES.find((s) => s.id === selectedShape)?.image});
+              mask-image: url(${CROP_SHAPES.find((s) => s.id === selectedShape)?.image});
+              -webkit-mask-size: 100% 100%;
+              mask-size: 100% 100%;
+              -webkit-mask-repeat: no-repeat;
+              mask-repeat: no-repeat;
+            }
+          `
+            : ""}
+        </style>
         <div className="flex flex-row gap-5" style={{ maxHeight: "600px" }}>
           {/* Left side - Cropper */}
           <div className="flex-1" style={{ minWidth: 0 }}>
