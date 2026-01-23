@@ -76,6 +76,7 @@ const EditorPage: React.FC = () => {
     selectElement,
     deleteElement,
     selectedElementId,
+    selectedElementIds,
     undo,
     redo,
     history,
@@ -92,14 +93,23 @@ const EditorPage: React.FC = () => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.key === "Delete" || e.key === "Backspace") && selectedElementId) {
+      // Handle delete for multi-selection
+      if (
+        (e.key === "Delete" || e.key === "Backspace") &&
+        (selectedElementId || selectedElementIds.length > 0)
+      ) {
         if (
           (e.target as HTMLElement).tagName === "INPUT" ||
           (e.target as HTMLElement).tagName === "TEXTAREA"
         ) {
           return;
         }
-        deleteElement(selectedElementId);
+        // Delete all selected elements
+        if (selectedElementIds.length > 0) {
+          selectedElementIds.forEach((id) => deleteElement(id));
+        } else if (selectedElementId) {
+          deleteElement(selectedElementId);
+        }
       }
 
       if (e.key === "Escape") {
@@ -120,7 +130,14 @@ const EditorPage: React.FC = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedElementId, deleteElement, selectElement, undo, redo]);
+  }, [
+    selectedElementId,
+    selectedElementIds,
+    deleteElement,
+    selectElement,
+    undo,
+    redo,
+  ]);
 
   const handleExport = async (format: "png" | "jpg") => {
     const canvasElement = document.querySelector(

@@ -1,36 +1,55 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { Stage, Layer, Rect, Transformer } from "react-konva";
 import Konva from "konva";
 import { useEditorStore } from "@/store/editorStore";
 import TextElementComponent from "./elements/TextElement";
 import ImageElementComponent from "./elements/ImageElement";
 import ShapeElementComponent from "./elements/ShapeElement";
-import FloatingToolbar from "./FloatingToolbar";
 import { EditorElement } from "@/types/editor";
 
 interface EditorCanvasProps {
   canvasHeight?: number;
 }
 
+interface SelectionBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  visible: boolean;
+  startX: number;
+  startY: number;
+}
+
 const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
-  const [stagePosition, setStagePosition] = React.useState({ x: 0, y: 0 });
+
+  // Marquee selection state
+  const [selectionBox, setSelectionBox] = useState<SelectionBox>({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    visible: false,
+    startX: 0,
+    startY: 0,
+  });
+  const isSelecting = useRef(false);
 
   const {
     canvasSettings,
     elements,
     selectedElementId,
+    selectedElementIds,
     selectElement,
+    selectElements,
+    addToSelection,
     updateElement,
     moveElement,
     resizeElement,
-    duplicateElement,
-    deleteElement,
-    bringForward,
-    sendBackward,
   } = useEditorStore();
 
   // Use canvasHeight prop if provided, otherwise use canvasSettings.height
@@ -67,7 +86,17 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     const stage = stageRef.current;
     const transformer = transformerRef.current;
 
-    if (selectedElementId) {
+    // Support multi-selection
+    if (selectedElementIds.length > 0) {
+      const selectedNodes = selectedElementIds
+        .map((id) => stage.findOne(`#${id}`))
+        .filter((node): node is Konva.Node => node !== null);
+
+      if (selectedNodes.length > 0) {
+        transformer.nodes(selectedNodes);
+        transformer.getLayer()?.batchDraw();
+      }
+    } else if (selectedElementId) {
       const selectedNode = stage.findOne(`#${selectedElementId}`);
       if (selectedNode) {
         transformer.nodes([selectedNode]);
@@ -77,31 +106,105 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       transformer.nodes([]);
       transformer.getLayer()?.batchDraw();
     }
-  }, [selectedElementId, elements]);
+  }, [selectedElementId, selectedElementIds, elements]);
 
-  // Update stage position for toolbar
-  useEffect(() => {
-    const updateStagePosition = () => {
-      const container = stageRef.current?.container();
-      if (container) {
-        const rect = container.getBoundingClientRect();
-        setStagePosition({ x: rect.left, y: rect.top });
+  // Check if element intersects with selection box
+  const isElementInSelectionBox = useCallback(
+    (element: EditorElement, box: SelectionBox) => {
+      const elLeft = element.position.x;
+      const elTop = element.position.y;
+      const elRight = element.position.x + element.size.width;
+      const elBottom = element.position.y + element.size.height;
+
+      const boxLeft = Math.min(box.x, box.x + box.width);
+      const boxTop = Math.min(box.y, box.y + box.height);
+      const boxRight = Math.max(box.x, box.x + box.width);
+      const boxBottom = Math.max(box.y, box.y + box.height);
+
+      // Check if rectangles intersect
+      return !(
+        elRight < boxLeft ||
+        elLeft > boxRight ||
+        elBottom < boxTop ||
+        elTop > boxBottom
+      );
+    },
+    [],
+  );
+
+  const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    // Only start selection when clicking on empty area (stage or background)
+    if (e.target === e.target.getStage() || e.target.name() === "background") {
+      const stage = e.target.getStage();
+      if (!stage) return;
+
+      const pos = stage.getPointerPosition();
+      if (!pos) return;
+
+      isSelecting.current = true;
+      setSelectionBox({
+        x: pos.x,
+        y: pos.y,
+        width: 0,
+        height: 0,
+        visible: true,
+        startX: pos.x,
+        startY: pos.y,
+      });
+
+      // Clear selection when starting new marquee
+      selectElement(null);
+    }
+  };
+
+  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    if (!isSelecting.current) return;
+
+    const stage = e.target.getStage();
+    if (!stage) return;
+
+    const pos = stage.getPointerPosition();
+    if (!pos) return;
+
+    setSelectionBox((prev) => ({
+      ...prev,
+      x: Math.min(pos.x, prev.startX),
+      y: Math.min(pos.y, prev.startY),
+      width: Math.abs(pos.x - prev.startX),
+      height: Math.abs(pos.y - prev.startY),
+    }));
+  };
+
+  const handleMouseUp = () => {
+    if (!isSelecting.current) return;
+
+    isSelecting.current = false;
+
+    // Find elements within selection box
+    if (selectionBox.width > 5 || selectionBox.height > 5) {
+      const selectedIds = elements
+        .filter((el) => isElementInSelectionBox(el, selectionBox))
+        .map((el) => el.id);
+
+      if (selectedIds.length > 0) {
+        selectElements(selectedIds);
       }
-    };
+    }
 
-    updateStagePosition();
-    window.addEventListener("scroll", updateStagePosition);
-    window.addEventListener("resize", updateStagePosition);
-
-    return () => {
-      window.removeEventListener("scroll", updateStagePosition);
-      window.removeEventListener("resize", updateStagePosition);
-    };
-  }, []);
+    setSelectionBox((prev) => ({
+      ...prev,
+      visible: false,
+      width: 0,
+      height: 0,
+    }));
+  };
 
   const handleStageClick = (
-    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>
+    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
+    // Don't clear selection if we just finished marquee selection
+    if (selectionBox.width > 5 || selectionBox.height > 5) return;
+
     if (e.target === e.target.getStage() || e.target.name() === "background") {
       selectElement(null);
     }
@@ -139,7 +242,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       // Subtract padding from total dimensions to get content area
       const contentWidth = Math.max(
         20,
-        newWidth - padding.left - padding.right
+        newWidth - padding.left - padding.right,
       );
 
       // Create a temporary text node to measure actual text height
@@ -148,9 +251,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         fontSize: textEl.fontSize,
         fontFamily: textEl.fontFamily,
         fontStyle:
-          `${textEl.fontWeight >= 700 ? "bold" : ""} ${
-            textEl.fontStyle === "italic" ? "italic" : ""
-          }`.trim() || "normal",
+          `${textEl.fontWeight >= 700 ? "bold" : ""} ${textEl.fontStyle === "italic" ? "italic" : ""}`.trim() ||
+          "normal",
         lineHeight: textEl.lineHeight,
         letterSpacing: textEl.letterSpacing,
         width: contentWidth,
@@ -166,7 +268,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       newWidth = contentWidth;
       newHeight = Math.max(
         newHeight - padding.top - padding.bottom,
-        minContentHeight
+        minContentHeight,
       );
     }
 
@@ -197,6 +299,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
 
     const angleMatch = gradientString.match(/(\d+)deg/);
     const angle = angleMatch ? parseInt(angleMatch[1]) : 135;
+
+    const angleRad = (angle - 90) * (Math.PI / 180);
     const width = canvasSettings.width;
     const height = effectiveHeight;
 
@@ -213,7 +317,9 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
   const gradientProps = parseGradient(canvasSettings.backgroundColor);
 
   const renderElement = (element: EditorElement) => {
-    const isSelected = selectedElementId === element.id;
+    const isSelected =
+      selectedElementId === element.id ||
+      selectedElementIds.includes(element.id);
     const commonProps = {
       isSelected,
       onSelect: () => selectElement(element.id),
@@ -274,14 +380,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     );
   }
 
-  // Get selected element for toolbar
-  const selectedElement =
-    elements.find((el) => el.id === selectedElementId) || null;
-
   return (
     <div className="flex items-center justify-center">
       <div
-        className="bg-white shadow-lg rounded-sm overflow-hidden relative"
+        className="bg-white shadow-lg rounded-sm overflow-hidden canvas-wrapper"
         style={{
           width: canvasSettings.width,
           height: effectiveHeight,
@@ -293,6 +395,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
           height={effectiveHeight}
           onClick={handleStageClick}
           onTap={handleStageClick}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
         >
           <Layer>
             {/* Background */}
@@ -306,8 +412,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
                 gradientProps
                   ? undefined
                   : canvasSettings.backgroundColor === "transparent"
-                  ? undefined
-                  : canvasSettings.backgroundColor
+                    ? undefined
+                    : canvasSettings.backgroundColor
               }
               {...gradientProps}
             />
@@ -330,25 +436,23 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
             {/* Elements */}
             {sortedElements.map(renderElement)}
 
+            {/* Selection Box (Marquee) */}
+            {selectionBox.visible && (
+              <Rect
+                x={selectionBox.x}
+                y={selectionBox.y}
+                width={selectionBox.width}
+                height={selectionBox.height}
+                fill="rgba(100, 149, 237, 0.2)"
+                stroke="rgba(100, 149, 237, 0.8)"
+                strokeWidth={1}
+                dash={[4, 4]}
+              />
+            )}
+
             {/* Transformer */}
             <Transformer
               ref={transformerRef}
-              rotateAnchorOffset={30}
-              rotationSnaps={[0, 90, 180, 270]}
-              anchorSize={12}
-              anchorStroke="#4A90E2"
-              anchorFill="#FFFFFF"
-              anchorStrokeWidth={2}
-              anchorCornerRadius={2}
-              borderStroke="#4A90E2"
-              borderStrokeWidth={2}
-              rotateAnchorCursor="grab"
-              enabledAnchors={[
-                "top-left",
-                "top-right",
-                "bottom-left",
-                "bottom-right",
-              ]}
               boundBoxFunc={(oldBox, newBox) => {
                 // Allow small height for line shapes
                 if (newBox.width < 5) {
@@ -360,25 +464,16 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
                 }
                 return newBox;
               }}
+              anchorStyleFunc={(anchor) => {
+                anchor.cornerRadius(10);
+                if (anchor.hasName("rotater")) {
+                  anchor.fill("#ff6b35");
+                  anchor.stroke("#ff6b35");
+                }
+              }}
             />
           </Layer>
         </Stage>
-
-        {/* Floating Toolbar */}
-        <FloatingToolbar
-          selectedElement={selectedElement}
-          stagePosition={stagePosition}
-          onDuplicate={() =>
-            selectedElementId && duplicateElement(selectedElementId)
-          }
-          onDelete={() => selectedElementId && deleteElement(selectedElementId)}
-          onBringForward={() =>
-            selectedElementId && bringForward(selectedElementId)
-          }
-          onSendBackward={() =>
-            selectedElementId && sendBackward(selectedElementId)
-          }
-        />
       </div>
     </div>
   );

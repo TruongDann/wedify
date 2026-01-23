@@ -17,6 +17,7 @@ interface EditorStore {
   // Elements
   elements: EditorElement[];
   selectedElementId: string | null;
+  selectedElementIds: string[]; // Multi-selection support
 
   // Element actions
   addElement: (element: Omit<EditorElement, "id" | "zIndex">) => void;
@@ -24,6 +25,8 @@ interface EditorStore {
   deleteElement: (id: string) => void;
   duplicateElement: (id: string) => void;
   selectElement: (id: string | null) => void;
+  selectElements: (ids: string[]) => void; // Multi-selection
+  addToSelection: (id: string) => void; // Add element to current selection
   moveElement: (id: string, position: { x: number; y: number }) => void;
   resizeElement: (id: string, size: { width: number; height: number }) => void;
   rotateElement: (id: string, rotation: number) => void;
@@ -61,6 +64,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   canvasSettings: defaultCanvasSettings,
   elements: [],
   selectedElementId: null,
+  selectedElementIds: [],
   history: [],
   historyIndex: -1,
 
@@ -128,7 +132,27 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   },
 
   selectElement: (id) => {
-    set({ selectedElementId: id });
+    set({ selectedElementId: id, selectedElementIds: id ? [id] : [] });
+  },
+
+  selectElements: (ids) => {
+    set({
+      selectedElementIds: ids,
+      selectedElementId:
+        ids.length === 1 ? ids[0] : ids.length > 0 ? ids[0] : null,
+    });
+  },
+
+  addToSelection: (id) => {
+    const { selectedElementIds } = get();
+    if (!selectedElementIds.includes(id)) {
+      const newSelection = [...selectedElementIds, id];
+      set({
+        selectedElementIds: newSelection,
+        selectedElementId:
+          newSelection.length === 1 ? newSelection[0] : newSelection[0],
+      });
+    }
   },
 
   moveElement: (id, position) => {
