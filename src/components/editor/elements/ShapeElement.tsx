@@ -9,6 +9,7 @@ interface ShapeElementProps {
   element: ShapeElement;
   isSelected: boolean;
   onSelect: () => void;
+  onDragMove?: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onTransformEnd: (e: Konva.KonvaEventObject<Event>) => void;
 }
@@ -17,6 +18,7 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
   element,
   isSelected,
   onSelect,
+  onDragMove,
   onDragEnd,
   onTransformEnd,
 }) => {
@@ -38,6 +40,7 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
     draggable: !element.locked,
     onClick: onSelect,
     onTap: onSelect,
+    onDragMove,
     onDragEnd,
     onTransformEnd,
     fill: element.fill,

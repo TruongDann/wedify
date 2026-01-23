@@ -13,6 +13,7 @@ interface TextElementProps {
   element: TextElement;
   isSelected: boolean;
   onSelect: () => void;
+  onDragMove?: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onTransformEnd: (e: Konva.KonvaEventObject<Event>) => void;
 }
@@ -39,6 +40,7 @@ const calculateOffset = (offset: number, direction: number) => {
 const TextElementComponent: React.FC<TextElementProps> = ({
   element,
   onSelect,
+  onDragMove,
   onDragEnd,
   onTransformEnd,
 }) => {
@@ -651,6 +653,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
       onTap={handleClick}
       onDblClick={handleDblClick}
       onDblTap={handleDblClick}
+      onDragMove={onDragMove}
       onDragEnd={onDragEnd}
       onTransformEnd={onTransformEnd}
     >

@@ -9,6 +9,7 @@ interface ImageElementProps {
   element: ImageElement;
   isSelected: boolean;
   onSelect: () => void;
+  onDragMove?: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onTransformEnd: (e: Konva.KonvaEventObject<Event>) => void;
 }
@@ -17,6 +18,7 @@ const ImageElementComponent: React.FC<ImageElementProps> = ({
   element,
   isSelected,
   onSelect,
+  onDragMove,
   onDragEnd,
   onTransformEnd,
 }) => {
@@ -136,6 +138,7 @@ const ImageElementComponent: React.FC<ImageElementProps> = ({
         draggable={!element.locked}
         onClick={onSelect}
         onTap={onSelect}
+        onDragMove={onDragMove}
         onDragEnd={onDragEnd}
         onTransformEnd={onTransformEnd}
       />
@@ -154,6 +157,7 @@ const ImageElementComponent: React.FC<ImageElementProps> = ({
       draggable={!element.locked}
       onClick={onSelect}
       onTap={onSelect}
+      onDragMove={onDragMove}
       onDragEnd={onDragEnd}
       onTransformEnd={onTransformEnd}
       clipFunc={

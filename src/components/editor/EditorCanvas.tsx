@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { Stage, Layer, Rect, Transformer } from "react-konva";
+import { Stage, Layer, Rect, Transformer, Line } from "react-konva";
 import Konva from "konva";
 import { useEditorStore } from "@/store/editorStore";
 import TextElementComponent from "./elements/TextElement";
@@ -23,6 +23,13 @@ interface SelectionBox {
   startY: number;
 }
 
+interface GuideLine {
+  points: number[];
+  orientation: "horizontal" | "vertical";
+}
+
+const SNAP_THRESHOLD = 5; // Distance in pixels to snap
+
 const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -38,6 +45,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     startY: 0,
   });
   const isSelecting = useRef(false);
+
+  // Alignment guides state
+  const [guides, setGuides] = useState<GuideLine[]>([]);
+  const isDragging = useRef(false);
 
   const {
     canvasSettings,
@@ -210,12 +221,207 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     }
   };
 
-  const handleDragEnd = (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
-    moveElement(id, {
-      x: e.target.x(),
-      y: e.target.y(),
-    });
-  };
+  // Calculate snap lines for alignment guides
+  const getSnapLines = useCallback(
+    (draggedId: string, draggedNode: Konva.Node) => {
+      const newGuides: GuideLine[] = [];
+      const canvasWidth = canvasSettings.width;
+      const canvasHeight = effectiveHeight;
+
+      // Get dragged element bounds
+      const draggedBox = {
+        x: draggedNode.x(),
+        y: draggedNode.y(),
+        width: draggedNode.width() * draggedNode.scaleX(),
+        height: draggedNode.height() * draggedNode.scaleY(),
+      };
+
+      const draggedLeft = draggedBox.x;
+      const draggedRight = draggedBox.x + draggedBox.width;
+      const draggedTop = draggedBox.y;
+      const draggedBottom = draggedBox.y + draggedBox.height;
+      const draggedCenterX = draggedBox.x + draggedBox.width / 2;
+      const draggedCenterY = draggedBox.y + draggedBox.height / 2;
+
+      // Canvas center lines
+      const canvasCenterX = canvasWidth / 2;
+      const canvasCenterY = canvasHeight / 2;
+
+      // Check canvas center vertical line
+      if (Math.abs(draggedCenterX - canvasCenterX) < SNAP_THRESHOLD) {
+        newGuides.push({
+          points: [canvasCenterX, 0, canvasCenterX, canvasHeight],
+          orientation: "vertical",
+        });
+        draggedNode.x(canvasCenterX - draggedBox.width / 2);
+      }
+
+      // Check canvas center horizontal line
+      if (Math.abs(draggedCenterY - canvasCenterY) < SNAP_THRESHOLD) {
+        newGuides.push({
+          points: [0, canvasCenterY, canvasWidth, canvasCenterY],
+          orientation: "horizontal",
+        });
+        draggedNode.y(canvasCenterY - draggedBox.height / 2);
+      }
+
+      // Check canvas edges
+      // Left edge
+      if (Math.abs(draggedLeft) < SNAP_THRESHOLD) {
+        newGuides.push({
+          points: [0, 0, 0, canvasHeight],
+          orientation: "vertical",
+        });
+        draggedNode.x(0);
+      }
+      // Right edge
+      if (Math.abs(draggedRight - canvasWidth) < SNAP_THRESHOLD) {
+        newGuides.push({
+          points: [canvasWidth, 0, canvasWidth, canvasHeight],
+          orientation: "vertical",
+        });
+        draggedNode.x(canvasWidth - draggedBox.width);
+      }
+      // Top edge
+      if (Math.abs(draggedTop) < SNAP_THRESHOLD) {
+        newGuides.push({
+          points: [0, 0, canvasWidth, 0],
+          orientation: "horizontal",
+        });
+        draggedNode.y(0);
+      }
+      // Bottom edge
+      if (Math.abs(draggedBottom - canvasHeight) < SNAP_THRESHOLD) {
+        newGuides.push({
+          points: [0, canvasHeight, canvasWidth, canvasHeight],
+          orientation: "horizontal",
+        });
+        draggedNode.y(canvasHeight - draggedBox.height);
+      }
+
+      // Check alignment with other elements
+      elements.forEach((el) => {
+        if (el.id === draggedId) return;
+
+        const elLeft = el.position.x;
+        const elRight = el.position.x + el.size.width;
+        const elTop = el.position.y;
+        const elBottom = el.position.y + el.size.height;
+        const elCenterX = el.position.x + el.size.width / 2;
+        const elCenterY = el.position.y + el.size.height / 2;
+
+        // Vertical alignments (left, center, right)
+        // Left to left
+        if (Math.abs(draggedLeft - elLeft) < SNAP_THRESHOLD) {
+          newGuides.push({
+            points: [elLeft, Math.min(draggedTop, elTop) - 10, elLeft, Math.max(draggedBottom, elBottom) + 10],
+            orientation: "vertical",
+          });
+          draggedNode.x(elLeft);
+        }
+        // Right to right
+        if (Math.abs(draggedRight - elRight) < SNAP_THRESHOLD) {
+          newGuides.push({
+            points: [elRight, Math.min(draggedTop, elTop) - 10, elRight, Math.max(draggedBottom, elBottom) + 10],
+            orientation: "vertical",
+          });
+          draggedNode.x(elRight - draggedBox.width);
+        }
+        // Center to center (vertical)
+        if (Math.abs(draggedCenterX - elCenterX) < SNAP_THRESHOLD) {
+          newGuides.push({
+            points: [elCenterX, Math.min(draggedTop, elTop) - 10, elCenterX, Math.max(draggedBottom, elBottom) + 10],
+            orientation: "vertical",
+          });
+          draggedNode.x(elCenterX - draggedBox.width / 2);
+        }
+        // Left to right
+        if (Math.abs(draggedLeft - elRight) < SNAP_THRESHOLD) {
+          newGuides.push({
+            points: [elRight, Math.min(draggedTop, elTop) - 10, elRight, Math.max(draggedBottom, elBottom) + 10],
+            orientation: "vertical",
+          });
+          draggedNode.x(elRight);
+        }
+        // Right to left
+        if (Math.abs(draggedRight - elLeft) < SNAP_THRESHOLD) {
+          newGuides.push({
+            points: [elLeft, Math.min(draggedTop, elTop) - 10, elLeft, Math.max(draggedBottom, elBottom) + 10],
+            orientation: "vertical",
+          });
+          draggedNode.x(elLeft - draggedBox.width);
+        }
+
+        // Horizontal alignments (top, center, bottom)
+        // Top to top
+        if (Math.abs(draggedTop - elTop) < SNAP_THRESHOLD) {
+          newGuides.push({
+            points: [Math.min(draggedLeft, elLeft) - 10, elTop, Math.max(draggedRight, elRight) + 10, elTop],
+            orientation: "horizontal",
+          });
+          draggedNode.y(elTop);
+        }
+        // Bottom to bottom
+        if (Math.abs(draggedBottom - elBottom) < SNAP_THRESHOLD) {
+          newGuides.push({
+            points: [Math.min(draggedLeft, elLeft) - 10, elBottom, Math.max(draggedRight, elRight) + 10, elBottom],
+            orientation: "horizontal",
+          });
+          draggedNode.y(elBottom - draggedBox.height);
+        }
+        // Center to center (horizontal)
+        if (Math.abs(draggedCenterY - elCenterY) < SNAP_THRESHOLD) {
+          newGuides.push({
+            points: [Math.min(draggedLeft, elLeft) - 10, elCenterY, Math.max(draggedRight, elRight) + 10, elCenterY],
+            orientation: "horizontal",
+          });
+          draggedNode.y(elCenterY - draggedBox.height / 2);
+        }
+        // Top to bottom
+        if (Math.abs(draggedTop - elBottom) < SNAP_THRESHOLD) {
+          newGuides.push({
+            points: [Math.min(draggedLeft, elLeft) - 10, elBottom, Math.max(draggedRight, elRight) + 10, elBottom],
+            orientation: "horizontal",
+          });
+          draggedNode.y(elBottom);
+        }
+        // Bottom to top
+        if (Math.abs(draggedBottom - elTop) < SNAP_THRESHOLD) {
+          newGuides.push({
+            points: [Math.min(draggedLeft, elLeft) - 10, elTop, Math.max(draggedRight, elRight) + 10, elTop],
+            orientation: "horizontal",
+          });
+          draggedNode.y(elTop - draggedBox.height);
+        }
+      });
+
+      return newGuides;
+    },
+    [canvasSettings.width, effectiveHeight, elements],
+  );
+
+  // Handle element drag for showing guides
+  const handleElementDragMove = useCallback(
+    (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
+      isDragging.current = true;
+      const node = e.target;
+      const newGuides = getSnapLines(id, node);
+      setGuides(newGuides);
+    },
+    [getSnapLines],
+  );
+
+  const handleElementDragEnd = useCallback(
+    (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
+      isDragging.current = false;
+      setGuides([]);
+      moveElement(id, {
+        x: e.target.x(),
+        y: e.target.y(),
+      });
+    },
+    [moveElement],
+  );
 
   const handleTransformEnd = (id: string, e: Konva.KonvaEventObject<Event>) => {
     const node = e.target;
@@ -323,8 +529,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     const commonProps = {
       isSelected,
       onSelect: () => selectElement(element.id),
+      onDragMove: (e: Konva.KonvaEventObject<DragEvent>) =>
+        handleElementDragMove(element.id, e),
       onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) =>
-        handleDragEnd(element.id, e),
+        handleElementDragEnd(element.id, e),
       onTransformEnd: (e: Konva.KonvaEventObject<Event>) =>
         handleTransformEnd(element.id, e),
     };
@@ -449,6 +657,17 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
                 dash={[4, 4]}
               />
             )}
+
+            {/* Alignment Guide Lines */}
+            {guides.map((guide, index) => (
+              <Line
+                key={`guide-${index}`}
+                points={guide.points}
+                stroke="#FF6B9D"
+                strokeWidth={1}
+                dash={[4, 4]}
+              />
+            ))}
 
             {/* Transformer */}
             <Transformer
