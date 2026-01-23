@@ -1,18 +1,13 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import {
-  Stage,
-  Layer,
-  Rect,
-  Transformer,
-  Image as KonvaImage,
-} from "react-konva";
+import { Stage, Layer, Rect, Transformer } from "react-konva";
 import Konva from "konva";
 import { useEditorStore } from "@/store/editorStore";
 import TextElementComponent from "./elements/TextElement";
 import ImageElementComponent from "./elements/ImageElement";
 import ShapeElementComponent from "./elements/ShapeElement";
+import FloatingToolbar from "./FloatingToolbar";
 import { EditorElement } from "@/types/editor";
 
 interface EditorCanvasProps {
@@ -22,6 +17,7 @@ interface EditorCanvasProps {
 const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
+  const [stagePosition, setStagePosition] = React.useState({ x: 0, y: 0 });
 
   const {
     canvasSettings,
@@ -31,6 +27,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     updateElement,
     moveElement,
     resizeElement,
+    duplicateElement,
+    deleteElement,
+    bringForward,
+    sendBackward,
   } = useEditorStore();
 
   // Use canvasHeight prop if provided, otherwise use canvasSettings.height
@@ -79,8 +79,28 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     }
   }, [selectedElementId, elements]);
 
+  // Update stage position for toolbar
+  useEffect(() => {
+    const updateStagePosition = () => {
+      const container = stageRef.current?.container();
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        setStagePosition({ x: rect.left, y: rect.top });
+      }
+    };
+
+    updateStagePosition();
+    window.addEventListener("scroll", updateStagePosition);
+    window.addEventListener("resize", updateStagePosition);
+
+    return () => {
+      window.removeEventListener("scroll", updateStagePosition);
+      window.removeEventListener("resize", updateStagePosition);
+    };
+  }, []);
+
   const handleStageClick = (
-    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
+    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>
   ) => {
     if (e.target === e.target.getStage() || e.target.name() === "background") {
       selectElement(null);
@@ -119,7 +139,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       // Subtract padding from total dimensions to get content area
       const contentWidth = Math.max(
         20,
-        newWidth - padding.left - padding.right,
+        newWidth - padding.left - padding.right
       );
 
       // Create a temporary text node to measure actual text height
@@ -128,8 +148,9 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         fontSize: textEl.fontSize,
         fontFamily: textEl.fontFamily,
         fontStyle:
-          `${textEl.fontWeight >= 700 ? "bold" : ""} ${textEl.fontStyle === "italic" ? "italic" : ""}`.trim() ||
-          "normal",
+          `${textEl.fontWeight >= 700 ? "bold" : ""} ${
+            textEl.fontStyle === "italic" ? "italic" : ""
+          }`.trim() || "normal",
         lineHeight: textEl.lineHeight,
         letterSpacing: textEl.letterSpacing,
         width: contentWidth,
@@ -145,7 +166,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       newWidth = contentWidth;
       newHeight = Math.max(
         newHeight - padding.top - padding.bottom,
-        minContentHeight,
+        minContentHeight
       );
     }
 
@@ -176,8 +197,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
 
     const angleMatch = gradientString.match(/(\d+)deg/);
     const angle = angleMatch ? parseInt(angleMatch[1]) : 135;
-
-    const angleRad = (angle - 90) * (Math.PI / 180);
     const width = canvasSettings.width;
     const height = effectiveHeight;
 
@@ -255,10 +274,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     );
   }
 
+  // Get selected element for toolbar
+  const selectedElement =
+    elements.find((el) => el.id === selectedElementId) || null;
+
   return (
     <div className="flex items-center justify-center">
       <div
-        className="bg-white shadow-lg rounded-sm overflow-hidden"
+        className="bg-white shadow-lg rounded-sm overflow-hidden relative"
         style={{
           width: canvasSettings.width,
           height: effectiveHeight,
@@ -283,8 +306,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
                 gradientProps
                   ? undefined
                   : canvasSettings.backgroundColor === "transparent"
-                    ? undefined
-                    : canvasSettings.backgroundColor
+                  ? undefined
+                  : canvasSettings.backgroundColor
               }
               {...gradientProps}
             />
@@ -310,6 +333,22 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
             {/* Transformer */}
             <Transformer
               ref={transformerRef}
+              rotateAnchorOffset={30}
+              rotationSnaps={[0, 90, 180, 270]}
+              anchorSize={12}
+              anchorStroke="#4A90E2"
+              anchorFill="#FFFFFF"
+              anchorStrokeWidth={2}
+              anchorCornerRadius={2}
+              borderStroke="#4A90E2"
+              borderStrokeWidth={2}
+              rotateAnchorCursor="grab"
+              enabledAnchors={[
+                "top-left",
+                "top-right",
+                "bottom-left",
+                "bottom-right",
+              ]}
               boundBoxFunc={(oldBox, newBox) => {
                 // Allow small height for line shapes
                 if (newBox.width < 5) {
@@ -321,16 +360,25 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
                 }
                 return newBox;
               }}
-              anchorStyleFunc={(anchor) => {
-                anchor.cornerRadius(10);
-                if (anchor.hasName("rotater")) {
-                  anchor.fill("#ff6b35");
-                  anchor.stroke("#ff6b35");
-                }
-              }}
             />
           </Layer>
         </Stage>
+
+        {/* Floating Toolbar */}
+        <FloatingToolbar
+          selectedElement={selectedElement}
+          stagePosition={stagePosition}
+          onDuplicate={() =>
+            selectedElementId && duplicateElement(selectedElementId)
+          }
+          onDelete={() => selectedElementId && deleteElement(selectedElementId)}
+          onBringForward={() =>
+            selectedElementId && bringForward(selectedElementId)
+          }
+          onSendBackward={() =>
+            selectedElementId && sendBackward(selectedElementId)
+          }
+        />
       </div>
     </div>
   );
