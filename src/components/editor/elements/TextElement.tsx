@@ -236,7 +236,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
   const renderTextEffects = () => {
     const effectOffset = calculateOffset(
       textEffect.offset,
-      textEffect.direction
+      textEffect.direction,
     );
     const effectOpacity = 1 - textEffect.transparency / 100;
 
@@ -261,7 +261,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         const shadowOffsetScale = textEffect.offset / 50;
         const shadowOffset = calculateOffset(
           shadowOffsetScale,
-          textEffect.direction
+          textEffect.direction,
         );
         const scaledBlur = textEffect.blur / 20;
         return (
@@ -324,7 +324,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         const spliceOffsetScale = textEffect.offset / 50;
         const spliceOffset = calculateOffset(
           spliceOffsetScale,
-          textEffect.direction
+          textEffect.direction,
         );
         return (
           <>
@@ -376,7 +376,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         const echoOffsetScale = textEffect.offset / 50;
         const echoOffset = calculateOffset(
           echoOffsetScale,
-          textEffect.direction
+          textEffect.direction,
         );
         return (
           <>
@@ -404,7 +404,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         const glitchOffsetScale = textEffect.offset / 50;
         const glitchOffset = calculateOffset(
           glitchOffsetScale,
-          textEffect.direction
+          textEffect.direction,
         );
         return (
           <>

@@ -314,7 +314,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Left to left
         if (Math.abs(draggedLeft - elLeft) < SNAP_THRESHOLD) {
           newGuides.push({
-            points: [elLeft, Math.min(draggedTop, elTop) - 10, elLeft, Math.max(draggedBottom, elBottom) + 10],
+            points: [
+              elLeft,
+              Math.min(draggedTop, elTop) - 10,
+              elLeft,
+              Math.max(draggedBottom, elBottom) + 10,
+            ],
             orientation: "vertical",
           });
           draggedNode.x(elLeft);
@@ -322,7 +327,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Right to right
         if (Math.abs(draggedRight - elRight) < SNAP_THRESHOLD) {
           newGuides.push({
-            points: [elRight, Math.min(draggedTop, elTop) - 10, elRight, Math.max(draggedBottom, elBottom) + 10],
+            points: [
+              elRight,
+              Math.min(draggedTop, elTop) - 10,
+              elRight,
+              Math.max(draggedBottom, elBottom) + 10,
+            ],
             orientation: "vertical",
           });
           draggedNode.x(elRight - draggedBox.width);
@@ -330,7 +340,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Center to center (vertical)
         if (Math.abs(draggedCenterX - elCenterX) < SNAP_THRESHOLD) {
           newGuides.push({
-            points: [elCenterX, Math.min(draggedTop, elTop) - 10, elCenterX, Math.max(draggedBottom, elBottom) + 10],
+            points: [
+              elCenterX,
+              Math.min(draggedTop, elTop) - 10,
+              elCenterX,
+              Math.max(draggedBottom, elBottom) + 10,
+            ],
             orientation: "vertical",
           });
           draggedNode.x(elCenterX - draggedBox.width / 2);
@@ -338,7 +353,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Left to right
         if (Math.abs(draggedLeft - elRight) < SNAP_THRESHOLD) {
           newGuides.push({
-            points: [elRight, Math.min(draggedTop, elTop) - 10, elRight, Math.max(draggedBottom, elBottom) + 10],
+            points: [
+              elRight,
+              Math.min(draggedTop, elTop) - 10,
+              elRight,
+              Math.max(draggedBottom, elBottom) + 10,
+            ],
             orientation: "vertical",
           });
           draggedNode.x(elRight);
@@ -346,7 +366,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Right to left
         if (Math.abs(draggedRight - elLeft) < SNAP_THRESHOLD) {
           newGuides.push({
-            points: [elLeft, Math.min(draggedTop, elTop) - 10, elLeft, Math.max(draggedBottom, elBottom) + 10],
+            points: [
+              elLeft,
+              Math.min(draggedTop, elTop) - 10,
+              elLeft,
+              Math.max(draggedBottom, elBottom) + 10,
+            ],
             orientation: "vertical",
           });
           draggedNode.x(elLeft - draggedBox.width);
@@ -356,7 +381,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Top to top
         if (Math.abs(draggedTop - elTop) < SNAP_THRESHOLD) {
           newGuides.push({
-            points: [Math.min(draggedLeft, elLeft) - 10, elTop, Math.max(draggedRight, elRight) + 10, elTop],
+            points: [
+              Math.min(draggedLeft, elLeft) - 10,
+              elTop,
+              Math.max(draggedRight, elRight) + 10,
+              elTop,
+            ],
             orientation: "horizontal",
           });
           draggedNode.y(elTop);
@@ -364,7 +394,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Bottom to bottom
         if (Math.abs(draggedBottom - elBottom) < SNAP_THRESHOLD) {
           newGuides.push({
-            points: [Math.min(draggedLeft, elLeft) - 10, elBottom, Math.max(draggedRight, elRight) + 10, elBottom],
+            points: [
+              Math.min(draggedLeft, elLeft) - 10,
+              elBottom,
+              Math.max(draggedRight, elRight) + 10,
+              elBottom,
+            ],
             orientation: "horizontal",
           });
           draggedNode.y(elBottom - draggedBox.height);
@@ -372,7 +407,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Center to center (horizontal)
         if (Math.abs(draggedCenterY - elCenterY) < SNAP_THRESHOLD) {
           newGuides.push({
-            points: [Math.min(draggedLeft, elLeft) - 10, elCenterY, Math.max(draggedRight, elRight) + 10, elCenterY],
+            points: [
+              Math.min(draggedLeft, elLeft) - 10,
+              elCenterY,
+              Math.max(draggedRight, elRight) + 10,
+              elCenterY,
+            ],
             orientation: "horizontal",
           });
           draggedNode.y(elCenterY - draggedBox.height / 2);
@@ -380,7 +420,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Top to bottom
         if (Math.abs(draggedTop - elBottom) < SNAP_THRESHOLD) {
           newGuides.push({
-            points: [Math.min(draggedLeft, elLeft) - 10, elBottom, Math.max(draggedRight, elRight) + 10, elBottom],
+            points: [
+              Math.min(draggedLeft, elLeft) - 10,
+              elBottom,
+              Math.max(draggedRight, elRight) + 10,
+              elBottom,
+            ],
             orientation: "horizontal",
           });
           draggedNode.y(elBottom);
@@ -388,7 +433,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Bottom to top
         if (Math.abs(draggedBottom - elTop) < SNAP_THRESHOLD) {
           newGuides.push({
-            points: [Math.min(draggedLeft, elLeft) - 10, elTop, Math.max(draggedRight, elRight) + 10, elTop],
+            points: [
+              Math.min(draggedLeft, elLeft) - 10,
+              elTop,
+              Math.max(draggedRight, elRight) + 10,
+              elTop,
+            ],
             orientation: "horizontal",
           });
           draggedNode.y(elTop - draggedBox.height);
