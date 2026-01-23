@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { Stage, Layer, Rect, Transformer, Line } from "react-konva";
+import { Stage, Layer, Rect, Transformer, Line, Text } from "react-konva";
 import Konva from "konva";
 import { useEditorStore } from "@/store/editorStore";
 import TextElementComponent from "./elements/TextElement";
@@ -26,6 +26,8 @@ interface SelectionBox {
 interface GuideLine {
   points: number[];
   orientation: "horizontal" | "vertical";
+  distance?: number; // Distance in pixels (for edge-to-edge or center-to-center)
+  label?: string; // Text label to display
 }
 
 const SNAP_THRESHOLD = 5; // Distance in pixels to snap
@@ -249,18 +251,24 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
 
       // Check canvas center vertical line
       if (Math.abs(draggedCenterX - canvasCenterX) < SNAP_THRESHOLD) {
+        const distance = Math.round(canvasCenterX);
         newGuides.push({
           points: [canvasCenterX, 0, canvasCenterX, canvasHeight],
           orientation: "vertical",
+          distance: distance,
+          label: `${distance}px`,
         });
         draggedNode.x(canvasCenterX - draggedBox.width / 2);
       }
 
       // Check canvas center horizontal line
       if (Math.abs(draggedCenterY - canvasCenterY) < SNAP_THRESHOLD) {
+        const distance = Math.round(canvasCenterY);
         newGuides.push({
           points: [0, canvasCenterY, canvasWidth, canvasCenterY],
           orientation: "horizontal",
+          distance: distance,
+          label: `${distance}px`,
         });
         draggedNode.y(canvasCenterY - draggedBox.height / 2);
       }
@@ -271,6 +279,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         newGuides.push({
           points: [0, 0, 0, canvasHeight],
           orientation: "vertical",
+          distance: 0,
+          label: "0px",
         });
         draggedNode.x(0);
       }
@@ -279,6 +289,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         newGuides.push({
           points: [canvasWidth, 0, canvasWidth, canvasHeight],
           orientation: "vertical",
+          distance: canvasWidth,
+          label: `${canvasWidth}px`,
         });
         draggedNode.x(canvasWidth - draggedBox.width);
       }
@@ -287,6 +299,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         newGuides.push({
           points: [0, 0, canvasWidth, 0],
           orientation: "horizontal",
+          distance: 0,
+          label: "0px",
         });
         draggedNode.y(0);
       }
@@ -295,6 +309,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         newGuides.push({
           points: [0, canvasHeight, canvasWidth, canvasHeight],
           orientation: "horizontal",
+          distance: canvasHeight,
+          label: `${canvasHeight}px`,
         });
         draggedNode.y(canvasHeight - draggedBox.height);
       }
@@ -313,6 +329,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Vertical alignments (left, center, right)
         // Left to left
         if (Math.abs(draggedLeft - elLeft) < SNAP_THRESHOLD) {
+          const distance = Math.round(elLeft);
           newGuides.push({
             points: [
               elLeft,
@@ -321,11 +338,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               Math.max(draggedBottom, elBottom) + 10,
             ],
             orientation: "vertical",
+            distance: distance,
+            label: `${distance}px`,
           });
           draggedNode.x(elLeft);
         }
         // Right to right
         if (Math.abs(draggedRight - elRight) < SNAP_THRESHOLD) {
+          const distance = Math.round(elRight);
           newGuides.push({
             points: [
               elRight,
@@ -334,11 +354,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               Math.max(draggedBottom, elBottom) + 10,
             ],
             orientation: "vertical",
+            distance: distance,
+            label: `${distance}px`,
           });
           draggedNode.x(elRight - draggedBox.width);
         }
         // Center to center (vertical)
         if (Math.abs(draggedCenterX - elCenterX) < SNAP_THRESHOLD) {
+          const distance = Math.round(elCenterX);
           newGuides.push({
             points: [
               elCenterX,
@@ -347,11 +370,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               Math.max(draggedBottom, elBottom) + 10,
             ],
             orientation: "vertical",
+            distance: distance,
+            label: `${distance}px`,
           });
           draggedNode.x(elCenterX - draggedBox.width / 2);
         }
         // Left to right
         if (Math.abs(draggedLeft - elRight) < SNAP_THRESHOLD) {
+          const distance = Math.round(Math.abs(draggedLeft - elRight));
           newGuides.push({
             points: [
               elRight,
@@ -360,11 +386,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               Math.max(draggedBottom, elBottom) + 10,
             ],
             orientation: "vertical",
+            distance: distance,
+            label: `${distance}px`,
           });
           draggedNode.x(elRight);
         }
         // Right to left
         if (Math.abs(draggedRight - elLeft) < SNAP_THRESHOLD) {
+          const distance = Math.round(Math.abs(draggedRight - elLeft));
           newGuides.push({
             points: [
               elLeft,
@@ -373,6 +402,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               Math.max(draggedBottom, elBottom) + 10,
             ],
             orientation: "vertical",
+            distance: distance,
+            label: `${distance}px`,
           });
           draggedNode.x(elLeft - draggedBox.width);
         }
@@ -380,6 +411,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         // Horizontal alignments (top, center, bottom)
         // Top to top
         if (Math.abs(draggedTop - elTop) < SNAP_THRESHOLD) {
+          const distance = Math.round(elTop);
           newGuides.push({
             points: [
               Math.min(draggedLeft, elLeft) - 10,
@@ -388,11 +420,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               elTop,
             ],
             orientation: "horizontal",
+            distance: distance,
+            label: `${distance}px`,
           });
           draggedNode.y(elTop);
         }
         // Bottom to bottom
         if (Math.abs(draggedBottom - elBottom) < SNAP_THRESHOLD) {
+          const distance = Math.round(elBottom);
           newGuides.push({
             points: [
               Math.min(draggedLeft, elLeft) - 10,
@@ -401,11 +436,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               elBottom,
             ],
             orientation: "horizontal",
+            distance: distance,
+            label: `${distance}px`,
           });
           draggedNode.y(elBottom - draggedBox.height);
         }
         // Center to center (horizontal)
         if (Math.abs(draggedCenterY - elCenterY) < SNAP_THRESHOLD) {
+          const distance = Math.round(elCenterY);
           newGuides.push({
             points: [
               Math.min(draggedLeft, elLeft) - 10,
@@ -414,11 +452,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               elCenterY,
             ],
             orientation: "horizontal",
+            distance: distance,
+            label: `${distance}px`,
           });
           draggedNode.y(elCenterY - draggedBox.height / 2);
         }
         // Top to bottom
         if (Math.abs(draggedTop - elBottom) < SNAP_THRESHOLD) {
+          const distance = Math.round(Math.abs(draggedTop - elBottom));
           newGuides.push({
             points: [
               Math.min(draggedLeft, elLeft) - 10,
@@ -427,11 +468,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               elBottom,
             ],
             orientation: "horizontal",
+            distance: distance,
+            label: `${distance}px`,
           });
           draggedNode.y(elBottom);
         }
         // Bottom to top
         if (Math.abs(draggedBottom - elTop) < SNAP_THRESHOLD) {
+          const distance = Math.round(Math.abs(draggedBottom - elTop));
           newGuides.push({
             points: [
               Math.min(draggedLeft, elLeft) - 10,
@@ -440,6 +484,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               elTop,
             ],
             orientation: "horizontal",
+            distance: distance,
+            label: `${distance}px`,
           });
           draggedNode.y(elTop - draggedBox.height);
         }
@@ -709,15 +755,41 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
             )}
 
             {/* Alignment Guide Lines */}
-            {guides.map((guide, index) => (
-              <Line
-                key={`guide-${index}`}
-                points={guide.points}
-                stroke="#FF6B9D"
-                strokeWidth={1}
-                dash={[4, 4]}
-              />
-            ))}
+            {guides.map((guide, index) => {
+              // Calculate label position
+              const isVertical = guide.orientation === "vertical";
+              const labelX = isVertical
+                ? guide.points[0] + 5 // Offset to the right of vertical line
+                : (guide.points[0] + guide.points[2]) / 2; // Center of horizontal line
+              const labelY = isVertical
+                ? (guide.points[1] + guide.points[3]) / 2 // Center of vertical line
+                : guide.points[1] - 10; // Above horizontal line
+
+              return (
+                <React.Fragment key={`guide-${index}`}>
+                  <Line
+                    points={guide.points}
+                    stroke="#FF6B9D"
+                    strokeWidth={1}
+                    dash={[4, 4]}
+                  />
+                  {guide.label && (
+                    <Text
+                      x={labelX}
+                      y={labelY}
+                      text={guide.label}
+                      fontSize={11}
+                      fill="#FF6B9D"
+                      fontStyle="bold"
+                      shadowColor="rgba(255, 255, 255, 0.8)"
+                      shadowBlur={3}
+                      shadowOffsetX={0}
+                      shadowOffsetY={0}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            })}
 
             {/* Transformer */}
             <Transformer
