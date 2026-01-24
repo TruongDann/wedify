@@ -251,24 +251,18 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
 
       // Check canvas center vertical line
       if (Math.abs(draggedCenterX - canvasCenterX) < SNAP_THRESHOLD) {
-        const distance = Math.round(canvasCenterX);
         newGuides.push({
           points: [canvasCenterX, 0, canvasCenterX, canvasHeight],
           orientation: "vertical",
-          distance: distance,
-          label: `${distance}px`,
         });
         draggedNode.x(canvasCenterX - draggedBox.width / 2);
       }
 
       // Check canvas center horizontal line
       if (Math.abs(draggedCenterY - canvasCenterY) < SNAP_THRESHOLD) {
-        const distance = Math.round(canvasCenterY);
         newGuides.push({
           points: [0, canvasCenterY, canvasWidth, canvasCenterY],
           orientation: "horizontal",
-          distance: distance,
-          label: `${distance}px`,
         });
         draggedNode.y(canvasCenterY - draggedBox.height / 2);
       }
@@ -279,8 +273,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         newGuides.push({
           points: [0, 0, 0, canvasHeight],
           orientation: "vertical",
-          distance: 0,
-          label: "0px",
         });
         draggedNode.x(0);
       }
@@ -289,8 +281,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         newGuides.push({
           points: [canvasWidth, 0, canvasWidth, canvasHeight],
           orientation: "vertical",
-          distance: canvasWidth,
-          label: `${canvasWidth}px`,
         });
         draggedNode.x(canvasWidth - draggedBox.width);
       }
@@ -299,8 +289,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         newGuides.push({
           points: [0, 0, canvasWidth, 0],
           orientation: "horizontal",
-          distance: 0,
-          label: "0px",
         });
         draggedNode.y(0);
       }
@@ -309,8 +297,6 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         newGuides.push({
           points: [0, canvasHeight, canvasWidth, canvasHeight],
           orientation: "horizontal",
-          distance: canvasHeight,
-          label: `${canvasHeight}px`,
         });
         draggedNode.y(canvasHeight - draggedBox.height);
       }
@@ -327,57 +313,64 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         const elCenterY = el.position.y + el.size.height / 2;
 
         // Vertical alignments (left, center, right)
-        // Left to left
+        // Left to left (show vertical spacing between elements)
         if (Math.abs(draggedLeft - elLeft) < SNAP_THRESHOLD) {
-          const distance = Math.round(elLeft);
+          // Calculate vertical distance between element centers
+          const verticalSpacing = Math.abs(draggedCenterY - elCenterY);
+          const distance = Math.round(verticalSpacing);
+          // Line at horizontal center, drawn only in the gap between elements
+          const midX = (draggedCenterX + elCenterX) / 2;
+          // Draw from bottom of top element to top of bottom element
+          const topElement = draggedTop < elTop ? draggedBottom : elBottom;
+          const bottomElement = draggedTop < elTop ? elTop : draggedTop;
           newGuides.push({
-            points: [
-              elLeft,
-              Math.min(draggedTop, elTop) - 10,
-              elLeft,
-              Math.max(draggedBottom, elBottom) + 10,
-            ],
+            points: [midX, topElement, midX, bottomElement],
             orientation: "vertical",
             distance: distance,
             label: `${distance}px`,
           });
           draggedNode.x(elLeft);
         }
-        // Right to right
+        // Right to right (show vertical spacing between elements)
         if (Math.abs(draggedRight - elRight) < SNAP_THRESHOLD) {
-          const distance = Math.round(elRight);
+          // Calculate vertical distance between element centers
+          const verticalSpacing = Math.abs(draggedCenterY - elCenterY);
+          const distance = Math.round(verticalSpacing);
+          // Line at horizontal center, drawn only in the gap between elements
+          const midX = (draggedCenterX + elCenterX) / 2;
+          // Draw from bottom of top element to top of bottom element
+          const topElement = draggedTop < elTop ? draggedBottom : elBottom;
+          const bottomElement = draggedTop < elTop ? elTop : draggedTop;
           newGuides.push({
-            points: [
-              elRight,
-              Math.min(draggedTop, elTop) - 10,
-              elRight,
-              Math.max(draggedBottom, elBottom) + 10,
-            ],
+            points: [midX, topElement, midX, bottomElement],
             orientation: "vertical",
             distance: distance,
             label: `${distance}px`,
           });
           draggedNode.x(elRight - draggedBox.width);
         }
-        // Center to center (vertical)
+        // Center to center (vertical) - show vertical spacing
         if (Math.abs(draggedCenterX - elCenterX) < SNAP_THRESHOLD) {
-          const distance = Math.round(elCenterX);
+          // Calculate vertical distance between element centers
+          const verticalSpacing = Math.abs(draggedCenterY - elCenterY);
+          const distance = Math.round(verticalSpacing);
+          // Line at center X, drawn only in the gap between elements
+          // Draw from bottom of top element to top of bottom element
+          const topElement = draggedTop < elTop ? draggedBottom : elBottom;
+          const bottomElement = draggedTop < elTop ? elTop : draggedTop;
           newGuides.push({
-            points: [
-              elCenterX,
-              Math.min(draggedTop, elTop) - 10,
-              elCenterX,
-              Math.max(draggedBottom, elBottom) + 10,
-            ],
+            points: [elCenterX, topElement, elCenterX, bottomElement],
             orientation: "vertical",
             distance: distance,
             label: `${distance}px`,
           });
           draggedNode.x(elCenterX - draggedBox.width / 2);
         }
-        // Left to right
+        // Left to right (show spacing between elements)
         if (Math.abs(draggedLeft - elRight) < SNAP_THRESHOLD) {
-          const distance = Math.round(Math.abs(draggedLeft - elRight));
+          // Calculate the gap BEFORE snapping for meaningful display
+          const gap = Math.abs(draggedLeft - elRight);
+          const distance = Math.round(gap);
           newGuides.push({
             points: [
               elRight,
@@ -387,13 +380,15 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
             ],
             orientation: "vertical",
             distance: distance,
-            label: `${distance}px`,
+            label: distance === 0 ? `0px` : `${distance}px gap`,
           });
           draggedNode.x(elRight);
         }
-        // Right to left
+        // Right to left (show spacing between elements)
         if (Math.abs(draggedRight - elLeft) < SNAP_THRESHOLD) {
-          const distance = Math.round(Math.abs(draggedRight - elLeft));
+          // Calculate the gap BEFORE snapping for meaningful display
+          const gap = Math.abs(draggedRight - elLeft);
+          const distance = Math.round(gap);
           newGuides.push({
             points: [
               elLeft,
@@ -403,63 +398,70 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
             ],
             orientation: "vertical",
             distance: distance,
-            label: `${distance}px`,
+            label: distance === 0 ? `0px` : `${distance}px gap`,
           });
           draggedNode.x(elLeft - draggedBox.width);
         }
 
         // Horizontal alignments (top, center, bottom)
-        // Top to top
+        // Top to top (show horizontal spacing between elements)
         if (Math.abs(draggedTop - elTop) < SNAP_THRESHOLD) {
-          const distance = Math.round(elTop);
+          // Calculate horizontal distance between element centers
+          const horizontalSpacing = Math.abs(draggedCenterX - elCenterX);
+          const distance = Math.round(horizontalSpacing);
+          // Line at vertical center, drawn only in the gap between elements
+          const midY = (draggedCenterY + elCenterY) / 2;
+          // Draw from right of left element to left of right element
+          const leftElement = draggedLeft < elLeft ? draggedRight : elRight;
+          const rightElement = draggedLeft < elLeft ? elLeft : draggedLeft;
           newGuides.push({
-            points: [
-              Math.min(draggedLeft, elLeft) - 10,
-              elTop,
-              Math.max(draggedRight, elRight) + 10,
-              elTop,
-            ],
+            points: [leftElement, midY, rightElement, midY],
             orientation: "horizontal",
             distance: distance,
             label: `${distance}px`,
           });
           draggedNode.y(elTop);
         }
-        // Bottom to bottom
+        // Bottom to bottom (show horizontal spacing between elements)
         if (Math.abs(draggedBottom - elBottom) < SNAP_THRESHOLD) {
-          const distance = Math.round(elBottom);
+          // Calculate horizontal distance between element centers
+          const horizontalSpacing = Math.abs(draggedCenterX - elCenterX);
+          const distance = Math.round(horizontalSpacing);
+          // Line at vertical center, drawn only in the gap between elements
+          const midY = (draggedCenterY + elCenterY) / 2;
+          // Draw from right of left element to left of right element
+          const leftElement = draggedLeft < elLeft ? draggedRight : elRight;
+          const rightElement = draggedLeft < elLeft ? elLeft : draggedLeft;
           newGuides.push({
-            points: [
-              Math.min(draggedLeft, elLeft) - 10,
-              elBottom,
-              Math.max(draggedRight, elRight) + 10,
-              elBottom,
-            ],
+            points: [leftElement, midY, rightElement, midY],
             orientation: "horizontal",
             distance: distance,
             label: `${distance}px`,
           });
           draggedNode.y(elBottom - draggedBox.height);
         }
-        // Center to center (horizontal)
+        // Center to center (horizontal) - show horizontal spacing
         if (Math.abs(draggedCenterY - elCenterY) < SNAP_THRESHOLD) {
-          const distance = Math.round(elCenterY);
+          // Calculate horizontal distance between element centers
+          const horizontalSpacing = Math.abs(draggedCenterX - elCenterX);
+          const distance = Math.round(horizontalSpacing);
+          // Line at center Y, drawn only in the gap between elements
+          // Draw from right of left element to left of right element
+          const leftElement = draggedLeft < elLeft ? draggedRight : elRight;
+          const rightElement = draggedLeft < elLeft ? elLeft : draggedLeft;
           newGuides.push({
-            points: [
-              Math.min(draggedLeft, elLeft) - 10,
-              elCenterY,
-              Math.max(draggedRight, elRight) + 10,
-              elCenterY,
-            ],
+            points: [leftElement, elCenterY, rightElement, elCenterY],
             orientation: "horizontal",
             distance: distance,
             label: `${distance}px`,
           });
           draggedNode.y(elCenterY - draggedBox.height / 2);
         }
-        // Top to bottom
+        // Top to bottom (show spacing between elements)
         if (Math.abs(draggedTop - elBottom) < SNAP_THRESHOLD) {
-          const distance = Math.round(Math.abs(draggedTop - elBottom));
+          // Calculate the gap BEFORE snapping for meaningful display
+          const gap = Math.abs(draggedTop - elBottom);
+          const distance = Math.round(gap);
           newGuides.push({
             points: [
               Math.min(draggedLeft, elLeft) - 10,
@@ -469,13 +471,15 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
             ],
             orientation: "horizontal",
             distance: distance,
-            label: `${distance}px`,
+            label: distance === 0 ? `0px` : `${distance}px gap`,
           });
           draggedNode.y(elBottom);
         }
-        // Bottom to top
+        // Bottom to top (show spacing between elements)
         if (Math.abs(draggedBottom - elTop) < SNAP_THRESHOLD) {
-          const distance = Math.round(Math.abs(draggedBottom - elTop));
+          // Calculate the gap BEFORE snapping for meaningful display
+          const gap = Math.abs(draggedBottom - elTop);
+          const distance = Math.round(gap);
           newGuides.push({
             points: [
               Math.min(draggedLeft, elLeft) - 10,
@@ -485,11 +489,38 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
             ],
             orientation: "horizontal",
             distance: distance,
-            label: `${distance}px`,
+            label: distance === 0 ? `0px` : `${distance}px gap`,
           });
           draggedNode.y(elTop - draggedBox.height);
         }
       });
+
+      // Filter to show only the nearest guideline
+      if (newGuides.length > 0) {
+        // Prioritize guides with smallest distance (closest snap)
+        // For guides with same orientation, keep only the one with smallest distance
+        const verticalGuides = newGuides.filter(
+          (g) => g.orientation === "vertical",
+        );
+        const horizontalGuides = newGuides.filter(
+          (g) => g.orientation === "horizontal",
+        );
+
+        const closestVertical = verticalGuides.sort(
+          (a, b) => (a.distance || Infinity) - (b.distance || Infinity),
+        )[0];
+
+        const closestHorizontal = horizontalGuides.sort(
+          (a, b) => (a.distance || Infinity) - (b.distance || Infinity),
+        )[0];
+
+        // Return only the closest guides (one vertical, one horizontal max)
+        const filteredGuides: GuideLine[] = [];
+        if (closestVertical) filteredGuides.push(closestVertical);
+        if (closestHorizontal) filteredGuides.push(closestHorizontal);
+
+        return filteredGuides;
+      }
 
       return newGuides;
     },
@@ -756,14 +787,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
 
             {/* Alignment Guide Lines */}
             {guides.map((guide, index) => {
-              // Calculate label position
+              // Calculate label position - positioned further from the line
               const isVertical = guide.orientation === "vertical";
               const labelX = isVertical
-                ? guide.points[0] + 5 // Offset to the right of vertical line
+                ? guide.points[0] + 8 // Position to the RIGHT of vertical line with more spacing
                 : (guide.points[0] + guide.points[2]) / 2; // Center of horizontal line
               const labelY = isVertical
-                ? (guide.points[1] + guide.points[3]) / 2 // Center of vertical line
-                : guide.points[1] - 10; // Above horizontal line
+                ? (guide.points[1] + guide.points[3]) / 2 - 6 // Center of vertical line
+                : guide.points[1] - 18; // Above horizontal line with more spacing
 
               return (
                 <React.Fragment key={`guide-${index}`}>
