@@ -6,7 +6,6 @@ import { preloadCommonFonts } from "@/utils/fontLoader";
 import { EmptyState } from "../shared";
 import {
   TextTab,
-  ShapesTab,
   ImageTab,
   StockTab,
   BackgroundTab,
@@ -27,8 +26,7 @@ const Left: React.FC<LeftProps> = ({ activeTab }) => {
     switch (activeTab) {
       case "text":
         return <TextTab />;
-      case "element":
-        return <ShapesTab />;
+
       case "image":
         return <ImageTab />;
       case "stock":
