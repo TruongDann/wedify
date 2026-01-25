@@ -25,8 +25,8 @@ import {
   RightOutlined,
   QuestionCircleOutlined,
 } from "@ant-design/icons";
-import LeftPanel from "@/components/editor/LeftPanel";
-import RightPanel from "@/components/editor/RightPanel";
+import Left from "@/components/editor/panels/Left";
+import Right from "@/components/editor/panels/Right";
 import { useEditorStore } from "@/store/editorStore";
 
 // Dynamic import EditorCanvas vì Konva cần window
@@ -305,7 +305,7 @@ const EditorPage: React.FC = () => {
           </div>
 
           {/* Left Panel - Content */}
-          <LeftPanel activeTab={activeTab} />
+          <Left activeTab={activeTab} />
 
           {/* Canvas Area */}
           <div className="flex-1 flex flex-col bg-gray-200 overflow-hidden">
@@ -399,7 +399,7 @@ const EditorPage: React.FC = () => {
           </div>
 
           {/* Right Panel - Settings */}
-          <RightPanel
+          <Right
             cardTitle={cardTitle}
             cardCategory={cardCategory}
             cardStatus={cardStatus}

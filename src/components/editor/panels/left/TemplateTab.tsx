@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Section } from "../shared";
+import { Section } from "../../shared";
 
 export const TemplateTab: React.FC = () => {
   const templates = [

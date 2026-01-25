@@ -23,7 +23,7 @@ import {
   TextStyleButtons,
   AlignButtons,
   PositionGrid,
-} from "../shared";
+} from "../../shared";
 
 const { Option } = Select;
 
@@ -119,7 +119,9 @@ export const TextStyleSection: React.FC<TextStyleSectionProps> = ({
                 onUpdate({ backgroundColor: color.toHexString() })
               }
             />
-            <Button onClick={() => onUpdate({ backgroundColor: "transparent" })}>
+            <Button
+              onClick={() => onUpdate({ backgroundColor: "transparent" })}
+            >
               Trong suốt
             </Button>
           </div>
@@ -185,7 +187,9 @@ export const PaddingSection: React.FC<PaddingSectionProps> = ({
         <div className="px-4 pt-3 pb-4">
           <div className="mb-3">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-gray-500">Khoảng đệm (Padding)</span>
+              <span className="text-xs text-gray-500">
+                Khoảng đệm (Padding)
+              </span>
               <button
                 className={`p-1.5 rounded transition-colors ${
                   paddingLinked
@@ -289,7 +293,10 @@ interface BorderSectionProps {
   borderRadius: BorderRadiusProps;
   isExpanded: boolean;
   onToggle: (key: string) => void;
-  onUpdate: (updates: { border?: BorderProps; borderRadius?: BorderRadiusProps }) => void;
+  onUpdate: (updates: {
+    border?: BorderProps;
+    borderRadius?: BorderRadiusProps;
+  }) => void;
   borderRadiusLinked: boolean;
   setBorderRadiusLinked: (linked: boolean) => void;
 }
@@ -416,7 +423,10 @@ export const BorderSection: React.FC<BorderSectionProps> = ({
                   { label: "BR", key: "bottomRight" },
                 ] as const
               ).map((item) => (
-                <div key={item.key} className="flex flex-col items-center gap-1">
+                <div
+                  key={item.key}
+                  className="flex flex-col items-center gap-1"
+                >
                   <span className="text-xs text-gray-400">{item.label}</span>
                   <input
                     type="number"
@@ -528,7 +538,9 @@ export const ShadowSection: React.FC<ShadowSectionProps> = ({
               <ColorPicker
                 value={shadow.color}
                 onChange={(color) =>
-                  onUpdate({ shadow: { ...shadow, color: color.toHexString() } })
+                  onUpdate({
+                    shadow: { ...shadow, color: color.toHexString() },
+                  })
                 }
               />
             </PropertyRow>
@@ -626,7 +638,9 @@ export const AnimationSection: React.FC<AnimationSectionProps> = ({
         {animation.enabled && (
           <>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Chuyển động liên tục</span>
+              <span className="text-sm text-gray-600">
+                Chuyển động liên tục
+              </span>
               <Switch
                 checked={animation.continuous}
                 onChange={(checked) =>

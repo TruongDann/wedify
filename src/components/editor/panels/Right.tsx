@@ -23,9 +23,9 @@ import {
   LinkSection,
   AnimationSection,
   PositionSection,
-} from "./right-panel/TextPropertySections";
+} from "./right/TextPropertySections";
 
-import { TextEffectSection } from "./right-panel/TextEffectSection";
+import { TextEffectSection } from "./right/TextEffectSection";
 
 import {
   ImageActionSection,
@@ -37,20 +37,20 @@ import {
   ImageAnimationSection,
   ImagePositionSection,
   DeleteButton,
-} from "./right-panel/ImagePropertySections";
+} from "./right/ImagePropertySections";
 
 import {
   ShapeColorSection,
   ShapeShadowSection,
   ShapePositionSection,
   ShapeDeleteButton,
-} from "./right-panel/ShapePropertySections";
+} from "./right/ShapePropertySections";
 
-import { PageSettings } from "./right-panel/PageSettingsSection";
+import { PageSettings } from "./right/PageSettingsSection";
 
 // ==================== Types ====================
 
-interface RightPanelProps {
+interface RightProps {
   cardTitle?: string;
   cardCategory?: string;
   cardStatus?: string;
@@ -64,7 +64,7 @@ interface RightPanelProps {
 
 // ==================== Main Component ====================
 
-const RightPanel: React.FC<RightPanelProps> = ({
+const Right: React.FC<RightProps> = ({
   cardTitle = "Thiệp cưới của tôi",
   cardCategory = "wedding",
   cardStatus = "draft",
@@ -113,7 +113,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
   const [cropImageSrc, setCropImageSrc] = useState<string>("");
   const [selectedShape, setSelectedShape] = useState<string>("001");
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<number | null>(
-    null
+    null,
   );
   const cropperRef = useRef<ReactCropperElement>(null);
 
@@ -123,7 +123,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
 
   const toggleSection = (key: string) => {
     setExpandedSections((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
     );
   };
 
@@ -196,7 +196,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
         shapeImg.src = shapeData.image;
       });
     },
-    []
+    [],
   );
 
   const handleCropComplete = useCallback(async () => {
@@ -207,7 +207,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
         try {
           const croppedImageUrl = await applyShapeMask(
             croppedCanvas,
-            selectedShape
+            selectedShape,
           );
           if (selectedElement) {
             updateElement(selectedElement.id, { src: croppedImageUrl });
@@ -232,10 +232,30 @@ const RightPanel: React.FC<RightPanelProps> = ({
   // ==================== Render Functions ====================
 
   const renderTextProperties = (element: TextElement) => {
-    const border = element.border || { width: 0, color: "#000000", style: "solid" as const, position: "all" as const };
-    const borderRadius = element.borderRadius || { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 };
-    const shadow = element.shadow || { enabled: false, x: 0, y: 4, blur: 8, color: "rgba(0,0,0,0.2)" };
-    const animation = element.animation || { enabled: false, continuous: false, type: "none" as const };
+    const border = element.border || {
+      width: 0,
+      color: "#000000",
+      style: "solid" as const,
+      position: "all" as const,
+    };
+    const borderRadius = element.borderRadius || {
+      topLeft: 0,
+      topRight: 0,
+      bottomLeft: 0,
+      bottomRight: 0,
+    };
+    const shadow = element.shadow || {
+      enabled: false,
+      x: 0,
+      y: 4,
+      blur: 8,
+      color: "rgba(0,0,0,0.2)",
+    };
+    const animation = element.animation || {
+      enabled: false,
+      continuous: false,
+      type: "none" as const,
+    };
 
     return (
       <div className="p-3 space-y-3">
@@ -420,9 +440,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
         />
 
         <DeleteButton
-          onDelete={() =>
-            selectedElement && deleteElement(selectedElement.id)
-          }
+          onDelete={() => selectedElement && deleteElement(selectedElement.id)}
         />
       </div>
     );
@@ -463,9 +481,7 @@ const RightPanel: React.FC<RightPanelProps> = ({
         />
 
         <ShapeDeleteButton
-          onDelete={() =>
-            selectedElement && deleteElement(selectedElement.id)
-          }
+          onDelete={() => selectedElement && deleteElement(selectedElement.id)}
         />
       </div>
     );
@@ -656,4 +672,4 @@ const RightPanel: React.FC<RightPanelProps> = ({
   );
 };
 
-export default RightPanel;
+export default Right;

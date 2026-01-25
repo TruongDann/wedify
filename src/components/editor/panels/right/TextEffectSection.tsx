@@ -4,7 +4,7 @@ import React from "react";
 import { Slider, ColorPicker } from "antd";
 import { ThunderboltOutlined } from "@ant-design/icons";
 import { TextElement } from "@/types/editor";
-import { SectionHeader, PropertyRow } from "../shared";
+import { SectionHeader, PropertyRow } from "../../shared";
 
 const TEXT_EFFECT_STYLES = [
   { type: "none", label: "Không", preview: "Ag" },
@@ -103,10 +103,34 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
           {textEffect.type === "shadow" && (
             <EffectSettings
               settings={[
-                { label: "Offset", value: textEffect.offset, key: "offset", min: 0, max: 100 },
-                { label: "Hướng", value: textEffect.direction, key: "direction", min: -180, max: 180 },
-                { label: "Blur", value: textEffect.blur, key: "blur", min: 0, max: 100 },
-                { label: "Độ mờ", value: textEffect.transparency, key: "transparency", min: 0, max: 100 },
+                {
+                  label: "Offset",
+                  value: textEffect.offset,
+                  key: "offset",
+                  min: 0,
+                  max: 100,
+                },
+                {
+                  label: "Hướng",
+                  value: textEffect.direction,
+                  key: "direction",
+                  min: -180,
+                  max: 180,
+                },
+                {
+                  label: "Blur",
+                  value: textEffect.blur,
+                  key: "blur",
+                  min: 0,
+                  max: 100,
+                },
+                {
+                  label: "Độ mờ",
+                  value: textEffect.transparency,
+                  key: "transparency",
+                  min: 0,
+                  max: 100,
+                },
               ]}
               onUpdate={handleEffectUpdate}
             />
@@ -116,7 +140,13 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
           {textEffect.type === "lift" && (
             <EffectSettings
               settings={[
-                { label: "Intensity", value: textEffect.intensity, key: "intensity", min: 0, max: 100 },
+                {
+                  label: "Intensity",
+                  value: textEffect.intensity,
+                  key: "intensity",
+                  min: 0,
+                  max: 100,
+                },
               ]}
               onUpdate={handleEffectUpdate}
             />
@@ -126,7 +156,13 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
           {textEffect.type === "hollow" && (
             <EffectSettings
               settings={[
-                { label: "Thickness", value: textEffect.intensity, key: "intensity", min: 0, max: 100 },
+                {
+                  label: "Thickness",
+                  value: textEffect.intensity,
+                  key: "intensity",
+                  min: 0,
+                  max: 100,
+                },
               ]}
               onUpdate={handleEffectUpdate}
             />
@@ -136,7 +172,13 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
           {textEffect.type === "outline" && (
             <EffectSettings
               settings={[
-                { label: "Thickness", value: textEffect.intensity, key: "intensity", min: 0, max: 200 },
+                {
+                  label: "Thickness",
+                  value: textEffect.intensity,
+                  key: "intensity",
+                  min: 0,
+                  max: 200,
+                },
               ]}
               onUpdate={handleEffectUpdate}
             />
@@ -146,9 +188,27 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
           {textEffect.type === "splice" && (
             <EffectSettings
               settings={[
-                { label: "Thickness", value: textEffect.intensity, key: "intensity", min: 0, max: 100 },
-                { label: "Offset", value: textEffect.offset, key: "offset", min: 0, max: 100 },
-                { label: "Direction", value: textEffect.direction, key: "direction", min: -180, max: 180 },
+                {
+                  label: "Thickness",
+                  value: textEffect.intensity,
+                  key: "intensity",
+                  min: 0,
+                  max: 100,
+                },
+                {
+                  label: "Offset",
+                  value: textEffect.offset,
+                  key: "offset",
+                  min: 0,
+                  max: 100,
+                },
+                {
+                  label: "Direction",
+                  value: textEffect.direction,
+                  key: "direction",
+                  min: -180,
+                  max: 180,
+                },
               ]}
               onUpdate={handleEffectUpdate}
             />
@@ -158,8 +218,20 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
           {(textEffect.type === "echo" || textEffect.type === "glitch") && (
             <EffectSettings
               settings={[
-                { label: "Offset", value: textEffect.offset, key: "offset", min: 0, max: 100 },
-                { label: "Direction", value: textEffect.direction, key: "direction", min: -180, max: 180 },
+                {
+                  label: "Offset",
+                  value: textEffect.offset,
+                  key: "offset",
+                  min: 0,
+                  max: 100,
+                },
+                {
+                  label: "Direction",
+                  value: textEffect.direction,
+                  key: "direction",
+                  min: -180,
+                  max: 180,
+                },
               ]}
               onUpdate={handleEffectUpdate}
             />
@@ -169,8 +241,20 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
           {textEffect.type === "neon" && (
             <EffectSettings
               settings={[
-                { label: "Intensity", value: textEffect.intensity, key: "intensity", min: 0, max: 100 },
-                { label: "Blur", value: textEffect.blur, key: "blur", min: 0, max: 100 },
+                {
+                  label: "Intensity",
+                  value: textEffect.intensity,
+                  key: "intensity",
+                  min: 0,
+                  max: 100,
+                },
+                {
+                  label: "Blur",
+                  value: textEffect.blur,
+                  key: "blur",
+                  min: 0,
+                  max: 100,
+                },
               ]}
               onUpdate={handleEffectUpdate}
             />
@@ -321,7 +405,10 @@ interface EffectSettingsProps {
   onUpdate: (updates: Record<string, number>) => void;
 }
 
-const EffectSettings: React.FC<EffectSettingsProps> = ({ settings, onUpdate }) => (
+const EffectSettings: React.FC<EffectSettingsProps> = ({
+  settings,
+  onUpdate,
+}) => (
   <div className="space-y-3 mb-4 pt-3 border-t border-gray-100">
     {settings.map((setting) => (
       <PropertyRow key={setting.key} label={setting.label}>
@@ -336,7 +423,9 @@ const EffectSettings: React.FC<EffectSettingsProps> = ({ settings, onUpdate }) =
           type="number"
           className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
           value={setting.value}
-          onChange={(e) => onUpdate({ [setting.key]: Number(e.target.value) || 0 })}
+          onChange={(e) =>
+            onUpdate({ [setting.key]: Number(e.target.value) || 0 })
+          }
         />
       </PropertyRow>
     ))}

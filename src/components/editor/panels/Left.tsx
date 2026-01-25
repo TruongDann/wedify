@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { CalendarOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { preloadCommonFonts } from "@/utils/fontLoader";
-import { EmptyState } from "./shared";
+import { EmptyState } from "../shared";
 import {
   TextTab,
   ShapesTab,
@@ -12,13 +12,13 @@ import {
   BackgroundTab,
   MusicTab,
   TemplateTab,
-} from "./left-panel";
+} from "./left/index";
 
-interface LeftPanelProps {
+interface LeftProps {
   activeTab: string;
 }
 
-const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
+const Left: React.FC<LeftProps> = ({ activeTab }) => {
   useEffect(() => {
     preloadCommonFonts();
   }, []);
@@ -62,4 +62,4 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ activeTab }) => {
   );
 };
 
-export default LeftPanel;
+export default Left;
