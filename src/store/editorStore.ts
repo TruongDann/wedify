@@ -1,14 +1,17 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-import {
-  EditorElement,
-  TextElement,
-  ImageElement,
-  ShapeElement,
-  CanvasSettings,
-  HistoryState,
-} from "@/types/editor";
+import { EditorElement, CanvasSettings, HistoryState } from "@/types/editor";
 
+// Re-export helpers for backward compatibility
+export {
+  createTextElement,
+  createImageElement,
+  createShapeElement,
+} from "./helpers";
+
+// =============================================================================
+// Types
+// =============================================================================
 interface EditorStore {
   // Canvas settings
   canvasSettings: CanvasSettings;
@@ -17,7 +20,7 @@ interface EditorStore {
   // Elements
   elements: EditorElement[];
   selectedElementId: string | null;
-  selectedElementIds: string[]; // Multi-selection support
+  selectedElementIds: string[];
 
   // Element actions
   addElement: (element: Omit<EditorElement, "id" | "zIndex">) => void;
@@ -25,8 +28,8 @@ interface EditorStore {
   deleteElement: (id: string) => void;
   duplicateElement: (id: string) => void;
   selectElement: (id: string | null) => void;
-  selectElements: (ids: string[]) => void; // Multi-selection
-  addToSelection: (id: string) => void; // Add element to current selection
+  selectElements: (ids: string[]) => void;
+  addToSelection: (id: string) => void;
   moveElement: (id: string, position: { x: number; y: number }) => void;
   resizeElement: (id: string, size: { width: number; height: number }) => void;
   rotateElement: (id: string, rotation: number) => void;
@@ -44,14 +47,17 @@ interface EditorStore {
   redo: () => void;
   saveHistory: () => void;
 
-  // Clear
+  // Clear & Template
   clearCanvas: () => void;
   loadTemplate: (
     elements: EditorElement[],
-    canvasSettings: CanvasSettings,
+    canvasSettings: CanvasSettings
   ) => void;
 }
 
+// =============================================================================
+// Default Values
+// =============================================================================
 const defaultCanvasSettings: CanvasSettings = {
   width: 600,
   height: 800,
@@ -60,7 +66,13 @@ const defaultCanvasSettings: CanvasSettings = {
   backgroundSize: "cover",
 };
 
+// =============================================================================
+// Store
+// =============================================================================
 export const useEditorStore = create<EditorStore>((set, get) => ({
+  // ---------------------------------------------------------------------------
+  // Initial State
+  // ---------------------------------------------------------------------------
   canvasSettings: defaultCanvasSettings,
   elements: [],
   selectedElementId: null,
@@ -68,6 +80,9 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   history: [],
   historyIndex: -1,
 
+  // ---------------------------------------------------------------------------
+  // Canvas Settings
+  // ---------------------------------------------------------------------------
   setCanvasSettings: (settings) => {
     set((state) => ({
       canvasSettings: { ...state.canvasSettings, ...settings },
@@ -75,6 +90,9 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     get().saveHistory();
   },
 
+  // ---------------------------------------------------------------------------
+  // Element CRUD
+  // ---------------------------------------------------------------------------
   addElement: (element) => {
     const id = uuidv4();
     const maxZIndex = Math.max(0, ...get().elements.map((e) => e.zIndex));
@@ -94,7 +112,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   updateElement: (id, updates) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? ({ ...el, ...updates } as EditorElement) : el,
+        el.id === id ? ({ ...el, ...updates } as EditorElement) : el
       ),
     }));
     get().saveHistory();
@@ -131,6 +149,9 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     }
   },
 
+  // ---------------------------------------------------------------------------
+  // Selection
+  // ---------------------------------------------------------------------------
   selectElement: (id) => {
     set({ selectedElementId: id, selectedElementIds: id ? [id] : [] });
   },
@@ -155,10 +176,13 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     }
   },
 
+  // ---------------------------------------------------------------------------
+  // Element Transform
+  // ---------------------------------------------------------------------------
   moveElement: (id, position) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, position } : el,
+        el.id === id ? { ...el, position } : el
       ),
     }));
   },
@@ -166,7 +190,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   resizeElement: (id, size) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, size } : el,
+        el.id === id ? { ...el, size } : el
       ),
     }));
   },
@@ -174,16 +198,19 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   rotateElement: (id, rotation) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, rotation } : el,
+        el.id === id ? { ...el, rotation } : el
       ),
     }));
   },
 
+  // ---------------------------------------------------------------------------
+  // Layer Management
+  // ---------------------------------------------------------------------------
   bringToFront: (id) => {
     const maxZIndex = Math.max(...get().elements.map((e) => e.zIndex));
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, zIndex: maxZIndex + 1 } : el,
+        el.id === id ? { ...el, zIndex: maxZIndex + 1 } : el
       ),
     }));
     get().saveHistory();
@@ -193,7 +220,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const minZIndex = Math.min(...get().elements.map((e) => e.zIndex));
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, zIndex: minZIndex - 1 } : el,
+        el.id === id ? { ...el, zIndex: minZIndex - 1 } : el
       ),
     }));
     get().saveHistory();
@@ -204,11 +231,11 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const element = elements.find((el) => el.id === id);
     if (element) {
       const higherElements = elements.filter(
-        (el) => el.zIndex > element.zIndex,
+        (el) => el.zIndex > element.zIndex
       );
       if (higherElements.length > 0) {
         const nextElement = higherElements.reduce((prev, curr) =>
-          curr.zIndex < prev.zIndex ? curr : prev,
+          curr.zIndex < prev.zIndex ? curr : prev
         );
         set((state) => ({
           elements: state.elements.map((el) => {
@@ -227,10 +254,12 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const elements = get().elements;
     const element = elements.find((el) => el.id === id);
     if (element) {
-      const lowerElements = elements.filter((el) => el.zIndex < element.zIndex);
+      const lowerElements = elements.filter(
+        (el) => el.zIndex < element.zIndex
+      );
       if (lowerElements.length > 0) {
         const prevElement = lowerElements.reduce((prev, curr) =>
-          curr.zIndex > prev.zIndex ? curr : prev,
+          curr.zIndex > prev.zIndex ? curr : prev
         );
         set((state) => ({
           elements: state.elements.map((el) => {
@@ -245,6 +274,9 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     }
   },
 
+  // ---------------------------------------------------------------------------
+  // History (Undo/Redo)
+  // ---------------------------------------------------------------------------
   saveHistory: () => {
     const { elements, canvasSettings, history, historyIndex } = get();
     const newHistory = history.slice(0, historyIndex + 1);
@@ -290,6 +322,9 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     }
   },
 
+  // ---------------------------------------------------------------------------
+  // Canvas Operations
+  // ---------------------------------------------------------------------------
   clearCanvas: () => {
     set({
       elements: [],
@@ -308,128 +343,3 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     get().saveHistory();
   },
 }));
-
-// Helper functions to create elements
-export const createTextElement = (
-  overrides?: Partial<TextElement>,
-): Omit<TextElement, "id" | "zIndex"> => ({
-  type: "text",
-  content: "Nhập văn bản",
-  position: { x: 100, y: 100 },
-  size: { width: 200, height: 50 },
-  rotation: 0,
-  opacity: 1,
-  locked: false,
-  fontFamily: "Times New Roman",
-  fontSize: 24,
-  fontWeight: 400,
-  fontStyle: "normal",
-  textDecoration: "none",
-  textAlign: "center",
-  color: "#333333",
-  backgroundColor: "transparent",
-  lineHeight: 1.5,
-  letterSpacing: 0,
-  // New properties
-  padding: { top: 0, right: 0, bottom: 0, left: 0 },
-  border: { width: 0, color: "#000000", style: "solid", position: "all" },
-  borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 },
-  shadow: { enabled: false, x: 0, y: 4, blur: 8, color: "rgba(0,0,0,0.2)" },
-  hyperlink: "",
-  animation: { enabled: false, continuous: false, type: "none" },
-  // Text Effects
-  textEffect: {
-    type: "none",
-    offset: 50,
-    direction: -45,
-    blur: 0,
-    transparency: 40,
-    color: "#000000",
-    intensity: 50,
-    spread: 50,
-    roundness: 50,
-    curveAmount: 0,
-  },
-  ...overrides,
-});
-
-export const createImageElement = (
-  src: string,
-  overrides?: Partial<ImageElement>,
-): Omit<ImageElement, "id" | "zIndex"> => ({
-  type: "image",
-  src,
-  alt: "Image",
-  position: { x: 100, y: 100 },
-  size: { width: 200, height: 200 },
-  rotation: 0,
-  opacity: 1,
-  locked: false,
-  objectFit: "cover",
-  // Padding
-  padding: { top: 0, right: 0, bottom: 0, left: 0 },
-  // Border
-  border: {
-    width: 0,
-    color: "#000000",
-    style: "solid",
-    position: "all",
-  },
-  // Border Radius
-  borderRadius: {
-    topLeft: 0,
-    topRight: 0,
-    bottomLeft: 0,
-    bottomRight: 0,
-  },
-  // Shadow
-  shadow: {
-    enabled: false,
-    x: 0,
-    y: 4,
-    blur: 8,
-    color: "rgba(0,0,0,0.2)",
-  },
-  // Link
-  hyperlink: "",
-  // Animation
-  animation: {
-    enabled: false,
-    continuous: false,
-    type: "none",
-  },
-  // Filters
-  filters: {
-    brightness: 100,
-    contrast: 100,
-    saturation: 100,
-    blur: 0,
-    grayscale: 0,
-  },
-  ...overrides,
-});
-
-export const createShapeElement = (
-  shapeType: ShapeElement["shapeType"],
-  overrides?: Partial<ShapeElement>,
-): Omit<ShapeElement, "id" | "zIndex"> => ({
-  type: "shape",
-  shapeType,
-  position: { x: 100, y: 100 },
-  size: { width: 100, height: 100 },
-  rotation: 0,
-  opacity: 1,
-  locked: false,
-  fill: "#f472b6",
-  stroke: "#ec4899",
-  strokeWidth: 2,
-  // Shadow
-  shadow: {
-    enabled: false,
-    x: 0,
-    y: 4,
-    blur: 8,
-    color: "rgba(0,0,0,0.2)",
-  },
-  ...overrides,
-});
