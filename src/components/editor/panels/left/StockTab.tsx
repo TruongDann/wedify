@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, ArrowLeft } from "lucide-react";
 import { Dropdown } from "antd";
 import {
   createImageElement,
@@ -101,7 +101,10 @@ export const StockTab: React.FC = () => {
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Yếu tố đám cưới
                 </h3>
-                <button className="text-sm text-gray-500 hover:text-primary">
+                <button 
+                  className="text-sm text-gray-500 hover:text-primary"
+                  onClick={() => setSelectedCategory("wedding-elements")}
+                >
                   Xem thêm
                 </button>
               </div>
@@ -129,7 +132,10 @@ export const StockTab: React.FC = () => {
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Nhân vật
                 </h3>
-                <button className="text-sm text-gray-500 hover:text-primary">
+                <button 
+                  className="text-sm text-gray-500 hover:text-primary"
+                  onClick={() => setSelectedCategory("people")}
+                >
                   Xem thêm
                 </button>
               </div>
@@ -157,7 +163,10 @@ export const StockTab: React.FC = () => {
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Hình dạng
                 </h3>
-                <button className="text-sm text-gray-500 hover:text-primary">
+                <button 
+                  className="text-sm text-gray-500 hover:text-primary"
+                  onClick={() => setSelectedCategory("shapes")}
+                >
                   Xem thêm
                 </button>
               </div>
@@ -188,8 +197,11 @@ export const StockTab: React.FC = () => {
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Yếu tố đám cưới
               </h3>
-              <button className="text-sm text-gray-500 hover:text-primary">
-                Xem thêm
+              <button 
+                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
+                onClick={() => setSelectedCategory("all")}
+              >
+                <ArrowLeft size={14} /> Quay lại
               </button>
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -218,8 +230,11 @@ export const StockTab: React.FC = () => {
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Nhân vật
               </h3>
-              <button className="text-sm text-gray-500 hover:text-primary">
-                Xem thêm
+              <button 
+                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
+                onClick={() => setSelectedCategory("all")}
+              >
+                <ArrowLeft size={14} /> Quay lại
               </button>
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -245,11 +260,14 @@ export const StockTab: React.FC = () => {
         {selectedCategory === "flowers" && (
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base font-semibold text-gray-800">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Hoa cưới
               </h3>
-              <button className="text-sm text-gray-500 hover:text-primary">
-                Xem thêm
+              <button 
+                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
+                onClick={() => setSelectedCategory("all")}
+              >
+                <ArrowLeft size={14} /> Quay lại
               </button>
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -278,8 +296,11 @@ export const StockTab: React.FC = () => {
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Hình dạng
               </h3>
-              <button className="text-sm text-gray-500 hover:text-primary">
-                Xem thêm
+              <button 
+                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
+                onClick={() => setSelectedCategory("all")}
+              >
+                <ArrowLeft size={14} /> Quay lại
               </button>
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -308,8 +329,11 @@ export const StockTab: React.FC = () => {
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Chủ hý
               </h3>
-              <button className="text-sm text-gray-500 hover:text-primary">
-                Xem thêm
+              <button 
+                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
+                onClick={() => setSelectedCategory("all")}
+              >
+                <ArrowLeft size={14} /> Quay lại
               </button>
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -335,11 +359,14 @@ export const StockTab: React.FC = () => {
         {selectedCategory === "hearts" && (
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base font-semibold text-gray-800">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Trái tim
               </h3>
-              <button className="text-sm text-gray-500 hover:text-primary">
-                Xem thêm
+              <button 
+                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
+                onClick={() => setSelectedCategory("all")}
+              >
+                <ArrowLeft size={14} /> Quay lại
               </button>
             </div>
             <div className="grid grid-cols-3 gap-2">
