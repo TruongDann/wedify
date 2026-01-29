@@ -47,10 +47,12 @@ import {
 } from "./right/ShapePropertySections";
 
 import { PageSettings } from "./right/PageSettingsSection";
+import { MusicPropertySection } from "./right/MusicPropertySection";
 
 // ==================== Types ====================
 
 interface RightProps {
+  activeTab?: string;
   cardTitle?: string;
   cardCategory?: string;
   cardStatus?: string;
@@ -65,6 +67,7 @@ interface RightProps {
 // ==================== Main Component ====================
 
 const Right: React.FC<RightProps> = ({
+  activeTab,
   cardTitle = "Thiệp cưới của tôi",
   cardCategory = "wedding",
   cardStatus = "draft",
@@ -101,6 +104,7 @@ const Right: React.FC<RightProps> = ({
     "canvasSize",
     "background",
     "grid",
+    "music",
   ]);
 
   // Sync toggles
@@ -488,23 +492,33 @@ const Right: React.FC<RightProps> = ({
   };
 
   const renderPageSettings = () => (
-    <PageSettings
-      cardTitle={cardTitle}
-      cardCategory={cardCategory}
-      cardStatus={cardStatus}
-      previewImage={previewImage}
-      onTitleChange={onTitleChange}
-      onCategoryChange={onCategoryChange}
-      onStatusChange={onStatusChange}
-      onPreviewImageChange={onPreviewImageChange}
-      expandedSections={expandedSections}
-      onToggle={toggleSection}
-      sizeLinked={sizeLinked}
-      onToggleSizeLinked={() => setSizeLinked(!sizeLinked)}
-    />
+    <>
+      <PageSettings
+        cardTitle={cardTitle}
+        cardCategory={cardCategory}
+        cardStatus={cardStatus}
+        previewImage={previewImage}
+        onTitleChange={onTitleChange}
+        onCategoryChange={onCategoryChange}
+        onStatusChange={onStatusChange}
+        onPreviewImageChange={onPreviewImageChange}
+        expandedSections={expandedSections}
+        onToggle={toggleSection}
+        sizeLinked={sizeLinked}
+        onToggleSizeLinked={() => setSizeLinked(!sizeLinked)}
+      />
+      <MusicPropertySection />
+    </>
   );
 
+  const renderMusicSettings = () => <MusicPropertySection />;
+
   const renderProperties = () => {
+    // If music tab is active, always show music settings (regardless of element selection)
+    if (activeTab === "music") {
+      return renderMusicSettings();
+    }
+
     if (!selectedElement) return renderPageSettings();
 
     switch (selectedElement.type) {
@@ -519,6 +533,13 @@ const Right: React.FC<RightProps> = ({
     }
   };
 
+  // Get header text based on context
+  const getHeaderText = () => {
+    if (activeTab === "music") return "Tùy chỉnh nhạc nền";
+    if (selectedElement) return "Tùy chỉnh phần tử";
+    return "Tùy chỉnh";
+  };
+
   // ==================== Main Render ====================
 
   return (
@@ -526,9 +547,7 @@ const Right: React.FC<RightProps> = ({
       {/* Header */}
       <div className="h-12 px-4 border-b border-gray-200 flex items-center gap-2 shrink-0">
         <EditOutlined className="text-gray-400" />
-        <span className="font-semibold text-sm">
-          {selectedElement ? "Tùy chỉnh phần tử" : "Tùy chỉnh"}
-        </span>
+        <span className="font-semibold text-sm">{getHeaderText()}</span>
       </div>
 
       {/* Content */}

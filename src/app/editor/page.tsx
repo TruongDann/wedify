@@ -140,6 +140,7 @@ const EditorPage: React.FC = () => {
 
           {/* Right Panel - Settings */}
           <Right
+            activeTab={activeTab}
             cardTitle={cardTitle}
             cardCategory={cardCategory}
             cardStatus={cardStatus}

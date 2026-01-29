@@ -25,6 +25,7 @@ import { useEditorStore } from "@/store/editorStore";
 import { TextElement, ImageElement, ShapeElement } from "@/types/editor";
 import { loadGoogleFont } from "@/utils/fontLoader";
 import { FONTS } from "@/constants/fonts";
+import { MusicPropertySection } from "./panels/right/MusicPropertySection";
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -38,9 +39,13 @@ const PropertiesPanel: React.FC = () => {
   if (!selectedElement) {
     return (
       <div className="editor-properties">
-        <div className="p-6 text-center text-gray-400">
-          <p>Chọn một phần tử để chỉnh sửa</p>
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center gap-2 text-gray-600">
+            <span className="text-sm">✏️</span>
+            <span className="text-sm font-medium">Tuỳ chỉnh</span>
+          </div>
         </div>
+        <MusicPropertySection />
       </div>
     );
   }
@@ -464,6 +469,10 @@ const PropertiesPanel: React.FC = () => {
         {selectedElement.type === "shape" &&
           renderShapeProperties(selectedElement)}
       </Collapse>
+
+      {/* Music Section - Always visible */}
+      <Divider className="!my-4" />
+      <MusicPropertySection />
     </div>
   );
 };
