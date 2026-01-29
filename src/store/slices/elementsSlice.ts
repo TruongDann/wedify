@@ -44,7 +44,7 @@ export const createElementsSlice: StateCreator<
   updateElement: (id, updates) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? ({ ...el, ...updates } as EditorElement) : el
+        el.id === id ? ({ ...el, ...updates } as EditorElement) : el,
       ),
     }));
     get().saveHistory();
@@ -84,7 +84,7 @@ export const createElementsSlice: StateCreator<
   moveElement: (id, position) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, position } : el
+        el.id === id ? { ...el, position } : el,
       ),
     }));
   },
@@ -92,7 +92,7 @@ export const createElementsSlice: StateCreator<
   resizeElement: (id, size) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, size } : el
+        el.id === id ? { ...el, size } : el,
       ),
     }));
   },
@@ -100,7 +100,7 @@ export const createElementsSlice: StateCreator<
   rotateElement: (id, rotation) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, rotation } : el
+        el.id === id ? { ...el, rotation } : el,
       ),
     }));
   },

@@ -17,7 +17,7 @@ export interface ExportOptions {
  */
 export const exportCanvasToImage = async (
   canvas: HTMLCanvasElement,
-  options: ExportOptions
+  options: ExportOptions,
 ): Promise<void> => {
   const { format, quality = 1, scale = 1, filename = "wedding-card" } = options;
 
@@ -60,7 +60,7 @@ export const exportCanvasToImage = async (
 export const canvasToBlob = (
   canvas: HTMLCanvasElement,
   format: "png" | "jpg" | "webp" = "png",
-  quality: number = 1
+  quality: number = 1,
 ): Promise<Blob | null> => {
   return new Promise((resolve) => {
     const mimeType = `image/${format === "jpg" ? "jpeg" : format}`;
@@ -69,7 +69,7 @@ export const canvasToBlob = (
         resolve(blob);
       },
       mimeType,
-      quality
+      quality,
     );
   });
 };
@@ -100,7 +100,7 @@ export const downloadDataUrl = (dataUrl: string, filename: string): void => {
  * Copy canvas to clipboard
  */
 export const copyCanvasToClipboard = async (
-  canvas: HTMLCanvasElement
+  canvas: HTMLCanvasElement,
 ): Promise<boolean> => {
   try {
     const blob = await canvasToBlob(canvas, "png");

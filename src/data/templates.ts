@@ -13,6 +13,7 @@ export const weddingTemplates: Template[] = [
       backgroundColor: "#fff5f5",
       backgroundImage: null,
       backgroundSize: "cover",
+      backgroundMusic: null,
     },
     elements: [
       {
@@ -150,6 +151,7 @@ export const weddingTemplates: Template[] = [
       backgroundColor: "#ffffff",
       backgroundImage: null,
       backgroundSize: "cover",
+      backgroundMusic: null,
     },
     elements: [
       {

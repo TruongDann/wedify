@@ -189,12 +189,22 @@ export type EditorElement =
   | ShapeElement
   | StickerElement;
 
+export interface BackgroundMusic {
+  name: string;
+  artist: string;
+  duration: string;
+  src?: string;
+  icon?: string;
+  iconColor?: string;
+}
+
 export interface CanvasSettings {
   width: number;
   height: number;
   backgroundColor: string;
   backgroundImage: string | null;
   backgroundSize: "cover" | "contain" | "fill";
+  backgroundMusic: BackgroundMusic | null;
 }
 
 export interface Template {

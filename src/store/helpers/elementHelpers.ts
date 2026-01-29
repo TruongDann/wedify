@@ -4,7 +4,7 @@ import { TextElement, ImageElement, ShapeElement } from "@/types/editor";
  * Helper function to create a text element with default values
  */
 export const createTextElement = (
-  overrides?: Partial<TextElement>
+  overrides?: Partial<TextElement>,
 ): Omit<TextElement, "id" | "zIndex"> => ({
   type: "text",
   content: "Nhập văn bản",
@@ -56,7 +56,7 @@ export const createTextElement = (
  */
 export const createImageElement = (
   src: string,
-  overrides?: Partial<ImageElement>
+  overrides?: Partial<ImageElement>,
 ): Omit<ImageElement, "id" | "zIndex"> => ({
   type: "image",
   src,
@@ -115,7 +115,7 @@ export const createImageElement = (
  */
 export const createShapeElement = (
   shapeType: ShapeElement["shapeType"],
-  overrides?: Partial<ShapeElement>
+  overrides?: Partial<ShapeElement>,
 ): Omit<ShapeElement, "id" | "zIndex"> => ({
   type: "shape",
   shapeType,

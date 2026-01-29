@@ -5,7 +5,9 @@ import { Popover } from "antd";
 import { COLOR_PALETTE } from "@/constants/colors";
 
 // Extract color strings from COLOR_PALETTE
-const DEFAULT_COLORS = COLOR_PALETTE.filter(c => !c.isTransparent).map(c => c.color);
+const DEFAULT_COLORS = COLOR_PALETTE.filter((c) => !c.isTransparent).map(
+  (c) => c.color,
+);
 
 interface ColorPickerProps {
   value: string;

@@ -25,7 +25,7 @@ export const angleBetweenPoints = (p1: Position, p2: Position): number => {
 export const rotatePoint = (
   point: Position,
   center: Position,
-  angleDegrees: number
+  angleDegrees: number,
 ): Position => {
   const angleRadians = (angleDegrees * Math.PI) / 180;
   const cos = Math.cos(angleRadians);
@@ -56,7 +56,7 @@ export const getRectCenter = (position: Position, size: Size): Position => {
 export const isPointInRect = (
   point: Position,
   rectPosition: Position,
-  rectSize: Size
+  rectSize: Size,
 ): boolean => {
   return (
     point.x >= rectPosition.x &&
@@ -73,7 +73,7 @@ export const doRectsOverlap = (
   pos1: Position,
   size1: Size,
   pos2: Position,
-  size2: Size
+  size2: Size,
 ): boolean => {
   return (
     pos1.x < pos2.x + size2.width &&
@@ -102,7 +102,7 @@ export const snapToGrid = (value: number, gridSize: number): number => {
  */
 export const snapPositionToGrid = (
   position: Position,
-  gridSize: number
+  gridSize: number,
 ): Position => {
   return {
     x: snapToGrid(position.x, gridSize),
@@ -114,7 +114,7 @@ export const snapPositionToGrid = (
  * Calculate bounding box of multiple elements
  */
 export const getBoundingBox = (
-  elements: Array<{ position: Position; size: Size }>
+  elements: Array<{ position: Position; size: Size }>,
 ): { position: Position; size: Size } | null => {
   if (elements.length === 0) return null;
 

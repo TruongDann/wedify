@@ -13,8 +13,8 @@ export interface HistorySlice {
   clearHistory: () => void;
 }
 
-type HistoryStore = HistorySlice & { 
-  elements: EditorElement[]; 
+type HistoryStore = HistorySlice & {
+  elements: EditorElement[];
   canvasSettings: CanvasSettings;
   selectedElementId: string | null;
 };

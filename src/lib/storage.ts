@@ -38,7 +38,9 @@ const DEFAULT_PREFERENCES: UserPreferences = {
 /**
  * Save editor state to localStorage
  */
-export const saveEditorState = (data: Omit<EditorSaveData, "savedAt" | "version">): void => {
+export const saveEditorState = (
+  data: Omit<EditorSaveData, "savedAt" | "version">,
+): void => {
   try {
     const saveData: EditorSaveData = {
       ...data,
@@ -76,7 +78,10 @@ export const clearEditorState = (): void => {
  */
 export const saveRecentColors = (colors: string[]): void => {
   try {
-    localStorage.setItem(STORAGE_KEYS.RECENT_COLORS, JSON.stringify(colors.slice(0, 20)));
+    localStorage.setItem(
+      STORAGE_KEYS.RECENT_COLORS,
+      JSON.stringify(colors.slice(0, 20)),
+    );
   } catch (error) {
     console.error("Error saving recent colors:", error);
   }
@@ -108,11 +113,16 @@ export const addRecentColor = (color: string): void => {
 /**
  * Save user preferences
  */
-export const saveUserPreferences = (preferences: Partial<UserPreferences>): void => {
+export const saveUserPreferences = (
+  preferences: Partial<UserPreferences>,
+): void => {
   try {
     const current = loadUserPreferences();
     const updated = { ...current, ...preferences };
-    localStorage.setItem(STORAGE_KEYS.USER_PREFERENCES, JSON.stringify(updated));
+    localStorage.setItem(
+      STORAGE_KEYS.USER_PREFERENCES,
+      JSON.stringify(updated),
+    );
   } catch (error) {
     console.error("Error saving user preferences:", error);
   }
@@ -124,7 +134,9 @@ export const saveUserPreferences = (preferences: Partial<UserPreferences>): void
 export const loadUserPreferences = (): UserPreferences => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.USER_PREFERENCES);
-    return data ? { ...DEFAULT_PREFERENCES, ...JSON.parse(data) } : DEFAULT_PREFERENCES;
+    return data
+      ? { ...DEFAULT_PREFERENCES, ...JSON.parse(data) }
+      : DEFAULT_PREFERENCES;
   } catch (error) {
     console.error("Error loading user preferences:", error);
     return DEFAULT_PREFERENCES;

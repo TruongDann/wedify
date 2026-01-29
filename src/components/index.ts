@@ -5,6 +5,6 @@
 // UI Components
 export * from "./ui";
 
-// Editor Components  
+// Editor Components
 export * from "./editor/shared";
 export * from "./editor/hooks";

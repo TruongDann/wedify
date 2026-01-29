@@ -51,7 +51,7 @@ interface EditorStore {
   clearCanvas: () => void;
   loadTemplate: (
     elements: EditorElement[],
-    canvasSettings: CanvasSettings
+    canvasSettings: CanvasSettings,
   ) => void;
 }
 
@@ -112,7 +112,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   updateElement: (id, updates) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? ({ ...el, ...updates } as EditorElement) : el
+        el.id === id ? ({ ...el, ...updates } as EditorElement) : el,
       ),
     }));
     get().saveHistory();
@@ -182,7 +182,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   moveElement: (id, position) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, position } : el
+        el.id === id ? { ...el, position } : el,
       ),
     }));
   },
@@ -190,7 +190,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   resizeElement: (id, size) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, size } : el
+        el.id === id ? { ...el, size } : el,
       ),
     }));
   },
@@ -198,7 +198,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   rotateElement: (id, rotation) => {
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, rotation } : el
+        el.id === id ? { ...el, rotation } : el,
       ),
     }));
   },
@@ -210,7 +210,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const maxZIndex = Math.max(...get().elements.map((e) => e.zIndex));
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, zIndex: maxZIndex + 1 } : el
+        el.id === id ? { ...el, zIndex: maxZIndex + 1 } : el,
       ),
     }));
     get().saveHistory();
@@ -220,7 +220,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const minZIndex = Math.min(...get().elements.map((e) => e.zIndex));
     set((state) => ({
       elements: state.elements.map((el) =>
-        el.id === id ? { ...el, zIndex: minZIndex - 1 } : el
+        el.id === id ? { ...el, zIndex: minZIndex - 1 } : el,
       ),
     }));
     get().saveHistory();
@@ -231,11 +231,11 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const element = elements.find((el) => el.id === id);
     if (element) {
       const higherElements = elements.filter(
-        (el) => el.zIndex > element.zIndex
+        (el) => el.zIndex > element.zIndex,
       );
       if (higherElements.length > 0) {
         const nextElement = higherElements.reduce((prev, curr) =>
-          curr.zIndex < prev.zIndex ? curr : prev
+          curr.zIndex < prev.zIndex ? curr : prev,
         );
         set((state) => ({
           elements: state.elements.map((el) => {
@@ -254,12 +254,10 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const elements = get().elements;
     const element = elements.find((el) => el.id === id);
     if (element) {
-      const lowerElements = elements.filter(
-        (el) => el.zIndex < element.zIndex
-      );
+      const lowerElements = elements.filter((el) => el.zIndex < element.zIndex);
       if (lowerElements.length > 0) {
         const prevElement = lowerElements.reduce((prev, curr) =>
-          curr.zIndex > prev.zIndex ? curr : prev
+          curr.zIndex > prev.zIndex ? curr : prev,
         );
         set((state) => ({
           elements: state.elements.map((el) => {

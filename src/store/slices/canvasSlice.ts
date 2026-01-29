@@ -16,6 +16,7 @@ export const defaultCanvasSettings: CanvasSettings = {
   backgroundColor: "#ffffff",
   backgroundImage: null,
   backgroundSize: "cover",
+  backgroundMusic: null,
 };
 
 export const createCanvasSlice: StateCreator<

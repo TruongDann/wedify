@@ -22,7 +22,7 @@ interface RequestOptions {
  */
 export const apiRequest = async <T>(
   endpoint: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<ApiResponse<T>> => {
   const { method = "GET", body, headers = {} } = options;
 
@@ -70,21 +70,33 @@ export const get = <T>(endpoint: string, headers?: Record<string, string>) => {
 /**
  * POST request helper
  */
-export const post = <T>(endpoint: string, body: unknown, headers?: Record<string, string>) => {
+export const post = <T>(
+  endpoint: string,
+  body: unknown,
+  headers?: Record<string, string>,
+) => {
   return apiRequest<T>(endpoint, { method: "POST", body, headers });
 };
 
 /**
  * PUT request helper
  */
-export const put = <T>(endpoint: string, body: unknown, headers?: Record<string, string>) => {
+export const put = <T>(
+  endpoint: string,
+  body: unknown,
+  headers?: Record<string, string>,
+) => {
   return apiRequest<T>(endpoint, { method: "PUT", body, headers });
 };
 
 /**
  * PATCH request helper
  */
-export const patch = <T>(endpoint: string, body: unknown, headers?: Record<string, string>) => {
+export const patch = <T>(
+  endpoint: string,
+  body: unknown,
+  headers?: Record<string, string>,
+) => {
   return apiRequest<T>(endpoint, { method: "PATCH", body, headers });
 };
 
