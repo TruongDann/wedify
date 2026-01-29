@@ -7,3 +7,4 @@ export * from "./TextPropertySections";
 export * from "./ImagePropertySections";
 export * from "./ShapePropertySections";
 export * from "./PageSettingsSection";
+export * from "./MusicPropertySection";

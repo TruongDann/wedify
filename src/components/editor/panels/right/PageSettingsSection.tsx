@@ -1,13 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Input,
-  Select,
-  ColorPicker,
-  Slider,
-  message,
-} from "antd";
+import { Input, Select, ColorPicker, message } from "antd";
 import {
   FileImageOutlined,
   BgColorsOutlined,
@@ -16,6 +10,7 @@ import {
   UploadOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+
 import { useEditorStore } from "@/store/editorStore";
 import { COLOR_PALETTE } from "@/constants/colors";
 
@@ -215,12 +210,11 @@ export const CanvasSizeSection: React.FC<CanvasSizeSectionProps> = ({
   const handleSizeChange = (dimension: "width" | "height", value: number) => {
     if (sizeLinked) {
       const ratio =
-        dimension === "width"
-          ? value / canvasWidth
-          : value / canvasHeight;
+        dimension === "width" ? value / canvasWidth : value / canvasHeight;
       setCanvasSettings({
         width: dimension === "width" ? value : Math.round(canvasWidth * ratio),
-        height: dimension === "height" ? value : Math.round(canvasHeight * ratio),
+        height:
+          dimension === "height" ? value : Math.round(canvasHeight * ratio),
       });
     } else {
       setCanvasSettings({ [dimension]: value });
@@ -339,7 +333,7 @@ export const BackgroundSection: React.FC<BackgroundSectionProps> = ({
   const backgroundSize = canvasSettings.backgroundSize;
 
   const handleBackgroundImageUpload = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -499,6 +493,9 @@ export const PageSettings: React.FC<PageSettingsProps> = ({
       onToggleSizeLinked={onToggleSizeLinked}
     />
 
-    <BackgroundSection expandedSections={expandedSections} onToggle={onToggle} />
+    <BackgroundSection
+      expandedSections={expandedSections}
+      onToggle={onToggle}
+    />
   </div>
 );
