@@ -1,7 +1,17 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { Stage, Layer, Rect, Transformer, Line, Text } from "react-konva";
+import {
+  Stage,
+  Layer,
+  Rect,
+  Transformer,
+  Line,
+  Text,
+  Group,
+} from "react-konva";
+import { Html } from "react-konva-utils";
+import { Music, Disc3, Music2, Music3, Music4, Headphones } from "lucide-react";
 import Konva from "konva";
 import { useEditorStore } from "@/store/editorStore";
 import TextElementComponent from "./elements/TextElement";
@@ -14,6 +24,59 @@ import {
   useBackgroundImage,
   GuideLine,
 } from "./hooks";
+
+// Music icons mapping
+const MUSIC_ICONS: Record<
+  string,
+  React.ComponentType<{ size?: number; color?: string; className?: string }>
+> = {
+  music: Music,
+  disc: Disc3,
+  music2: Music2,
+  music3: Music3,
+  music4: Music4,
+  headphones: Headphones,
+};
+
+// Music icon component for canvas using Html from react-konva-utils
+interface MusicIconOnCanvasProps {
+  x: number;
+  y: number;
+  iconType: string;
+  iconColor: string;
+}
+
+const MusicIconOnCanvas: React.FC<MusicIconOnCanvasProps> = ({
+  x,
+  y,
+  iconType,
+  iconColor,
+}) => {
+  const IconComponent = MUSIC_ICONS[iconType] || MUSIC_ICONS.music;
+
+  return (
+    <Group x={x} y={y}>
+      <Html>
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            border: `1.5px solid ${iconColor}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            transform: "translate(-50%, -50%)",
+            cursor: "pointer",
+          }}
+        >
+          <IconComponent size={14} color={iconColor} />
+        </div>
+      </Html>
+    </Group>
+  );
+};
 
 interface EditorCanvasProps {
   canvasHeight?: number;
@@ -46,16 +109,12 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     canvasHeight: effectiveHeight,
   });
 
-  const {
-    selectionBox,
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-  } = useMarqueeSelection({
-    elements,
-    onSelectElement: selectElement,
-    onSelectElements: selectElements,
-  });
+  const { selectionBox, handleMouseDown, handleMouseMove, handleMouseUp } =
+    useMarqueeSelection({
+      elements,
+      onSelectElement: selectElement,
+      onSelectElements: selectElements,
+    });
 
   // Update transformer when selection changes
   useEffect(() => {
@@ -86,7 +145,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
   }, [selectedElementId, selectedElementIds, elements]);
 
   const handleStageClick = (
-    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>
+    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
     if (selectionBox.width > 5 || selectionBox.height > 5) return;
     if (e.target === e.target.getStage() || e.target.name() === "background") {
@@ -101,7 +160,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       const newGuides = getSnapLines(id, node);
       setGuides(newGuides);
     },
-    [getSnapLines]
+    [getSnapLines],
   );
 
   const handleElementDragEnd = useCallback(
@@ -113,7 +172,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         y: e.target.y(),
       });
     },
-    [moveElement]
+    [moveElement],
   );
 
   const handleTransformEnd = (id: string, e: Konva.KonvaEventObject<Event>) => {
@@ -138,7 +197,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         left: 0,
       };
 
-      const contentWidth = Math.max(20, newWidth - padding.left - padding.right);
+      const contentWidth = Math.max(
+        20,
+        newWidth - padding.left - padding.right,
+      );
 
       const tempText = new Konva.Text({
         text: textEl.content,
@@ -160,7 +222,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       newWidth = contentWidth;
       newHeight = Math.max(
         newHeight - padding.top - padding.bottom,
-        minContentHeight
+        minContentHeight,
       );
     }
 
@@ -315,6 +377,18 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
 
             {/* Elements */}
             {sortedElements.map(renderElement)}
+
+            {/* Music Icon - Show when music is selected */}
+            {canvasSettings.backgroundMusic && (
+              <MusicIconOnCanvas
+                x={canvasSettings.width - 30}
+                y={30}
+                iconType={canvasSettings.backgroundMusic.icon || "music"}
+                iconColor={
+                  canvasSettings.backgroundMusic.iconColor || "#000000"
+                }
+              />
+            )}
 
             {/* Selection Box (Marquee) */}
             {selectionBox.visible && (
