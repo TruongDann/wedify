@@ -28,6 +28,7 @@ const EditorCanvas = dynamic(() => import("@/components/editor/EditorCanvas"), {
 const EditorPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>("text");
   const [canvasHeight, setCanvasHeight] = useState(800);
+  const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true);
 
   // Card settings state
   const [cardTitle, setCardTitle] = useState("Thiệp cưới của tôi");
@@ -120,7 +121,11 @@ const EditorPage: React.FC = () => {
           <EditorSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
           {/* Left Panel - Content */}
-          <Left activeTab={activeTab} />
+          <Left
+            activeTab={activeTab}
+            isOpen={isLeftPanelOpen}
+            onToggle={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+          />
 
           {/* Canvas Area */}
           <div className="flex-1 flex flex-col bg-gray-200 overflow-hidden">
