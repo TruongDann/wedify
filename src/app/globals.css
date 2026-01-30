@@ -7,6 +7,7 @@
   --color-primary: #FFA5B4;
   --color-primary-dark: #ff8599;
   --color-renderer-gray: #e8e8e8;
+  --width-sidebar: 72px;
 }
 
 * {

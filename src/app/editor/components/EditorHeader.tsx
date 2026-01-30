@@ -50,11 +50,14 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({ onPreview }) => {
   ];
 
   return (
-    <header className="h-14 bg-white border-b border-gray-200 flex items-center px-3 gap-2 z-50 fixed top-0 left-0 right-0">
-      {/* Left: Menu + Logo */}
-      <Button type="text" icon={<MenuOutlined />} className="px-3 py-2" />
+    <header className="h-14 bg-white border-b border-gray-200 flex items-center gap-2 z-50 fixed top-0 left-0 right-0">
+      {/* Left: Menu - centered in sidebar width */}
+      <div className="w-sidebar flex items-center justify-center shrink-0 border-r border-gray-200 h-full">
+        <Button type="text" icon={<MenuOutlined />} className="px-3 py-2" />
+      </div>
 
-      <Link href="/" className="flex items-center gap-2 ml-2">
+      {/* Logo */}
+      <Link href="/" className="flex items-center gap-2 px-3">
         <Image
           src="/logo-web.png"
           alt="Logo"
@@ -66,7 +69,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({ onPreview }) => {
       </Link>
 
       {/* Divider */}
-      <div className="h-6 w-px bg-gray-200 mx-2" />
+      <div className="h-6 w-px bg-gray-200" />
 
       {/* Actions: Undo, Redo, Security */}
       <div className="flex items-center gap-1 flex-1">

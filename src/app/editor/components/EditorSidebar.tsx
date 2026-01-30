@@ -50,7 +50,7 @@ export const EditorSidebar: React.FC<EditorSidebarProps> = ({
   onTabChange,
 }) => {
   return (
-    <div className="w-18 bg-white border-r border-gray-200 flex flex-col shrink-0">
+    <div className="w-sidebar bg-white border-r border-gray-200 flex flex-col shrink-0">
       <div className="flex-1 flex flex-col py-2 overflow-y-auto min-h-0 scrollbar-hide">
         {tabs.map((tab) => (
           <button
