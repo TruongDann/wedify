@@ -62,16 +62,19 @@ const MusicIconOnCanvas: React.FC<MusicIconOnCanvasProps> = ({
             width: 28,
             height: 28,
             borderRadius: "50%",
-            border: `1.5px solid ${iconColor}`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            backgroundColor: iconColor,
             transform: "translate(-50%, -50%)",
             cursor: "pointer",
+            boxShadow: "inset 0 0 0 2px rgba(255, 255, 255, 0.5)",
           }}
         >
-          <IconComponent size={14} color={iconColor} />
+          <IconComponent
+            size={14}
+            color={iconColor === "#ffffff" ? "#000000" : "#ffffff"}
+          />
         </div>
       </Html>
     </Group>
