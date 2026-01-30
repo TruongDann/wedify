@@ -44,6 +44,7 @@ interface MusicIconOnCanvasProps {
   y: number;
   iconType: string;
   iconColor: string;
+  isPlaying: boolean;
 }
 
 const MusicIconOnCanvas: React.FC<MusicIconOnCanvasProps> = ({
@@ -51,12 +52,21 @@ const MusicIconOnCanvas: React.FC<MusicIconOnCanvasProps> = ({
   y,
   iconType,
   iconColor,
+  isPlaying,
 }) => {
   const IconComponent = MUSIC_ICONS[iconType] || MUSIC_ICONS.music;
 
   return (
     <Group x={x} y={y}>
       <Html>
+        <style>
+          {`
+            @keyframes spin {
+              from { transform: translate(-50%, -50%) rotate(0deg); }
+              to { transform: translate(-50%, -50%) rotate(360deg); }
+            }
+          `}
+        </style>
         <div
           style={{
             width: 28,
@@ -69,6 +79,7 @@ const MusicIconOnCanvas: React.FC<MusicIconOnCanvasProps> = ({
             transform: "translate(-50%, -50%)",
             cursor: "pointer",
             boxShadow: "inset 0 0 0 2px rgba(255, 255, 255, 0.5)",
+            animation: isPlaying ? "spin 2s linear infinite" : "none",
           }}
         >
           <IconComponent
@@ -390,6 +401,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
                 iconColor={
                   canvasSettings.backgroundMusic.iconColor || "#000000"
                 }
+                isPlaying={canvasSettings.isMusicPlaying}
               />
             )}
 

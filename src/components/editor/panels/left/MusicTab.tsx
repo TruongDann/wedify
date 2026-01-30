@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Search,
   Play,
@@ -34,9 +34,61 @@ export const MusicTab: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(80);
   const [uploadedMusic, setUploadedMusic] = useState<UploadedMusic[]>([]);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const currentMusic = canvasSettings.backgroundMusic;
+
+  // Initialize audio element
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.addEventListener("timeupdate", () => {
+        setCurrentTime(audioRef.current?.currentTime || 0);
+      });
+      audioRef.current.addEventListener("loadedmetadata", () => {
+        setDuration(audioRef.current?.duration || 0);
+      });
+      audioRef.current.addEventListener("ended", () => {
+        setIsPlaying(false);
+        setCanvasSettings({ isMusicPlaying: false });
+        setCurrentTime(0);
+      });
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update audio source when music changes
+  useEffect(() => {
+    if (audioRef.current && currentMusic?.src) {
+      audioRef.current.src = currentMusic.src;
+      audioRef.current.load();
+      setCurrentTime(0);
+      setIsPlaying(false);
+      setCanvasSettings({ isMusicPlaying: false });
+    }
+  }, [currentMusic?.src]);
+
+  // Update volume
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume / 100;
+    }
+  }, [volume]);
+
+  const formatTime = (time: number) => {
+    if (!time || isNaN(time)) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
 
   const FILTERS = [
     { key: "all" as MusicFilter, label: "Tất cả" },
@@ -54,13 +106,22 @@ export const MusicTab: React.FC = () => {
   });
 
   const handlePlayPause = () => {
-    if (audioRef.current) {
+    if (audioRef.current && currentMusic?.src) {
       if (isPlaying) {
         audioRef.current.pause();
+        setCanvasSettings({ isMusicPlaying: false });
       } else {
-        audioRef.current.play();
+        audioRef.current.play().catch(console.error);
+        setCanvasSettings({ isMusicPlaying: true });
       }
       setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleSeek = (value: number) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = value;
+      setCurrentTime(value);
     }
   };
 
@@ -76,12 +137,13 @@ export const MusicTab: React.FC = () => {
         icon: currentMusic?.icon || "music",
         iconColor: currentMusic?.iconColor || "#000000",
       },
+      isMusicPlaying: false,
     });
     setIsPlaying(false);
   };
 
   const handleRemoveMusic = () => {
-    setCanvasSettings({ backgroundMusic: null });
+    setCanvasSettings({ backgroundMusic: null, isMusicPlaying: false });
     setIsPlaying(false);
     if (audioRef.current) {
       audioRef.current.pause();
@@ -125,8 +187,20 @@ export const MusicTab: React.FC = () => {
           <>
             <div className="flex items-center gap-3 bg-primary/5 rounded-xl p-3 border border-primary/10">
               <button
-                className="w-11 h-11 rounded-full bg-primary flex items-center justify-center shadow-md hover:bg-primary/90 transition-colors"
+                className={`w-11 h-11 rounded-full flex items-center justify-center shadow-md transition-colors ${
+                  currentMusic.src
+                    ? "bg-primary hover:bg-primary/90"
+                    : "bg-gray-300 cursor-not-allowed"
+                }`}
                 onClick={handlePlayPause}
+                disabled={!currentMusic.src}
+                title={
+                  currentMusic.src
+                    ? isPlaying
+                      ? "Tạm dừng"
+                      : "Phát"
+                    : "Không có file nhạc"
+                }
               >
                 {isPlaying ? (
                   <Pause size={18} className="text-white" fill="white" />
@@ -139,7 +213,10 @@ export const MusicTab: React.FC = () => {
                   {currentMusic.name}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {currentMusic.artist} • {currentMusic.duration}
+                  {currentMusic.artist} •{" "}
+                  {currentMusic.src
+                    ? formatTime(currentTime) + " / " + formatTime(duration)
+                    : currentMusic.duration}
                 </p>
               </div>
               <button
@@ -150,6 +227,20 @@ export const MusicTab: React.FC = () => {
                 <X size={18} className="text-gray-400 hover:text-gray-600" />
               </button>
             </div>
+
+            {/* Progress Bar - Only show when playing uploaded music */}
+            {currentMusic.src && (
+              <div className="mt-3 px-1">
+                <Slider
+                  value={currentTime}
+                  min={0}
+                  max={duration || 100}
+                  onChange={handleSeek}
+                  tooltip={{ formatter: (val) => formatTime(val || 0) }}
+                  className="!m-0"
+                />
+              </div>
+            )}
 
             {/* Volume Control */}
             <div className="flex items-center gap-2 mt-3 px-1">
@@ -272,18 +363,46 @@ export const MusicTab: React.FC = () => {
               accept="audio/*"
               showUploadList={false}
               beforeUpload={(file) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                  const src = e.target?.result as string;
+                // Validate file type
+                const isAudio = file.type.startsWith("audio/");
+                if (!isAudio) {
+                  console.error("File không phải là audio");
+                  return false;
+                }
+
+                // Use URL.createObjectURL instead of DataURL for better compatibility
+                const src = URL.createObjectURL(file);
+
+                // Create temporary audio to get duration
+                const tempAudio = new Audio();
+
+                const addMusic = (durationStr: string) => {
                   const newMusic: UploadedMusic = {
                     id: Date.now().toString(),
                     name: file.name.replace(/\.[^/.]+$/, ""),
                     src,
-                    duration: "--:--",
+                    duration: durationStr,
                   };
                   setUploadedMusic((prev) => [newMusic, ...prev]);
                 };
-                reader.readAsDataURL(file);
+
+                tempAudio.addEventListener("loadedmetadata", () => {
+                  const minutes = Math.floor(tempAudio.duration / 60);
+                  const seconds = Math.floor(tempAudio.duration % 60);
+                  const durationStr = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+                  addMusic(durationStr);
+                });
+
+                tempAudio.addEventListener("error", () => {
+                  // Still add the music even if we can't get duration
+                  console.error("Không thể đọc file audio:", tempAudio.error);
+                  addMusic("--:--");
+                });
+
+                // Set source after adding listeners
+                tempAudio.src = src;
+                tempAudio.load();
+
                 return false;
               }}
               className="block w-full [&_.ant-upload]:w-full"
