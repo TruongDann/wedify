@@ -14,6 +14,7 @@ export const weddingTemplates: Template[] = [
       backgroundImage: null,
       backgroundSize: "cover",
       backgroundMusic: null,
+      isMusicPlaying: false,
     },
     elements: [
       {
@@ -152,6 +153,7 @@ export const weddingTemplates: Template[] = [
       backgroundImage: null,
       backgroundSize: "cover",
       backgroundMusic: null,
+      isMusicPlaying: false,
     },
     elements: [
       {

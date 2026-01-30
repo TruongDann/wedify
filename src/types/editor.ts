@@ -205,6 +205,7 @@ export interface CanvasSettings {
   backgroundImage: string | null;
   backgroundSize: "cover" | "contain" | "fill";
   backgroundMusic: BackgroundMusic | null;
+  isMusicPlaying: boolean;
 }
 
 export interface Template {
