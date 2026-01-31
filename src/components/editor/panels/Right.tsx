@@ -421,23 +421,20 @@ const Right: React.FC<RightProps> = ({
   };
 
   const renderPageSettings = () => (
-    <>
-      <PageSettings
-        cardTitle={cardTitle}
-        cardCategory={cardCategory}
-        cardStatus={cardStatus}
-        previewImage={previewImage}
-        onTitleChange={onTitleChange}
-        onCategoryChange={onCategoryChange}
-        onStatusChange={onStatusChange}
-        onPreviewImageChange={onPreviewImageChange}
-        expandedSections={expandedSections}
-        onToggle={toggleSection}
-        sizeLinked={sizeLinked}
-        onToggleSizeLinked={() => setSizeLinked(!sizeLinked)}
-      />
-      <MusicPropertySection />
-    </>
+    <PageSettings
+      cardTitle={cardTitle}
+      cardCategory={cardCategory}
+      cardStatus={cardStatus}
+      previewImage={previewImage}
+      onTitleChange={onTitleChange}
+      onCategoryChange={onCategoryChange}
+      onStatusChange={onStatusChange}
+      onPreviewImageChange={onPreviewImageChange}
+      expandedSections={expandedSections}
+      onToggle={toggleSection}
+      sizeLinked={sizeLinked}
+      onToggleSizeLinked={() => setSizeLinked(!sizeLinked)}
+    />
   );
 
   const renderMusicSettings = () => <MusicPropertySection />;
