@@ -362,7 +362,9 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
                     ? "border-primary bg-primary/5"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
-                onClick={() => handleEffectUpdate({ type: "none" })}
+                onClick={() =>
+                  handleEffectUpdate({ type: "none", curveAmount: 0 })
+                }
               >
                 <span className="text-lg font-bold tracking-wide">ABCD</span>
                 <span className="text-xs text-gray-500">Thẳng</span>
@@ -373,19 +375,100 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
                     ? "border-primary bg-primary/5"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
-                onClick={() => handleEffectUpdate({ type: "curve" })}
+                onClick={() =>
+                  handleEffectUpdate({
+                    type: "curve",
+                    curveAmount: textEffect.curveAmount || 50,
+                  })
+                }
               >
-                <span
-                  className="text-lg font-bold tracking-wide"
-                  style={{
-                    transform: "perspective(100px) rotateX(-10deg)",
-                  }}
+                <svg
+                  width="50"
+                  height="24"
+                  viewBox="0 0 50 24"
+                  className="text-gray-700"
                 >
-                  ABCD
-                </span>
+                  <path
+                    d="M 2,18 Q 25,2 48,18"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <text
+                    x="8"
+                    y="16"
+                    fontSize="8"
+                    fontWeight="bold"
+                    fill="currentColor"
+                  >
+                    A
+                  </text>
+                  <text
+                    x="17"
+                    y="10"
+                    fontSize="8"
+                    fontWeight="bold"
+                    fill="currentColor"
+                  >
+                    B
+                  </text>
+                  <text
+                    x="27"
+                    y="10"
+                    fontSize="8"
+                    fontWeight="bold"
+                    fill="currentColor"
+                  >
+                    C
+                  </text>
+                  <text
+                    x="37"
+                    y="16"
+                    fontSize="8"
+                    fontWeight="bold"
+                    fill="currentColor"
+                  >
+                    D
+                  </text>
+                </svg>
                 <span className="text-xs text-gray-500">Cong</span>
               </button>
             </div>
+
+            {/* Curve Amount Slider - only show when curve is selected */}
+            {textEffect.type === "curve" && (
+              <div className="mt-4 space-y-3 pt-3 border-t border-gray-100">
+                <PropertyRow label="Độ cong">
+                  <Slider
+                    value={textEffect.curveAmount || 0}
+                    onChange={(value) =>
+                      handleEffectUpdate({ curveAmount: value })
+                    }
+                    min={-100}
+                    max={100}
+                    className="flex-1"
+                    tooltip={{ formatter: (value) => `${value}%` }}
+                  />
+                  <input
+                    type="number"
+                    className="w-14 h-8 text-center bg-gray-100 rounded text-sm"
+                    value={textEffect.curveAmount || 0}
+                    onChange={(e) =>
+                      handleEffectUpdate({
+                        curveAmount: Math.max(
+                          -100,
+                          Math.min(100, Number(e.target.value) || 0),
+                        ),
+                      })
+                    }
+                  />
+                </PropertyRow>
+                <div className="text-xs text-gray-400 text-center">
+                  Âm (-): Cong xuống • Dương (+): Cong lên
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

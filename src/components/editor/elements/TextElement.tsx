@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useMemo } from "react";
-import { Text, Group, Rect, Line } from "react-konva";
+import { Text, Group, Rect, Line, Path, TextPath } from "react-konva";
 import Konva from "konva";
 import { TextElement } from "@/types/editor";
 import { useEditorStore } from "@/store/editorStore";
@@ -46,6 +46,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
 }) => {
   const groupRef = useRef<Konva.Group>(null);
   const textRef = useRef<Konva.Text>(null);
+  const textPathRef = useRef<Konva.TextPath>(null);
   const { updateElement } = useEditorStore();
 
   // Lấy giá trị mặc định nếu chưa có
@@ -470,19 +471,60 @@ const TextElementComponent: React.FC<TextElementProps> = ({
         );
 
       case "curve":
+        // Calculate curve path based on curveAmount (-100 to 100)
+        // Positive = curve up (smile), Negative = curve down (frown)
+        const curveAmount = textEffect.curveAmount || 0;
+        const curveHeight = (curveAmount / 100) * (contentHeight * 0.8);
+
+        // Generate SVG path for curved text
+        // For positive curve (smile): M 0,height Q width/2,height-curveHeight width,height
+        // For negative curve (frown): M 0,0 Q width/2,curveHeight width,0
+        const generateCurvePath = () => {
+          if (curveAmount === 0) {
+            // Straight line
+            return `M 0,${contentHeight / 2} L ${contentWidth},${contentHeight / 2}`;
+          } else if (curveAmount > 0) {
+            // Curve up (smile) - text goes along the curve
+            const startY = contentHeight * 0.7;
+            const controlY = startY - Math.abs(curveHeight);
+            return `M 0,${startY} Q ${contentWidth / 2},${controlY} ${contentWidth},${startY}`;
+          } else {
+            // Curve down (frown)
+            const startY = contentHeight * 0.3;
+            const controlY = startY + Math.abs(curveHeight);
+            return `M 0,${startY} Q ${contentWidth / 2},${controlY} ${contentWidth},${startY}`;
+          }
+        };
+
+        const curvePath = generateCurvePath();
+
         return (
-          <Text
-            ref={textRef}
-            {...baseTextProps}
-            x={textX}
-            y={textY}
-            fill={element.color}
-            shadowEnabled={applyShadowToText}
-            shadowColor={applyShadowToText ? shadow.color : undefined}
-            shadowBlur={applyShadowToText ? shadow.blur : 0}
-            shadowOffsetX={applyShadowToText ? shadow.x : 0}
-            shadowOffsetY={applyShadowToText ? shadow.y : 0}
-          />
+          <Group x={textX} y={textY}>
+            {/* Hidden path for text to follow */}
+            <Path data={curvePath} stroke="transparent" strokeWidth={0} />
+            <TextPath
+              ref={textPathRef}
+              data={curvePath}
+              text={element.content}
+              fontFamily={element.fontFamily}
+              fontSize={element.fontSize}
+              fontStyle={baseTextStyle}
+              fill={element.color}
+              letterSpacing={element.letterSpacing}
+              align={
+                element.textAlign === "center"
+                  ? "center"
+                  : element.textAlign === "right"
+                    ? "right"
+                    : "left"
+              }
+              shadowEnabled={applyShadowToText}
+              shadowColor={applyShadowToText ? shadow.color : undefined}
+              shadowBlur={applyShadowToText ? shadow.blur : 0}
+              shadowOffsetX={applyShadowToText ? shadow.x : 0}
+              shadowOffsetY={applyShadowToText ? shadow.y : 0}
+            />
+          </Group>
         );
 
       case "none":
