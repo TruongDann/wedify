@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { ConfigProvider, Spin } from "antd";
+import { ConfigProvider, Spin, App } from "antd";
 import viVN from "antd/locale/vi_VN";
 import Left from "@/components/editor/panels/Left";
 import Right from "@/components/editor/panels/Right";
@@ -111,51 +111,53 @@ const EditorPage: React.FC = () => {
         },
       }}
     >
-      <div className="flex flex-col h-screen overflow-hidden bg-gray-100">
-        {/* Header */}
-        <EditorHeader />
+      <App>
+        <div className="flex flex-col h-screen overflow-hidden bg-gray-100">
+          {/* Header */}
+          <EditorHeader />
 
-        {/* Body */}
-        <div className="flex flex-1 mt-14 overflow-hidden">
-          {/* Left Sidebar - Toolbox with vertical tabs */}
-          <EditorSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+          {/* Body */}
+          <div className="flex flex-1 mt-14 overflow-hidden">
+            {/* Left Sidebar - Toolbox with vertical tabs */}
+            <EditorSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-          {/* Left Panel - Content */}
-          <Left
-            activeTab={activeTab}
-            isOpen={isLeftPanelOpen}
-            onToggle={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
-          />
+            {/* Left Panel - Content */}
+            <Left
+              activeTab={activeTab}
+              isOpen={isLeftPanelOpen}
+              onToggle={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+            />
 
-          {/* Canvas Area */}
-          <div className="flex-1 flex flex-col bg-gray-200 overflow-hidden">
-            <div className="flex-1 overflow-auto p-6 flex flex-col items-center">
-              <EditorCanvas canvasHeight={canvasHeight} />
+            {/* Canvas Area */}
+            <div className="flex-1 flex flex-col bg-gray-200 overflow-hidden">
+              <div className="flex-1 overflow-auto p-6 flex flex-col items-center">
+                <EditorCanvas canvasHeight={canvasHeight} />
 
-              {/* Page Height Resize Control */}
-              <CanvasHeightControl
-                height={canvasHeight}
-                onChange={setCanvasHeight}
-              />
+                {/* Page Height Resize Control */}
+                <CanvasHeightControl
+                  height={canvasHeight}
+                  onChange={setCanvasHeight}
+                />
+              </div>
+
+              {/* Quick Replace Bar */}
+              <QuickReplaceBar elements={elements} />
             </div>
 
-            {/* Quick Replace Bar */}
-            <QuickReplaceBar elements={elements} />
+            {/* Right Panel - Settings */}
+            <Right
+              activeTab={activeTab}
+              cardTitle={cardTitle}
+              cardCategory={cardCategory}
+              cardStatus={cardStatus}
+              onTitleChange={setCardTitle}
+              onCategoryChange={setCardCategory}
+              onStatusChange={setCardStatus}
+              onSwitchToImageTab={() => setActiveTab("image")}
+            />
           </div>
-
-          {/* Right Panel - Settings */}
-          <Right
-            activeTab={activeTab}
-            cardTitle={cardTitle}
-            cardCategory={cardCategory}
-            cardStatus={cardStatus}
-            onTitleChange={setCardTitle}
-            onCategoryChange={setCardCategory}
-            onStatusChange={setCardStatus}
-            onSwitchToImageTab={() => setActiveTab("image")}
-          />
         </div>
-      </div>
+      </App>
     </ConfigProvider>
   );
 };

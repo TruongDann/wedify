@@ -137,19 +137,43 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     const stage = stageRef.current;
     const transformer = transformerRef.current;
 
+    // Check if selected element still exists in elements array
+    const elementExists = (id: string) => elements.some((el) => el.id === id);
+
     if (selectedElementIds.length > 0) {
-      const selectedNodes = selectedElementIds
+      // Filter only existing elements
+      const validIds = selectedElementIds.filter(elementExists);
+      if (validIds.length === 0) {
+        transformer.nodes([]);
+        transformer.getLayer()?.batchDraw();
+        return;
+      }
+
+      const selectedNodes = validIds
         .map((id) => stage.findOne(`#${id}`))
         .filter((node): node is Konva.Node => node !== null);
 
       if (selectedNodes.length > 0) {
         transformer.nodes(selectedNodes);
         transformer.getLayer()?.batchDraw();
+      } else {
+        transformer.nodes([]);
+        transformer.getLayer()?.batchDraw();
       }
     } else if (selectedElementId) {
+      // Check if selected element still exists
+      if (!elementExists(selectedElementId)) {
+        transformer.nodes([]);
+        transformer.getLayer()?.batchDraw();
+        return;
+      }
+
       const selectedNode = stage.findOne(`#${selectedElementId}`);
       if (selectedNode) {
         transformer.nodes([selectedNode]);
+        transformer.getLayer()?.batchDraw();
+      } else {
+        transformer.nodes([]);
         transformer.getLayer()?.batchDraw();
       }
     } else {

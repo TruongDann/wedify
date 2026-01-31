@@ -1,10 +1,8 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
-import { Modal, Button, message } from "antd";
-import { EditOutlined, CloseOutlined, DeleteOutlined } from "@ant-design/icons";
-import Cropper, { ReactCropperElement } from "react-cropper";
-import "cropperjs/dist/cropper.css";
+import React, { useState, useCallback } from "react";
+import { Button } from "antd";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useEditorStore } from "@/store/editorStore";
 import {
   TextElement,
@@ -12,7 +10,6 @@ import {
   ShapeElement,
   EditorElement,
 } from "@/types/editor";
-import { CROP_SHAPES, ASPECT_RATIOS } from "@/constants/cropShapes";
 
 // Import extracted components
 import {
@@ -48,6 +45,7 @@ import {
 
 import { PageSettings } from "./right/PageSettingsSection";
 import { MusicPropertySection } from "./right/MusicPropertySection";
+import { CropModal } from "./right/CropModal";
 
 // ==================== Types ====================
 
@@ -115,11 +113,6 @@ const Right: React.FC<RightProps> = ({
   // Crop modal state
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string>("");
-  const [selectedShape, setSelectedShape] = useState<string>("001");
-  const [selectedAspectRatio, setSelectedAspectRatio] = useState<number | null>(
-    null,
-  );
-  const cropperRef = useRef<ReactCropperElement>(null);
 
   const selectedElement = elements.find((el) => el.id === selectedElementId);
 
@@ -156,82 +149,18 @@ const Right: React.FC<RightProps> = ({
   // Crop modal handlers
   const openCropModal = useCallback((imageSrc: string) => {
     setCropImageSrc(imageSrc);
-    setSelectedShape("001");
-    setSelectedAspectRatio(null);
     setIsCropModalOpen(true);
   }, []);
 
-  const applyShapeMask = useCallback(
-    (croppedCanvas: HTMLCanvasElement, shapeId: string): Promise<string> => {
-      return new Promise((resolve) => {
-        if (shapeId === "001") {
-          resolve(croppedCanvas.toDataURL("image/png"));
-          return;
-        }
-
-        const shapeData = CROP_SHAPES.find((s) => s.id === shapeId);
-        if (!shapeData) {
-          resolve(croppedCanvas.toDataURL("image/png"));
-          return;
-        }
-
-        const shapeImg = new Image();
-        shapeImg.crossOrigin = "anonymous";
-        shapeImg.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = croppedCanvas.width;
-          canvas.height = croppedCanvas.height;
-          const ctx = canvas.getContext("2d");
-
-          if (!ctx) {
-            resolve(croppedCanvas.toDataURL("image/png"));
-            return;
-          }
-
-          ctx.drawImage(shapeImg, 0, 0, canvas.width, canvas.height);
-          ctx.globalCompositeOperation = "source-in";
-          ctx.drawImage(croppedCanvas, 0, 0);
-
-          resolve(canvas.toDataURL("image/png"));
-        };
-        shapeImg.onerror = () => {
-          resolve(croppedCanvas.toDataURL("image/png"));
-        };
-        shapeImg.src = shapeData.image;
-      });
-    },
-    [],
-  );
-
-  const handleCropComplete = useCallback(async () => {
-    const cropper = cropperRef.current?.cropper;
-    if (cropper) {
-      const croppedCanvas = cropper.getCroppedCanvas();
-      if (croppedCanvas) {
-        try {
-          const croppedImageUrl = await applyShapeMask(
-            croppedCanvas,
-            selectedShape,
-          );
-          if (selectedElement) {
-            updateElement(selectedElement.id, { src: croppedImageUrl });
-          }
-          setIsCropModalOpen(false);
-          message.success("Đã cắt ảnh thành công!");
-        } catch {
-          message.error("Có lỗi khi cắt ảnh");
-        }
+  const handleCropComplete = useCallback(
+    (croppedImageUrl: string) => {
+      if (selectedElement) {
+        updateElement(selectedElement.id, { src: croppedImageUrl });
       }
-    }
-  }, [selectedElement, updateElement, selectedShape, applyShapeMask]);
-
-  const handleAspectRatioChange = (ratio: number | null) => {
-    setSelectedAspectRatio(ratio);
-    const cropper = cropperRef.current?.cropper;
-    if (cropper) {
-      cropper.setAspectRatio(ratio === null ? NaN : ratio);
-    }
-  };
+      setIsCropModalOpen(false);
+    },
+    [selectedElement, updateElement],
+  );
 
   // ==================== Render Functions ====================
 
@@ -554,139 +483,12 @@ const Right: React.FC<RightProps> = ({
       <div className="flex-1 overflow-y-auto min-h-0">{renderProperties()}</div>
 
       {/* Crop Modal */}
-      <Modal
-        title="Cắt ảnh"
-        open={isCropModalOpen}
-        onCancel={() => setIsCropModalOpen(false)}
-        footer={null}
-        width={900}
-        centered
-        styles={{ body: { padding: 0 } }}
-      >
-        <style>
-          {selectedShape !== "001"
-            ? `
-            .cropper-view-box,
-            .cropper-face {
-              -webkit-mask-image: url(${CROP_SHAPES.find((s) => s.id === selectedShape)?.image});
-              mask-image: url(${CROP_SHAPES.find((s) => s.id === selectedShape)?.image});
-              -webkit-mask-size: 100% 100%;
-              mask-size: 100% 100%;
-              -webkit-mask-repeat: no-repeat;
-              mask-repeat: no-repeat;
-            }
-          `
-            : ""}
-        </style>
-        <div className="flex flex-row gap-5" style={{ maxHeight: "600px" }}>
-          {/* Left side - Cropper */}
-          <div className="flex-1" style={{ minWidth: 0 }}>
-            <div style={{ width: "100%", height: "60vh", maxHeight: "500px" }}>
-              {cropImageSrc && (
-                <Cropper
-                  ref={cropperRef}
-                  src={cropImageSrc}
-                  style={{ height: "100%", width: "100%" }}
-                  initialAspectRatio={NaN}
-                  guides={true}
-                  viewMode={1}
-                  background={true}
-                  responsive={true}
-                  autoCropArea={0.8}
-                  checkOrientation={false}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Right side - Controls */}
-          <div className="w-64 flex flex-col gap-4 pr-4 py-2">
-            {/* Shape selection */}
-            <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <span>Hình dạng cắt:</span>
-                {selectedShape !== "001" && (
-                  <span
-                    className="relative inline-flex items-center justify-center w-6 h-6 bg-gray-100 rounded cursor-pointer hover:bg-gray-200"
-                    style={{
-                      backgroundImage: `url(${CROP_SHAPES.find((s) => s.id === selectedShape)?.image})`,
-                      backgroundSize: "contain",
-                      backgroundPosition: "center",
-                      backgroundRepeat: "no-repeat",
-                    }}
-                    onClick={() => setSelectedShape("001")}
-                  >
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-                      <CloseOutlined
-                        className="!text-white"
-                        style={{ fontSize: 8 }}
-                      />
-                    </span>
-                  </span>
-                )}
-              </h4>
-              <div
-                className="grid grid-cols-4 gap-1.5 max-h-52 overflow-y-auto pr-1"
-                style={{ scrollbarWidth: "thin" }}
-              >
-                {CROP_SHAPES.map((shape) => (
-                  <button
-                    key={shape.id}
-                    className={`w-10 h-10 border rounded transition-all bg-contain bg-center bg-no-repeat ${
-                      selectedShape === shape.id
-                        ? "border-blue-500 ring-1 ring-blue-500"
-                        : "border-gray-200 hover:border-gray-400"
-                    }`}
-                    style={{
-                      backgroundImage: `url(${shape.image})`,
-                    }}
-                    onClick={() => setSelectedShape(shape.id)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Aspect ratio selection */}
-            <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2">
-                Tỷ lệ khung hình
-              </h4>
-              <div className="grid grid-cols-2 gap-2">
-                {ASPECT_RATIOS.map((ratio) => (
-                  <button
-                    key={ratio.label}
-                    className={`px-3 py-2 text-sm rounded border transition-all ${
-                      selectedAspectRatio === ratio.value
-                        ? "bg-blue-500 text-white border-blue-500"
-                        : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
-                    }`}
-                    onClick={() => handleAspectRatioChange(ratio.value)}
-                  >
-                    {ratio.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex gap-2 mt-auto pt-4 border-t border-gray-200">
-              <Button
-                onClick={() => setIsCropModalOpen(false)}
-                className="flex-1"
-              >
-                Hủy
-              </Button>
-              <Button
-                type="primary"
-                onClick={handleCropComplete}
-                className="flex-1"
-              >
-                Xác nhận
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Modal>
+      <CropModal
+        isOpen={isCropModalOpen}
+        imageSrc={cropImageSrc}
+        onClose={() => setIsCropModalOpen(false)}
+        onCropComplete={handleCropComplete}
+      />
     </div>
   );
 };
