@@ -383,53 +383,30 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
                 }
               >
                 <svg
-                  width="50"
-                  height="24"
-                  viewBox="0 0 50 24"
-                  className="text-gray-700"
+                  width="56"
+                  height="28"
+                  viewBox="0 0 56 28"
+                  className="mb-1"
                 >
                   <path
-                    d="M 2,18 Q 25,2 48,18"
+                    id="curve-path"
+                    d="M 2,22 Q 28,6 54,22"
                     fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
+                    stroke="none"
                   />
                   <text
-                    x="8"
-                    y="16"
-                    fontSize="8"
+                    fontSize="14"
                     fontWeight="bold"
                     fill="currentColor"
+                    className="text-gray-700"
                   >
-                    A
-                  </text>
-                  <text
-                    x="17"
-                    y="10"
-                    fontSize="8"
-                    fontWeight="bold"
-                    fill="currentColor"
-                  >
-                    B
-                  </text>
-                  <text
-                    x="27"
-                    y="10"
-                    fontSize="8"
-                    fontWeight="bold"
-                    fill="currentColor"
-                  >
-                    C
-                  </text>
-                  <text
-                    x="37"
-                    y="16"
-                    fontSize="8"
-                    fontWeight="bold"
-                    fill="currentColor"
-                  >
-                    D
+                    <textPath
+                      href="#curve-path"
+                      startOffset="50%"
+                      textAnchor="middle"
+                    >
+                      ABCD
+                    </textPath>
                   </text>
                 </svg>
                 <span className="text-xs text-gray-500">Cong</span>
@@ -464,9 +441,6 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
                     }
                   />
                 </PropertyRow>
-                <div className="text-xs text-gray-400 text-center">
-                  Âm (-): Cong xuống • Dương (+): Cong lên
-                </div>
               </div>
             )}
           </div>
