@@ -4,6 +4,7 @@ import React from "react";
 import { Search, Type } from "lucide-react";
 import { Button, Input } from "antd";
 import { createTextElement, useEditorStore } from "@/store/editorStore";
+import { TEXT_TEMPLATES } from "@/data/textTemplates";
 
 export const TextTab: React.FC = () => {
   const { addElement } = useEditorStore();
@@ -12,8 +13,9 @@ export const TextTab: React.FC = () => {
     options: {
       fontSize?: number;
       fontWeight?: number;
+      fontFamily?: string;
       content?: string;
-    } = {}
+    } = {},
   ) => {
     addElement(createTextElement(options));
   };
@@ -98,13 +100,35 @@ export const TextTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Text Templates - placeholder for future expansion */}
+      {/* Text Templates */}
       <div>
         <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
           Mẫu văn bản
         </h3>
         <div className="grid grid-cols-2 gap-3">
-          {/* Templates will be rendered here */}
+          {TEXT_TEMPLATES.map((template) => (
+            <div
+              key={template.id}
+              className="bg-white border border-gray-200 hover:border-primary rounded-lg p-3 cursor-pointer transition-all hover:shadow-md aspect-square flex flex-col items-center justify-center overflow-hidden"
+              onClick={() =>
+                handleAddText({
+                  content: template.content,
+                  fontSize: template.fontSize,
+                  fontWeight: template.fontWeight,
+                  fontFamily: template.fontFamily,
+                })
+              }
+            >
+              <div className="text-center w-full px-1">
+                <div
+                  className="text-base font-bold break-words"
+                  style={template.previewStyle}
+                >
+                  {template.content}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
