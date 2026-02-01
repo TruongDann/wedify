@@ -12,6 +12,7 @@ import {
   BackgroundTab,
   MusicTab,
   TemplateTab,
+  EffectsTab,
 } from "./left/index";
 
 interface LeftProps {
@@ -45,12 +46,7 @@ const Left: React.FC<LeftProps> = ({ activeTab, isOpen, onToggle }) => {
           <EmptyState icon={<CalendarOutlined />} text="Tiện ích sắp ra mắt" />
         );
       case "effect":
-        return (
-          <EmptyState
-            icon={<ThunderboltOutlined />}
-            text="Hiệu ứng sắp ra mắt"
-          />
-        );
+        return <EffectsTab />;
       default:
         return null;
     }
