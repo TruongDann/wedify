@@ -9,7 +9,7 @@ export const createTextElement = (
   type: "text",
   content: "Nhập văn bản",
   position: { x: 100, y: 100 },
-  size: { width: 200, height: 50 },
+  size: { width: 200, height: 80 },
   rotation: 0,
   opacity: 1,
   locked: false,
@@ -24,7 +24,7 @@ export const createTextElement = (
   lineHeight: 1.5,
   letterSpacing: 0,
   // Padding
-  padding: { top: 0, right: 0, bottom: 0, left: 0 },
+  padding: { top: 5, right: 5, bottom: 5, left: 5 },
   // Border
   border: { width: 0, color: "#000000", style: "solid", position: "all" },
   // Border Radius
