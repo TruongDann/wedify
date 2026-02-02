@@ -140,7 +140,8 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     textarea.style.top = `${stageBox.top + absPos.y * scale}px`;
     textarea.style.left = `${stageBox.left + absPos.x * scale}px`;
     textarea.style.width = `${element.size.width * scale}px`;
-    textarea.style.height = `${element.size.height * scale}px`;
+    textarea.style.minHeight = `${element.size.height * scale}px`;
+    textarea.style.height = "auto";
     textarea.style.fontSize = `${element.fontSize * scale}px`;
     textarea.style.fontFamily = element.fontFamily;
     textarea.style.fontWeight = String(element.fontWeight);
@@ -164,14 +165,34 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     textarea.style.zIndex = "1000";
     textarea.style.boxSizing = "border-box";
 
+    // Auto resize textarea khi nhập
+    const autoResize = () => {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    };
+
+    textarea.addEventListener("input", autoResize);
+    autoResize(); // Gọi lần đầu
+
     // Focus và chọn toàn bộ text để sửa ngay
     textarea.focus();
     textarea.select();
 
     // Hàm dọn dẹp: Xóa textarea và hiện lại text gốc
     const removeTextarea = () => {
+      // Tính toán chiều cao mới dựa trên nội dung
+      const newHeight = Math.max(50, Math.ceil(textarea.scrollHeight / scale));
+
       textarea.remove();
       groupNode.show();
+
+      // Cập nhật chiều cao của element nếu cần
+      if (newHeight !== element.size.height) {
+        updateElement(element.id, {
+          size: { ...element.size, height: newHeight },
+        });
+      }
+
       stage.batchDraw();
     };
 
