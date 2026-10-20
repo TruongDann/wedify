@@ -14,6 +14,8 @@ import {
   CanvasHeightControl,
   type TabKey,
 } from "./components";
+import { useDraftAutosave } from "./useDraftAutosave";
+import { FallingEffectLayer } from "@/components/card/FallingEffectLayer";
 
 // Dynamic import EditorCanvas vì Konva cần window
 const EditorCanvas = dynamic(() => import("@/components/editor/EditorCanvas"), {
@@ -27,7 +29,6 @@ const EditorCanvas = dynamic(() => import("@/components/editor/EditorCanvas"), {
 
 const EditorPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>("text");
-  const [canvasHeight, setCanvasHeight] = useState(800);
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true);
 
   // Card settings state
@@ -44,7 +45,17 @@ const EditorPage: React.FC = () => {
     undo,
     redo,
     elements,
+    canvasSettings,
+    setCanvasSettings,
   } = useEditorStore();
+
+  const { status: saveStatus, flush } = useDraftAutosave();
+
+  // Lưu ngay rồi mở trang xem thiệp ở tab riêng (tab đó tự cập nhật khi thiệp thay đổi)
+  const handlePreview = () => {
+    const tab = window.open("/preview", "wedify-preview");
+    flush().finally(() => tab?.focus());
+  };
 
   // Initialize history
   useEffect(() => {
@@ -114,7 +125,7 @@ const EditorPage: React.FC = () => {
       <App>
         <div className="flex flex-col h-screen overflow-hidden bg-gray-100">
           {/* Header */}
-          <EditorHeader />
+          <EditorHeader onPreview={handlePreview} saveStatus={saveStatus} />
 
           {/* Body */}
           <div className="flex flex-1 mt-14 overflow-hidden">
@@ -131,12 +142,18 @@ const EditorPage: React.FC = () => {
             {/* Canvas Area */}
             <div className="flex-1 flex flex-col bg-gray-200 overflow-hidden">
               <div className="flex-1 overflow-auto p-6 flex flex-col items-center">
-                <EditorCanvas canvasHeight={canvasHeight} />
+                <div className="relative">
+                  <EditorCanvas canvasHeight={canvasSettings.height} />
+                  {/* Chạy thử hiệu ứng rơi khi đang ở tab Hiệu ứng */}
+                  {activeTab === "effect" && canvasSettings.fallingEffect && (
+                    <FallingEffectLayer effect={canvasSettings.fallingEffect} />
+                  )}
+                </div>
 
                 {/* Page Height Resize Control */}
                 <CanvasHeightControl
-                  height={canvasHeight}
-                  onChange={setCanvasHeight}
+                  height={canvasSettings.height}
+                  onChange={(height) => setCanvasSettings({ height })}
                 />
               </div>
 

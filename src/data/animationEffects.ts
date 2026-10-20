@@ -10,71 +10,63 @@ import {
   ExpandOutlined,
   SwapOutlined,
   RetweetOutlined,
-  ArrowRightOutlined,
 } from "@ant-design/icons";
 
 export interface AnimationEffect {
-  id: string;
+  id: "none" | "fadeInAll" | "slideUpAll" | "scaleInAll" | "slideSideMix" | "fadeInSequence";
   name: string;
   icon: React.ReactNode | string;
   description: string;
 }
 
 /**
- * Available animation effects for the editor
- * Add or modify effects here for easier maintenance
+ * Hiệu ứng áp cho cả thiệp — mỗi lựa chọn đặt lại hiệu ứng xuất hiện của mọi phần tử
+ * (xem applyAnimationPreset trong panels/left/EffectsTab.tsx).
  */
 export const ANIMATION_EFFECTS: AnimationEffect[] = [
   {
     id: "none",
-    name: "None",
+    name: "Không có",
     icon: React.createElement(BorderOutlined, { className: "text-2xl" }),
-    description: "Không có hiệu ứng",
+    description: "Tắt hiệu ứng của mọi phần tử",
   },
   {
     id: "fadeInAll",
-    name: "Fade In All",
+    name: "Hiện dần",
     icon: "⋮⋮⋮⋮",
-    description: "Hiển thị dần tất cả",
+    description: "Mọi phần tử hiện dần khi cuộn tới",
   },
   {
     id: "slideUpAll",
-    name: "Slide Up All",
+    name: "Trượt lên",
     icon: React.createElement(ArrowUpOutlined, {
       className: "text-2xl text-blue-500",
     }),
-    description: "Trượt lên tất cả",
+    description: "Mọi phần tử trượt lên khi cuộn tới",
   },
   {
     id: "scaleInAll",
-    name: "Scale In All",
+    name: "Phóng to",
     icon: React.createElement(ExpandOutlined, {
       className: "text-2xl text-pink-500",
     }),
-    description: "Phóng to tất cả",
+    description: "Mọi phần tử phóng to khi cuộn tới",
   },
   {
-    id: "flipInAll",
-    name: "Flip In All",
+    id: "slideSideMix",
+    name: "Trượt hai bên",
     icon: React.createElement(SwapOutlined, {
       className: "text-2xl text-pink-400",
     }),
-    description: "Lật vào tất cả",
+    description: "Bên trái trượt sang phải, bên phải trượt sang trái, ở giữa trượt lên",
   },
   {
-    id: "slideUpMix",
-    name: "Slide Up Mix",
+    id: "fadeInSequence",
+    name: "Lần lượt",
     icon: React.createElement(RetweetOutlined, {
       className: "text-2xl text-indigo-500",
     }),
-    description: "Trượt lên hỗn hợp",
-  },
-  {
-    id: "fadeInMix",
-    name: "Fade In Mix",
-    icon: React.createElement(ArrowRightOutlined, {
-      className: "text-2xl text-pink-400",
-    }),
-    description: "Hiển thị dần hỗn hợp",
+    description: "Các phần tử cùng hàng hiện lần lượt từ trái qua phải",
   },
 ];
+

@@ -13,6 +13,10 @@ import {
 
 import { useEditorStore } from "@/store/editorStore";
 import { COLOR_PALETTE } from "@/constants/colors";
+import {
+  ViewerDisplaySection,
+  ViewerInteractionSection,
+} from "./ViewerSettingsSections";
 
 const { Option } = Select;
 
@@ -497,5 +501,9 @@ export const PageSettings: React.FC<PageSettingsProps> = ({
       expandedSections={expandedSections}
       onToggle={onToggle}
     />
+
+    <ViewerDisplaySection expandedSections={expandedSections} onToggle={onToggle} />
+
+    <ViewerInteractionSection expandedSections={expandedSections} onToggle={onToggle} />
   </div>
 );

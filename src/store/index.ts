@@ -6,6 +6,7 @@ export {
   createTextElement,
   createImageElement,
   createShapeElement,
+  createWidgetElement,
 } from "./helpers";
 
 // Slices (for advanced usage)

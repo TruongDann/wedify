@@ -4,6 +4,10 @@
  */
 
 const loadedFonts = new Set<string>();
+
+// Đủ ký tự Latin + tiếng Việt để trình duyệt tải mọi phần (unicode-range) của font
+const FONT_SAMPLE_TEXT =
+  "AaBbZz09 ĂăÂâĐđÊêÔôƠơƯư ÁáÀàẢảÃãẠạẤấẦầẨẩẪẫẬậẮắẰằẲẳẴẵẶặ ÉéÈèẺẻẼẽẸẹẾếỀềỂểỄễỆệ ÍíÌìỈỉĨĩỊị ÓóÒòỎỏÕõỌọỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợ ÚúÙùỦủŨũỤụỨứỪừỬửỮữỰự ÝýỲỳỶỷỸỹỴỵ";
 const loadingFonts = new Map<string, Promise<void>>();
 
 /**
@@ -89,8 +93,16 @@ export const loadGoogleFont = async (fontFamily: string): Promise<void> => {
         // Use Font Loading API to wait for font
         (document as any).fonts.ready.then(() => {
           // Double check font is actually loaded
-          (document as any).fonts
-            .load(`16px "${fontFamily}"`)
+          // Tải cả phần chữ có dấu tiếng Việt (Google Fonts tách thành file riêng) và bản đậm/nghiêng:
+          // canvas không tự tải các phần này như HTML, nên Konva sẽ vẽ chữ có dấu bằng font dự phòng.
+          Promise.all(
+            ["", "bold ", "italic ", "italic bold "].map((style) =>
+              (document as any).fonts.load(
+                `${style}16px "${fontFamily}"`,
+                FONT_SAMPLE_TEXT,
+              ),
+            ),
+          )
             .then(() => {
               loadedFonts.add(fontFamily);
               loadingFonts.delete(fontFamily);

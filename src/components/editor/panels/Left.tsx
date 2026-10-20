@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { CalendarOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { preloadCommonFonts } from "@/utils/fontLoader";
-import { EmptyState } from "../shared";
 import {
   TextTab,
   ImageTab,
@@ -13,6 +11,8 @@ import {
   MusicTab,
   TemplateTab,
   EffectsTab,
+  WidgetTab,
+  BlocksTab,
 } from "./left/index";
 
 interface LeftProps {
@@ -37,14 +37,14 @@ const Left: React.FC<LeftProps> = ({ activeTab, isOpen, onToggle }) => {
         return <StockTab />;
       case "background":
         return <BackgroundTab />;
+      case "blocks":
+        return <BlocksTab />;
       case "template":
         return <TemplateTab />;
       case "music":
         return <MusicTab />;
       case "widget":
-        return (
-          <EmptyState icon={<CalendarOutlined />} text="Tiện ích sắp ra mắt" />
-        );
+        return <WidgetTab />;
       case "effect":
         return <EffectsTab />;
       default:

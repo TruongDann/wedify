@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, Slider, Select, Switch, Input, ColorPicker } from "antd";
+import { Button, Slider, Select, Switch, ColorPicker, Segmented } from "antd";
 import {
   EditOutlined,
   CameraOutlined,
@@ -11,8 +11,6 @@ import {
   BorderOuterOutlined,
   CopyOutlined,
   LinkOutlined,
-  ExportOutlined,
-  PlayCircleOutlined,
   DragOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
@@ -57,12 +55,6 @@ interface ShadowProps {
   y: number;
   blur: number;
   color: string;
-}
-
-interface AnimationProps {
-  enabled: boolean;
-  continuous: boolean;
-  type: "none" | "fadeIn" | "slideIn" | "bounce" | "pulse" | "shake" | "zoom";
 }
 
 interface SectionHeaderProps {
@@ -113,11 +105,15 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ label, children }) => (
 // ==================== Image Action Section ====================
 
 interface ImageActionSectionProps {
+  objectFit: ImageElement["objectFit"];
+  onObjectFitChange: (objectFit: ImageElement["objectFit"]) => void;
   onCropImage: () => void;
   onSwitchToImageTab: () => void;
 }
 
 export const ImageActionSection: React.FC<ImageActionSectionProps> = ({
+  objectFit,
+  onObjectFitChange,
   onCropImage,
   onSwitchToImageTab,
 }) => (
@@ -152,6 +148,21 @@ export const ImageActionSection: React.FC<ImageActionSectionProps> = ({
       >
         <ThunderboltOutlined /> Xóa nền (AI)
       </Button>
+      <div className="flex items-center gap-3 mt-3">
+        <span className="text-sm text-gray-600 shrink-0">Hiển thị</span>
+        <Segmented
+          size="small"
+          block
+          className="flex-1"
+          value={objectFit || "fill"}
+          onChange={(value) => onObjectFitChange(value as ImageElement["objectFit"])}
+          options={[
+            { value: "cover", label: "Lấp đầy" },
+            { value: "contain", label: "Vừa khung" },
+            { value: "fill", label: "Kéo giãn" },
+          ]}
+        />
+      </div>
     </div>
   </div>
 );
@@ -650,124 +661,6 @@ export const ImageShadowSection: React.FC<ImageShadowSectionProps> = ({
                   })
                 }
               />
-            </PropertyRow>
-          </>
-        )}
-      </div>
-    )}
-  </div>
-);
-
-// ==================== Image Link Section ====================
-
-interface ImageLinkSectionProps {
-  hyperlink: string;
-  expandedSections: string[];
-  onToggle: (key: string) => void;
-  onUpdate: (updates: Partial<EditorElement>) => void;
-}
-
-export const ImageLinkSection: React.FC<ImageLinkSectionProps> = ({
-  hyperlink,
-  expandedSections,
-  onToggle,
-  onUpdate,
-}) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
-    <SectionHeader
-      title="Liên kết"
-      sectionKey="imageLink"
-      icon={<LinkOutlined />}
-      expandedSections={expandedSections}
-      onToggle={onToggle}
-    />
-    {expandedSections.includes("imageLink") && (
-      <div className="px-4 pt-3 pb-4">
-        <div className="mb-2">
-          <span className="text-xs text-gray-500">Hyperlink (Tùy chọn)</span>
-        </div>
-        <div className="flex gap-2">
-          <Input
-            value={hyperlink}
-            onChange={(e) => onUpdate({ hyperlink: e.target.value })}
-            placeholder="https://example.com"
-            prefix={<LinkOutlined className="text-gray-400" />}
-          />
-          <Button
-            icon={<ExportOutlined />}
-            disabled={!hyperlink}
-            onClick={() => window.open(hyperlink, "_blank")}
-            title="Mở liên kết"
-          />
-        </div>
-      </div>
-    )}
-  </div>
-);
-
-// ==================== Image Animation Section ====================
-
-interface ImageAnimationSectionProps {
-  animation: AnimationProps;
-  expandedSections: string[];
-  onToggle: (key: string) => void;
-  onUpdate: (updates: Partial<EditorElement>) => void;
-}
-
-export const ImageAnimationSection: React.FC<ImageAnimationSectionProps> = ({
-  animation,
-  expandedSections,
-  onToggle,
-  onUpdate,
-}) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
-    <SectionHeader
-      title="Hiệu ứng chuyển động"
-      sectionKey="imageAnimation"
-      icon={<PlayCircleOutlined />}
-      expandedSections={expandedSections}
-      onToggle={onToggle}
-    />
-    {expandedSections.includes("imageAnimation") && (
-      <div className="px-4 pt-3 pb-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Bật hiệu ứng</span>
-          <Switch
-            checked={animation.enabled}
-            onChange={(checked) =>
-              onUpdate({ animation: { ...animation, enabled: checked } })
-            }
-          />
-        </div>
-
-        {animation.enabled && (
-          <>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Chuyển động liên tục</span>
-              <Switch
-                checked={animation.continuous}
-                onChange={(checked) =>
-                  onUpdate({ animation: { ...animation, continuous: checked } })
-                }
-              />
-            </div>
-
-            <PropertyRow label="Loại chuyển động">
-              <Select
-                value={animation.type}
-                onChange={(value) =>
-                  onUpdate({ animation: { ...animation, type: value } })
-                }
-                className="flex-1"
-              >
-                <Option value="none">Không có</Option>
-                <Option value="fadeIn">Fade In</Option>
-                <Option value="slideIn">Slide In</Option>
-                <Option value="bounce">Bounce</Option>
-                <Option value="pulse">Pulse</Option>
-                <Option value="shake">Shake</Option>
-                <Option value="zoom">Zoom</Option>
-              </Select>
             </PropertyRow>
           </>
         )}
