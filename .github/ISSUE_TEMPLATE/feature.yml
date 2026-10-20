@@ -1,0 +1,16 @@
+name: Feature / Task
+description: Đề xuất tính năng hoặc công việc mới
+labels: [enhancement]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Mô tả
+      description: Cần làm gì và vì sao?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Tiêu chí hoàn thành
+      placeholder: "- [ ] ..."
