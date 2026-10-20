@@ -1,9 +1,37 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Image, Rect, Group } from "react-konva";
 import Konva from "konva";
 import { ImageElement } from "@/types/editor";
+import { useElementAnimation } from "../hooks/useElementAnimation";
+
+/** Vị trí ảnh trong khung theo objectFit (cover cắt bớt, contain chừa lề, fill kéo giãn). */
+export const fitImage = (
+  objectFit: ImageElement["objectFit"] | undefined,
+  natural: { width: number; height: number },
+  box: { width: number; height: number },
+) => {
+  if (objectFit === "cover" && natural.width > 0 && natural.height > 0) {
+    const scale = Math.max(box.width / natural.width, box.height / natural.height);
+    const width = box.width / scale;
+    const height = box.height / scale;
+    return {
+      x: 0,
+      y: 0,
+      width: box.width,
+      height: box.height,
+      crop: { x: (natural.width - width) / 2, y: (natural.height - height) / 2, width, height },
+    };
+  }
+  if (objectFit === "contain" && natural.width > 0 && natural.height > 0) {
+    const scale = Math.min(box.width / natural.width, box.height / natural.height);
+    const width = natural.width * scale;
+    const height = natural.height * scale;
+    return { x: (box.width - width) / 2, y: (box.height - height) / 2, width, height, crop: undefined };
+  }
+  return { x: 0, y: 0, width: box.width, height: box.height, crop: undefined };
+};
 
 interface ImageElementProps {
   element: ImageElement;
@@ -23,6 +51,8 @@ const ImageElementComponent: React.FC<ImageElementProps> = ({
   onTransformEnd,
 }) => {
   const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const groupRef = useRef<Konva.Group>(null);
+  useElementAnimation(groupRef, element, !!image);
 
   // Default values for new properties
   const padding = element.padding || { top: 0, right: 0, bottom: 0, left: 0 };
@@ -121,6 +151,12 @@ const ImageElementComponent: React.FC<ImageElementProps> = ({
     }
   };
 
+  const fit = fitImage(
+    element.objectFit,
+    { width: image?.naturalWidth ?? 0, height: image?.naturalHeight ?? 0 },
+    { width: Math.max(contentWidth, 0), height: Math.max(contentHeight, 0) },
+  );
+
   if (!image) {
     // Placeholder while loading
     return (
@@ -148,6 +184,7 @@ const ImageElementComponent: React.FC<ImageElementProps> = ({
   return (
     <Group
       id={element.id}
+      ref={groupRef}
       x={element.position.x}
       y={element.position.y}
       width={element.size.width}
@@ -204,11 +241,12 @@ const ImageElementComponent: React.FC<ImageElementProps> = ({
 
       {/* Image with shadow */}
       <Image
-        x={padding.left}
-        y={padding.top}
+        x={padding.left + fit.x}
+        y={padding.top + fit.y}
         image={filteredImage || image}
-        width={Math.max(contentWidth, 0)}
-        height={Math.max(contentHeight, 0)}
+        width={fit.width}
+        height={fit.height}
+        crop={fit.crop}
         shadowColor={shadow.enabled ? shadow.color : undefined}
         shadowBlur={shadow.enabled ? shadow.blur : 0}
         shadowOffsetX={shadow.enabled ? shadow.x : 0}

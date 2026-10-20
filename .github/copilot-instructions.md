@@ -1,0 +1,1 @@
+Follow the project rules in [AGENTS.md](../AGENTS.md), especially the "Ship" workflow: when the user asks to up/push/ship a change, run `scripts/ship.ps1` to create the issue, branch, commit, push and PR in one go.

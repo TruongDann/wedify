@@ -2,12 +2,13 @@
 
 import React, { useState, useCallback } from "react";
 import { Button } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined } from "@ant-design/icons";
 import { useEditorStore } from "@/store/editorStore";
 import {
   TextElement,
   ImageElement,
   ShapeElement,
+  WidgetElement,
   EditorElement,
 } from "@/types/editor";
 
@@ -17,8 +18,6 @@ import {
   PaddingSection,
   BorderSection,
   ShadowSection,
-  LinkSection,
-  AnimationSection,
   PositionSection,
 } from "./right/TextPropertySections";
 
@@ -30,8 +29,6 @@ import {
   ImagePaddingSection,
   ImageBorderSection,
   ImageShadowSection,
-  ImageLinkSection,
-  ImageAnimationSection,
   ImagePositionSection,
   DeleteButton,
 } from "./right/ImagePropertySections";
@@ -43,6 +40,17 @@ import {
   ShapeDeleteButton,
 } from "./right/ShapePropertySections";
 
+import { AnimationSection, ClickActionSection } from "../shared";
+import {
+  WidgetStyleSection,
+  WidgetRsvpSection,
+  WidgetMapSection,
+} from "./right/WidgetPropertySections";
+import {
+  WidgetButtonSection,
+  WidgetMediaSection,
+  WidgetGiftSection,
+} from "./right/WidgetMoreSections";
 import { PageSettings } from "./right/PageSettingsSection";
 import { MusicPropertySection } from "./right/MusicPropertySection";
 import { CropModal } from "./right/CropModal";
@@ -103,6 +111,14 @@ const Right: React.FC<RightProps> = ({
     "background",
     "grid",
     "music",
+    "widgetStyle",
+    "widgetRsvp",
+    "widgetMap",
+    "widgetButton",
+    "widgetMedia",
+    "widgetGift",
+    "viewerDisplay",
+    "viewerInteraction",
   ]);
 
   // Sync toggles
@@ -184,14 +200,9 @@ const Right: React.FC<RightProps> = ({
       blur: 8,
       color: "rgba(0,0,0,0.2)",
     };
-    const animation = element.animation || {
-      enabled: false,
-      continuous: false,
-      type: "none" as const,
-    };
 
     return (
-      <div className="p-3 space-y-3">
+      <div className="p-4 space-y-3">
         <TextEffectSection
           element={element}
           isExpanded={expandedSections.includes("textEffect")}
@@ -232,18 +243,21 @@ const Right: React.FC<RightProps> = ({
           onUpdate={(updates) => handleUpdate(updates)}
         />
 
-        <LinkSection
-          hyperlink={element.hyperlink || ""}
+        <ClickActionSection
+          element={element}
+          elements={elements}
+          sectionKey="link"
           isExpanded={expandedSections.includes("link")}
           onToggle={toggleSection}
-          onUpdate={(updates) => handleUpdate(updates)}
+          onChange={handleUpdate}
         />
 
         <AnimationSection
-          animation={animation}
+          animation={element.animation}
+          sectionKey="animation"
           isExpanded={expandedSections.includes("animation")}
           onToggle={toggleSection}
-          onUpdate={(updates) => handleUpdate(updates)}
+          onChange={(animation) => handleUpdate({ animation })}
         />
 
         <PositionSection
@@ -299,16 +313,12 @@ const Right: React.FC<RightProps> = ({
       blur: 8,
       color: "rgba(0,0,0,0.2)",
     };
-    const hyperlink = element.hyperlink || "";
-    const animation = element.animation || {
-      enabled: false,
-      continuous: false,
-      type: "none" as const,
-    };
 
     return (
-      <div className="p-3 space-y-3">
+      <div className="p-4 space-y-3">
         <ImageActionSection
+          objectFit={element.objectFit}
+          onObjectFitChange={(objectFit) => handleUpdate({ objectFit })}
           onCropImage={() => openCropModal(element.src)}
           onSwitchToImageTab={onSwitchToImageTab || (() => {})}
         />
@@ -349,18 +359,21 @@ const Right: React.FC<RightProps> = ({
           onUpdate={handleUpdate}
         />
 
-        <ImageLinkSection
-          hyperlink={hyperlink}
-          expandedSections={expandedSections}
+        <ClickActionSection
+          element={element}
+          elements={elements}
+          sectionKey="imageLink"
+          isExpanded={expandedSections.includes("imageLink")}
           onToggle={toggleSection}
-          onUpdate={handleUpdate}
+          onChange={handleUpdate}
         />
 
-        <ImageAnimationSection
-          animation={animation}
-          expandedSections={expandedSections}
+        <AnimationSection
+          animation={element.animation}
+          sectionKey="imageAnimation"
+          isExpanded={expandedSections.includes("imageAnimation")}
           onToggle={toggleSection}
-          onUpdate={handleUpdate}
+          onChange={(animation) => handleUpdate({ animation })}
         />
 
         <ImagePositionSection
@@ -389,7 +402,7 @@ const Right: React.FC<RightProps> = ({
     };
 
     return (
-      <div className="p-3 space-y-3">
+      <div className="p-4 space-y-3">
         <ShapeColorSection
           element={element}
           expandedSections={expandedSections}
@@ -404,6 +417,23 @@ const Right: React.FC<RightProps> = ({
           onUpdate={handleUpdate}
         />
 
+        <AnimationSection
+          animation={element.animation}
+          sectionKey="animation"
+          isExpanded={expandedSections.includes("animation")}
+          onToggle={toggleSection}
+          onChange={(animation) => handleUpdate({ animation })}
+        />
+
+        <ClickActionSection
+          element={element}
+          elements={elements}
+          sectionKey="link"
+          isExpanded={expandedSections.includes("link")}
+          onToggle={toggleSection}
+          onChange={handleUpdate}
+        />
+
         <ShapePositionSection
           element={element}
           expandedSections={expandedSections}
@@ -414,6 +444,75 @@ const Right: React.FC<RightProps> = ({
         />
 
         <ShapeDeleteButton
+          onDelete={() => selectedElement && deleteElement(selectedElement.id)}
+        />
+      </div>
+    );
+  };
+
+  const renderWidgetProperties = (element: WidgetElement) => {
+    const sectionProps = {
+      element,
+      onToggle: toggleSection,
+      onUpdate: handleUpdate as (updates: Partial<WidgetElement>) => void,
+    };
+    return (
+      <div className="p-4 space-y-3">
+        <WidgetStyleSection
+          {...sectionProps}
+          isExpanded={expandedSections.includes("widgetStyle")}
+        />
+        {element.widget === "rsvp" && (
+          <WidgetRsvpSection
+            {...sectionProps}
+            isExpanded={expandedSections.includes("widgetRsvp")}
+          />
+        )}
+        {element.widget === "map" && (
+          <WidgetMapSection
+            {...sectionProps}
+            isExpanded={expandedSections.includes("widgetMap")}
+          />
+        )}
+        {(element.widget === "call" || element.widget === "reminder") && (
+          <WidgetButtonSection
+            {...sectionProps}
+            isExpanded={expandedSections.includes("widgetButton")}
+          />
+        )}
+        {["youtube", "slideshow", "album"].includes(element.widget) && (
+          <WidgetMediaSection
+            {...sectionProps}
+            isExpanded={expandedSections.includes("widgetMedia")}
+          />
+        )}
+        {element.widget === "giftQr" && (
+          <WidgetGiftSection
+            {...sectionProps}
+            isExpanded={expandedSections.includes("widgetGift")}
+          />
+        )}
+
+        <AnimationSection
+          animation={element.animation}
+          sectionKey="animation"
+          isExpanded={expandedSections.includes("animation")}
+          onToggle={toggleSection}
+          onChange={(animation) => handleUpdate({ animation })}
+        />
+
+        <PositionSection
+          position={{ x: element.position.x, y: element.position.y }}
+          size={{ width: element.size.width, height: element.size.height }}
+          rotation={element.rotation}
+          isExpanded={expandedSections.includes("position")}
+          onToggle={toggleSection}
+          onPositionChange={handlePositionUpdate}
+          onSizeChange={handleSizeUpdate}
+          onRotationChange={(value) => handleUpdate({ rotation: value })}
+        />
+
+        <DeleteButton
           onDelete={() => selectedElement && deleteElement(selectedElement.id)}
         />
       </div>
@@ -454,27 +553,45 @@ const Right: React.FC<RightProps> = ({
         return renderImageProperties(selectedElement as ImageElement);
       case "shape":
         return renderShapeProperties(selectedElement as ShapeElement);
+      case "widget":
+        return renderWidgetProperties(selectedElement);
       default:
         return renderPageSettings();
     }
   };
 
-  // Get header text based on context
-  const getHeaderText = () => {
-    if (activeTab === "music") return "Tùy chỉnh nhạc nền";
-    if (selectedElement) return "Tùy chỉnh phần tử";
-    return "Tùy chỉnh";
+  // Tiêu đề panel theo ngữ cảnh: eyebrow nhỏ + tiêu đề chính
+  const ELEMENT_TITLES: Record<EditorElement["type"], string> = {
+    text: "Văn bản",
+    image: "Hình ảnh",
+    shape: "Hình dạng",
+    sticker: "Sticker",
+    widget: "Tiện ích",
   };
+
+  const getHeader = () => {
+    if (activeTab === "music") return { eyebrow: "Âm nhạc", title: "Nhạc nền" };
+    if (selectedElement)
+      return {
+        eyebrow: "Đang chỉnh sửa",
+        title: ELEMENT_TITLES[selectedElement.type] ?? "Phần tử",
+      };
+    return { eyebrow: "Thiết lập chung", title: "Cài đặt thiệp" };
+  };
+
+  const header = getHeader();
 
   // ==================== Main Render ====================
 
   return (
-    <div className="w-80 bg-white border-l border-gray-200 flex flex-col shrink-0 overflow-hidden h-full">
+    <aside className="w-[350px] bg-white border-l border-line flex flex-col shrink-0 overflow-hidden h-full">
       {/* Header */}
-      <div className="h-12 px-4 border-b border-gray-200 flex items-center gap-2 shrink-0">
-        <EditOutlined className="text-gray-400" />
-        <span className="font-semibold text-sm">{getHeaderText()}</span>
-      </div>
+      <header className="px-4 pt-4 pb-1 shrink-0">
+        <p className="text-[13px] leading-5 text-ink-3">{header.eyebrow}</p>
+        <h2 className="text-base font-semibold leading-6 text-ink">
+          {header.title}
+        </h2>
+      </header>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto min-h-0">{renderProperties()}</div>
@@ -486,7 +603,7 @@ const Right: React.FC<RightProps> = ({
         onClose={() => setIsCropModalOpen(false)}
         onCropComplete={handleCropComplete}
       />
-    </div>
+    </aside>
   );
 };
 

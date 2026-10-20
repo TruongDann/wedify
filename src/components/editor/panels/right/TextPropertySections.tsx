@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Slider, ColorPicker, Select, Switch, Button, Input } from "antd";
+import { Slider, ColorPicker, Select, Switch, Button } from "antd";
 import {
   FontColorsOutlined,
   MinusOutlined,
@@ -10,9 +10,7 @@ import {
   BorderOuterOutlined,
   CopyOutlined,
   LinkOutlined,
-  PlayCircleOutlined,
   DragOutlined,
-  ExportOutlined,
 } from "@ant-design/icons";
 import { TextElement } from "@/types/editor";
 import { loadGoogleFont } from "@/utils/fontLoader";
@@ -40,7 +38,7 @@ export const TextStyleSection: React.FC<TextStyleSectionProps> = ({
   onToggle,
   onUpdate,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Kiểu chữ"
       sectionKey="style"
@@ -175,7 +173,7 @@ export const PaddingSection: React.FC<PaddingSectionProps> = ({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Khoảng đệm"
         sectionKey="padding"
@@ -310,7 +308,7 @@ export const BorderSection: React.FC<BorderSectionProps> = ({
   borderRadiusLinked,
   setBorderRadiusLinked,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Đường viền"
       sectionKey="border"
@@ -473,7 +471,7 @@ export const ShadowSection: React.FC<ShadowSectionProps> = ({
   onToggle,
   onUpdate,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Đổ bóng"
       sectionKey="shadow"
@@ -551,128 +549,6 @@ export const ShadowSection: React.FC<ShadowSectionProps> = ({
   </div>
 );
 
-interface LinkSectionProps {
-  hyperlink: string;
-  isExpanded: boolean;
-  onToggle: (key: string) => void;
-  onUpdate: (updates: { hyperlink: string }) => void;
-}
-
-export const LinkSection: React.FC<LinkSectionProps> = ({
-  hyperlink,
-  isExpanded,
-  onToggle,
-  onUpdate,
-}) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
-    <SectionHeader
-      title="Liên kết"
-      sectionKey="link"
-      icon={<LinkOutlined />}
-      isExpanded={isExpanded}
-      onToggle={onToggle}
-    />
-    {isExpanded && (
-      <div className="px-4 pt-3 pb-4">
-        <div className="mb-2">
-          <span className="text-xs text-gray-500">Hyperlink (Tùy chọn)</span>
-        </div>
-        <div className="flex gap-2">
-          <Input
-            value={hyperlink}
-            onChange={(e) => onUpdate({ hyperlink: e.target.value })}
-            placeholder="https://example.com"
-            prefix={<LinkOutlined className="text-gray-400" />}
-          />
-          <Button
-            icon={<ExportOutlined />}
-            disabled={!hyperlink}
-            onClick={() => window.open(hyperlink, "_blank")}
-            title="Mở liên kết"
-          />
-        </div>
-      </div>
-    )}
-  </div>
-);
-
-interface AnimationProps {
-  enabled: boolean;
-  continuous: boolean;
-  type: "none" | "fadeIn" | "slideIn" | "bounce" | "pulse" | "shake" | "zoom";
-}
-
-interface AnimationSectionProps {
-  animation: AnimationProps;
-  isExpanded: boolean;
-  onToggle: (key: string) => void;
-  onUpdate: (updates: { animation: AnimationProps }) => void;
-}
-
-export const AnimationSection: React.FC<AnimationSectionProps> = ({
-  animation,
-  isExpanded,
-  onToggle,
-  onUpdate,
-}) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
-    <SectionHeader
-      title="Hiệu ứng chuyển động"
-      sectionKey="animation"
-      icon={<PlayCircleOutlined />}
-      isExpanded={isExpanded}
-      onToggle={onToggle}
-    />
-    {isExpanded && (
-      <div className="px-4 pt-3 pb-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Bật hiệu ứng</span>
-          <Switch
-            checked={animation.enabled}
-            onChange={(checked) =>
-              onUpdate({ animation: { ...animation, enabled: checked } })
-            }
-          />
-        </div>
-
-        {animation.enabled && (
-          <>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">
-                Chuyển động liên tục
-              </span>
-              <Switch
-                checked={animation.continuous}
-                onChange={(checked) =>
-                  onUpdate({ animation: { ...animation, continuous: checked } })
-                }
-              />
-            </div>
-
-            <PropertyRow label="Loại chuyển động">
-              <Select
-                value={animation.type}
-                onChange={(value) =>
-                  onUpdate({ animation: { ...animation, type: value } })
-                }
-                className="flex-1"
-              >
-                <Option value="none">Không có</Option>
-                <Option value="fadeIn">Fade In</Option>
-                <Option value="slideIn">Slide In</Option>
-                <Option value="bounce">Bounce</Option>
-                <Option value="pulse">Pulse</Option>
-                <Option value="shake">Shake</Option>
-                <Option value="zoom">Zoom</Option>
-              </Select>
-            </PropertyRow>
-          </>
-        )}
-      </div>
-    )}
-  </div>
-);
-
 interface PositionSectionProps {
   position: { x: number; y: number };
   size: { width: number; height: number };
@@ -694,7 +570,7 @@ export const PositionSection: React.FC<PositionSectionProps> = ({
   onSizeChange,
   onRotationChange,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Vị trí & Kích thước"
       sectionKey="position"

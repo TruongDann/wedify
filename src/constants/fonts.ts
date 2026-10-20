@@ -23,6 +23,36 @@ export interface FontConfig {
 export const FONTS: FontConfig[] = [
   // Wedding Script Fonts - Font chữ viết tay cho thiệp cưới
   {
+    name: "Allison",
+    label: "Allison",
+    category: "script",
+    supportsVietnamese: true,
+  },
+  {
+    name: "Ephesis",
+    label: "Ephesis",
+    category: "script",
+    supportsVietnamese: true,
+  },
+  {
+    name: "Corinthia",
+    label: "Corinthia",
+    category: "script",
+    supportsVietnamese: true,
+  },
+  {
+    name: "Imperial Script",
+    label: "Imperial Script",
+    category: "script",
+    supportsVietnamese: true,
+  },
+  {
+    name: "Mrs Saint Delafield",
+    label: "Mrs Saint Delafield",
+    category: "script",
+    supportsVietnamese: false,
+  },
+  {
     name: "Dancing Script",
     label: "Dancing Script",
     category: "script",
@@ -96,6 +126,30 @@ export const FONTS: FontConfig[] = [
   },
 
   // Elegant Serif - Font serif sang trọng
+  {
+    name: "Prata",
+    label: "Prata",
+    category: "serif",
+    supportsVietnamese: true,
+  },
+  {
+    name: "Cormorant",
+    label: "Cormorant",
+    category: "serif",
+    supportsVietnamese: true,
+  },
+  {
+    name: "Italiana",
+    label: "Italiana",
+    category: "serif",
+    supportsVietnamese: false,
+  },
+  {
+    name: "Bodoni Moda",
+    label: "Bodoni Moda",
+    category: "serif",
+    supportsVietnamese: false,
+  },
   {
     name: "Playfair Display",
     label: "Playfair Display",
@@ -191,6 +245,12 @@ export const FONTS: FontConfig[] = [
   },
 
   // Decorative Fonts - Font trang trí
+  {
+    name: "Pacifico",
+    label: "Pacifico",
+    category: "decorative",
+    supportsVietnamese: true,
+  },
   {
     name: "Lobster",
     label: "Lobster",

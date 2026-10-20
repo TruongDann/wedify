@@ -5,22 +5,69 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button, Tooltip, Dropdown } from "antd";
 import {
-  UndoOutlined,
-  RedoOutlined,
-  EyeOutlined,
-  RocketOutlined,
-  MenuOutlined,
-  SecurityScanOutlined,
-} from "@ant-design/icons";
+  ChevronDown,
+  CloudAlert,
+  CloudCheck,
+  Eye,
+  LoaderCircle,
+  Menu,
+  Redo2,
+  Rocket,
+  Undo2,
+  type LucideIcon,
+} from "lucide-react";
 import { useEditorStore } from "@/store/editorStore";
 import { message } from "antd";
+import type { SaveStatus } from "../useDraftAutosave";
 
 interface EditorHeaderProps {
   onPreview?: () => void;
+  saveStatus?: SaveStatus;
 }
 
-export const EditorHeader: React.FC<EditorHeaderProps> = ({ onPreview }) => {
+const SAVE_STATUS: Record<
+  SaveStatus,
+  { label: string; tooltip: string; icon: LucideIcon; tone: string; spin?: boolean }
+> = {
+  loading: {
+    label: "Đang tải",
+    tooltip: "Đang mở bản nháp",
+    icon: LoaderCircle,
+    tone: "bg-surface-muted text-ink-3",
+    spin: true,
+  },
+  saving: {
+    label: "Đang lưu",
+    tooltip: "Đang lưu thay đổi",
+    icon: LoaderCircle,
+    tone: "bg-surface-muted text-ink-3",
+    spin: true,
+  },
+  saved: {
+    label: "Đã lưu nháp",
+    tooltip: "Bản nháp được lưu trên trình duyệt này",
+    icon: CloudCheck,
+    tone: "bg-surface-muted text-ink-2",
+  },
+  error: {
+    label: "Chưa lưu được",
+    tooltip: "Không lưu được bản nháp — bộ nhớ trình duyệt có thể đã đầy",
+    icon: CloudAlert,
+    tone: "bg-red-50 text-red-600",
+  },
+};
+
+// Nút icon tròn trong suốt (menu, hoàn tác, làm lại)
+const iconBtn =
+  "w-9.5 h-9.5 rounded-full flex items-center justify-center text-ink-2 hover:bg-surface-muted transition-colors disabled:text-ink-4 disabled:hover:bg-transparent disabled:cursor-not-allowed";
+
+export const EditorHeader: React.FC<EditorHeaderProps> = ({
+  onPreview,
+  saveStatus = "saved",
+}) => {
   const { undo, redo, history, historyIndex } = useEditorStore();
+  const status = SAVE_STATUS[saveStatus];
+  const StatusIcon = status.icon;
 
   const handleExport = async (format: "png" | "jpg") => {
     const canvasElement = document.querySelector(
@@ -50,101 +97,108 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({ onPreview }) => {
   ];
 
   return (
-    <header className="h-14 bg-white border-b border-gray-200 flex items-center gap-2 z-50 fixed top-0 left-0 right-0">
-      {/* Left: Menu - centered in sidebar width */}
-      <div className="w-sidebar flex items-center justify-center shrink-0 border-r border-gray-200 h-full">
-        <Button type="text" icon={<MenuOutlined />} className="px-3 py-2" />
-      </div>
+    <header className="h-16 bg-white border-b border-line-subtle flex items-center gap-4 px-6 z-50 fixed top-0 left-0 right-0">
+      {/* Left: menu, logo, undo/redo */}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <button type="button" className={`${iconBtn} -ml-2`} aria-label="Menu">
+          <Menu size={18} />
+        </button>
 
-      {/* Logo */}
-      <Link href="/" className="flex items-center gap-2 px-3">
-        <Image
-          src="/logo-web.png"
-          alt="Logo"
-          width={100}
-          height={28}
-          style={{ objectFit: "contain" }}
-          priority
-        />
-      </Link>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo-web.png"
+            alt="Logo"
+            width={100}
+            height={28}
+            style={{ objectFit: "contain" }}
+            priority
+          />
+        </Link>
 
-      {/* Divider */}
-      <div className="h-6 w-px bg-gray-200" />
-
-      {/* Actions: Undo, Redo, Security */}
-      <div className="flex items-center gap-1 flex-1">
-        <Tooltip title="Hoàn tác (Ctrl+Z)">
-          <Button
-            type="text"
-            icon={<UndoOutlined className="text-lg" />}
-            onClick={undo}
-            disabled={historyIndex <= 0}
-          />
-        </Tooltip>
-        <Tooltip title="Làm lại (Ctrl+Y)">
-          <Button
-            type="text"
-            icon={<RedoOutlined className="text-lg" />}
-            onClick={redo}
-            disabled={historyIndex >= history.length - 1}
-          />
-        </Tooltip>
-        {/* Divider */}
-        <div className="h-6 w-px bg-gray-200 mx-2" />
-        <Tooltip title="Kiểm tra bảo mật">
-          <Button
-            type="text"
-            icon={<SecurityScanOutlined className="text-lg" />}
-          />
-        </Tooltip>
+        <div className="flex items-center gap-0.5 ml-3">
+          <Tooltip title="Hoàn tác (Ctrl+Z)">
+            <button
+              type="button"
+              className={iconBtn}
+              onClick={undo}
+              disabled={historyIndex <= 0}
+              aria-label="Hoàn tác"
+            >
+              <Undo2 size={17} />
+            </button>
+          </Tooltip>
+          <Tooltip title="Làm lại (Ctrl+Y)">
+            <button
+              type="button"
+              className={iconBtn}
+              onClick={redo}
+              disabled={historyIndex >= history.length - 1}
+              aria-label="Làm lại"
+            >
+              <Redo2 size={17} />
+            </button>
+          </Tooltip>
+        </div>
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-2">
-        {/* Save status */}
-        <Tooltip title="Tất cả thay đổi đã được lưu lên cloud">
-          <div className="flex items-center gap-1.5 px-2 py-1 text-gray-500 hover:bg-gray-50 rounded cursor-default transition-colors">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M6.5 19a4.5 4.5 0 0 1-.42-8.98A6 6 0 0 1 18 10a4 4 0 0 1-.18 8H6.5Z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinejoin="round"
-              />
-              <path
-                d="m9 12 2 2 4-4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="text-xs">Đã lưu</span>
+        {/* Trạng thái lưu: cùng chiều cao, bo tròn như các nút bên cạnh */}
+        <Tooltip
+          title={
+            <>
+              {status.tooltip}
+              <br />
+              Bấm Xuất bản để lưu thiết kế vào hệ thống.
+            </>
+          }
+        >
+          <div
+            className={`h-9.5 px-3.5 mr-1 rounded-full flex items-center gap-1.5 text-[13px] font-medium cursor-default select-none transition-colors ${status.tone}`}
+          >
+            <StatusIcon
+              size={15}
+              strokeWidth={2}
+              className={status.spin ? "animate-spin" : undefined}
+            />
+            <span className="hidden sm:inline">{status.label}</span>
           </div>
         </Tooltip>
 
-        {/* Preview button */}
-        <Button icon={<EyeOutlined />} onClick={onPreview}>
+        <Button
+          shape="round"
+          icon={<Eye size={16} />}
+          onClick={onPreview}
+          className="h-9.5! px-4! text-sm!"
+        >
           Xem trước
         </Button>
 
-        {/* Publish button */}
         <Dropdown menu={{ items: exportMenuItems }}>
-          <Button type="primary" icon={<RocketOutlined />}>
+          <Button
+            type="primary"
+            shape="round"
+              icon={<Rocket size={16} />}
+            className="h-9.5! px-4! text-sm!"
+          >
             Xuất bản
           </Button>
         </Dropdown>
 
         {/* User avatar */}
-        <div className="w-9 h-9 rounded-full overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+        <button
+          type="button"
+          className="ml-1 flex items-center gap-1 p-0.5 pr-2 rounded-full border border-line hover:bg-surface-muted transition-colors"
+        >
           <Image
             src="/avatar.jpg"
             alt="Avatar"
-            width={36}
-            height={36}
-            className="w-full h-full object-cover"
+            width={32}
+            height={32}
+            className="w-8 h-8 rounded-full object-cover"
           />
-        </div>
+          <ChevronDown size={14} className="text-ink-3" />
+        </button>
       </div>
     </header>
   );

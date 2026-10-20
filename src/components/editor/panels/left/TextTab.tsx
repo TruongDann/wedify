@@ -1,10 +1,14 @@
 "use client";
 
 import React from "react";
-import { Search, Type } from "lucide-react";
-import { Button, Input } from "antd";
+import { Type } from "lucide-react";
+import { Button } from "antd";
 import { createTextElement, useEditorStore } from "@/store/editorStore";
 import { TEXT_TEMPLATES } from "@/data/textTemplates";
+import { SectionTitle } from "./ui";
+
+const STYLE_CARD =
+  "w-full text-left px-3 py-2.5 rounded-[10px] bg-surface-muted border border-transparent hover:border-line-strong transition-colors";
 
 export const TextTab: React.FC = () => {
   const { addElement } = useEditorStore();
@@ -21,95 +25,64 @@ export const TextTab: React.FC = () => {
   };
 
   return (
-    <div className="p-4 space-y-6">
-      {/* Search Bar */}
-      <div className="relative group">
-        <Input
-          prefix={<Search size={18} className="text-gray-400" />}
-          placeholder="Tìm kiếm font và mẫu..."
-          className="rounded-xl !py-2 !px-3 !border-gray-200"
-          style={{ backgroundColor: "white" }}
-        />
-      </div>
-
-      {/* Main Add Button */}
+    <div className="px-4 pt-2 pb-8 flex flex-col gap-5">
       <Button
         type="primary"
         block
+        shape="round"
         size="large"
         onClick={() => handleAddText()}
-        className="!font-medium !text-sm !rounded-md flex items-center justify-center h-10 shadow-sm"
-        icon={<Type size={18} className="mr-1" />}
+        icon={<Type size={16} />}
+        className="text-sm!"
       >
         Thêm hộp văn bản
       </Button>
 
-      {/* Default Text Styles */}
-      <div>
-        <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
-          Kiểu mặc định
-        </h3>
-        <div className="space-y-3">
-          {/* Heading */}
-          <div
-            className="bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center group"
+      {/* Kiểu mặc định */}
+      <section>
+        <SectionTitle title="Kiểu mặc định" />
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            className={STYLE_CARD}
             onClick={() =>
-              handleAddText({
-                content: "Thêm tiêu đề",
-                fontSize: 32,
-                fontWeight: 700,
-              })
+              handleAddText({ content: "Thêm tiêu đề", fontSize: 32, fontWeight: 700 })
             }
           >
-            <h1 className="text-2xl font-bold text-gray-800 w-full group-hover:text-black transition-colors">
-              Thêm tiêu đề
-            </h1>
-          </div>
-
-          {/* Subheading */}
-          <div
-            className="bg-gray-50 hover:bg-gray-100 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center group"
+            <span className="text-[22px] font-bold text-ink">Thêm tiêu đề</span>
+          </button>
+          <button
+            type="button"
+            className={STYLE_CARD}
             onClick={() =>
-              handleAddText({
-                content: "Thêm tiêu đề phụ",
-                fontSize: 24,
-                fontWeight: 600,
-              })
+              handleAddText({ content: "Thêm tiêu đề phụ", fontSize: 24, fontWeight: 600 })
             }
           >
-            <h2 className="text-lg font-semibold text-gray-700 w-full group-hover:text-black transition-colors">
+            <span className="text-base font-semibold text-ink">
               Thêm tiêu đề phụ
-            </h2>
-          </div>
-
-          {/* Body Text */}
-          <div
-            className="bg-gray-50 hover:bg-gray-100 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center group"
+            </span>
+          </button>
+          <button
+            type="button"
+            className={STYLE_CARD}
             onClick={() =>
-              handleAddText({
-                content: "Thêm văn bản nội dung",
-                fontSize: 16,
-                fontWeight: 400,
-              })
+              handleAddText({ content: "Thêm văn bản nội dung", fontSize: 16, fontWeight: 400 })
             }
           >
-            <p className="text-sm text-gray-600 w-full group-hover:text-gray-900 transition-colors">
-              Thêm văn bản nội dung
-            </p>
-          </div>
+            <span className="text-[13px] text-ink-2">Thêm văn bản nội dung</span>
+          </button>
         </div>
-      </div>
+      </section>
 
-      {/* Text Templates */}
-      <div>
-        <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
-          Mẫu văn bản
-        </h3>
-        <div className="grid grid-cols-2 gap-3">
+      {/* Mẫu văn bản */}
+      <section>
+        <SectionTitle title="Mẫu văn bản" />
+        <div className="grid grid-cols-2 gap-2">
           {TEXT_TEMPLATES.map((template) => (
-            <div
+            <button
               key={template.id}
-              className="bg-white border border-gray-200 hover:border-primary rounded-lg p-3 cursor-pointer transition-all hover:shadow-md aspect-square flex flex-col items-center justify-center overflow-hidden"
+              type="button"
+              className="aspect-square p-3 rounded-xl border border-line bg-white hover:border-line-strong transition-colors flex items-center justify-center overflow-hidden"
               onClick={() =>
                 handleAddText({
                   content: template.content,
@@ -119,18 +92,16 @@ export const TextTab: React.FC = () => {
                 })
               }
             >
-              <div className="text-center w-full px-1">
-                <div
-                  className="text-base font-bold break-words"
-                  style={template.previewStyle}
-                >
-                  {template.content}
-                </div>
-              </div>
-            </div>
+              <span
+                className="text-base font-bold text-center wrap-break-word w-full"
+                style={template.previewStyle}
+              >
+                {template.content}
+              </span>
+            </button>
           ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 };

@@ -7,6 +7,7 @@ export {
   createTextElement,
   createImageElement,
   createShapeElement,
+  createWidgetElement,
 } from "./helpers";
 
 // =============================================================================
@@ -339,6 +340,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       elements: elements.map((el) => ({ ...el, id: uuidv4() })),
       canvasSettings,
       selectedElementId: null,
+      selectedElementIds: [],
     });
     get().saveHistory();
   },

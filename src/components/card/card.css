@@ -1,0 +1,106 @@
+/* Hiệu ứng cho trang xem thiệp — tương ứng với Konva.Tween / Konva.Animation trong editor.
+   Mọi hiệu ứng lấy gốc ở góc trên-trái phần tử, giống Konva. */
+
+@keyframes wc-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes wc-slide-up {
+  from { opacity: 0; transform: translateY(50px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes wc-slide-down {
+  from { opacity: 0; transform: translateY(-50px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes wc-slide-left {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes wc-slide-right {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes wc-zoom-in {
+  from { transform: scale(0); }
+  to { transform: none; }
+}
+
+/* Konva.Easings.BounceEaseOut từ y - 30 */
+@keyframes wc-bounce-in {
+  0% { transform: translateY(-30px); animation-timing-function: ease-in; }
+  36.4% { transform: none; animation-timing-function: ease-out; }
+  54.5% { transform: translateY(-7.5px); animation-timing-function: ease-in; }
+  72.7% { transform: none; animation-timing-function: ease-out; }
+  81.8% { transform: translateY(-1.9px); animation-timing-function: ease-in; }
+  90.9% { transform: none; animation-timing-function: ease-out; }
+  95.5% { transform: translateY(-0.5px); animation-timing-function: ease-in; }
+  100% { transform: none; }
+}
+
+@keyframes wc-pulse {
+  from { transform: scale(0.95); }
+  to { transform: scale(1.05); }
+}
+
+@keyframes wc-shake {
+  from { transform: rotate(-5deg); }
+  to { transform: rotate(5deg); }
+}
+
+@keyframes wc-float {
+  from { transform: translateY(-10px); }
+  to { transform: translateY(10px); }
+}
+
+@keyframes wc-breathe {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+
+@keyframes wc-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-anim {
+    animation: none !important;
+  }
+}
+
+/* Lời chúc nổi */
+@keyframes wc-wish-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.wc-wish {
+  animation: wc-wish-in 0.5s ease both;
+}
+
+/* Bố cục máy tính "split": thiệp ở giữa, hai cột thông tin dính theo khi cuộn */
+.wc-split {
+  display: block;
+}
+.wc-split > .wc-side-col {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .wc-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--wc-card-width) minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+    padding: 0 32px;
+  }
+  .wc-split > .wc-side-col {
+    display: block;
+    position: sticky;
+    top: 32px;
+    padding-top: 32px;
+  }
+}

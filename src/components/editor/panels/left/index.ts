@@ -5,3 +5,5 @@ export * from "./BackgroundTab";
 export * from "./MusicTab";
 export * from "./TemplateTab";
 export * from "./EffectsTab";
+export * from "./WidgetTab";
+export * from "./BlocksTab";

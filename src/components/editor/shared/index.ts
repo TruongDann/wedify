@@ -6,3 +6,5 @@ export * from "./SliderProperty";
 export * from "./TextStyleButtons";
 export * from "./AlignButtons";
 export * from "./PositionGrid";
+export * from "./AnimationSection";
+export * from "./ClickActionSection";

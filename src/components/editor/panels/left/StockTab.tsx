@@ -1,391 +1,153 @@
 "use client";
 
 import React, { useState } from "react";
-import { MoreHorizontal, ArrowLeft } from "lucide-react";
-import { Dropdown } from "antd";
-import {
-  createImageElement,
-  createShapeElement,
-  useEditorStore,
-} from "@/store/editorStore";
-import { STICKERS, STOCK_IMAGES } from "@/constants/assets";
-import { SHAPES } from "@/constants/shapes";
-import { ShapeElement } from "@/types/editor";
+import { ChevronLeft } from "lucide-react";
+import { createImageElement, useEditorStore } from "@/store/editorStore";
+import { GRAPHIC_CATEGORIES, getGraphicUrls } from "@/constants/graphics";
+import { Chip, ChipRow, LinkButton, SectionTitle } from "./ui";
 
-type CategoryType =
-  | "all"
-  | "wedding-elements"
-  | "people"
-  | "flowers"
-  | "shapes"
-  | "notes"
-  | "hearts";
+type CategoryId = string;
 
-const CATEGORIES = [
-  { id: "all" as CategoryType, label: "Tất cả" },
-  { id: "wedding-elements" as CategoryType, label: "Yếu tố đám cưới" },
-  { id: "people" as CategoryType, label: "Nhân vật" },
-  { id: "flowers" as CategoryType, label: "Hoa cưới" },
-  { id: "shapes" as CategoryType, label: "Hình dạng" },
-  { id: "notes" as CategoryType, label: "Chủ hý" },
-  { id: "hearts" as CategoryType, label: "Trái tim" },
+const ALL = "all";
+
+const CHIPS: { id: CategoryId; label: string }[] = [
+  { id: ALL, label: "Tất cả" },
+  ...GRAPHIC_CATEGORIES,
 ];
+
+const PREVIEW_COUNT = 6;
+const PAGE_SIZE = 60;
+const MAX_INSERT_SIZE = 200;
+
+const TILE =
+  "aspect-square rounded-[10px] overflow-hidden cursor-pointer border border-transparent bg-surface-muted hover:border-line-strong transition-colors p-2.5 flex items-center justify-center";
 
 export const StockTab: React.FC = () => {
   const { addElement } = useEditorStore();
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType>("all");
+  const [selected, setSelected] = useState<CategoryId>(ALL);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const handleAddSticker = (src: string) => {
-    addElement(
-      createImageElement(src, {
-        size: { width: 80, height: 80 },
-      }),
+  const selectCategory = (id: CategoryId) => {
+    setSelected(id);
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  const handleAddGraphic = (src: string, alt: string) => {
+    const insert = (width: number, height: number) => {
+      const scale = Math.min(1, MAX_INSERT_SIZE / Math.max(width, height));
+      addElement(
+        createImageElement(src, {
+          alt,
+          size: {
+            width: Math.max(1, Math.round(width * scale)),
+            height: Math.max(1, Math.round(height * scale)),
+          },
+          objectFit: "contain",
+        }),
+      );
+    };
+    const img = new Image();
+    img.onload = () => insert(img.naturalWidth || 150, img.naturalHeight || 150);
+    img.onerror = () => insert(150, 150);
+    img.src = src;
+  };
+
+  const renderGraphicTile = (src: string, label: string, index: number) => (
+    <button
+      key={src}
+      type="button"
+      title={label}
+      className={TILE}
+      onClick={() => handleAddGraphic(src, `${label} ${index + 1}`)}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={`${label} ${index + 1}`}
+        loading="lazy"
+        decoding="async"
+        className="max-w-full max-h-full object-contain"
+      />
+    </button>
+  );
+
+  const renderSectionHeader = (id: CategoryId, label: string) => (
+    <SectionTitle
+      title={label}
+      action={
+        <LinkButton onClick={() => selectCategory(id)}>Xem tất cả</LinkButton>
+      }
+    />
+  );
+
+  const renderDetail = () => {
+    const label = CHIPS.find((c) => c.id === selected)?.label ?? "";
+    const header = (
+      <SectionTitle
+        title={label}
+        action={
+          <LinkButton onClick={() => selectCategory(ALL)}>
+            <ChevronLeft size={14} /> Quay lại
+          </LinkButton>
+        }
+      />
     );
-  };
 
-  const handleAddStockImage = (src: string) => {
-    addElement(createImageElement(src, { size: { width: 200, height: 200 } }));
-  };
-
-  const handleAddShape = (shapeType: ShapeElement["shapeType"]) => {
-    addElement(createShapeElement(shapeType));
+    const urls = getGraphicUrls(selected);
+    return (
+      <section>
+        {header}
+        <div className="grid grid-cols-3 gap-2">
+          {urls
+            .slice(0, visibleCount)
+            .map((src, i) => renderGraphicTile(src, label, i))}
+        </div>
+        {visibleCount < urls.length && (
+          <button
+            type="button"
+            className="mt-4 w-full h-9 text-[13px] font-semibold rounded-full border border-line-strong text-ink hover:bg-surface-muted transition-colors"
+            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+          >
+            Tải thêm ({urls.length - visibleCount})
+          </button>
+        )}
+      </section>
+    );
   };
 
   return (
     <div className="flex flex-col h-full">
-      {/* Category Filter Tabs */}
-      <div className="border-b border-gray-100 px-4 pt-4 pb-2">
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          {CATEGORIES.slice(0, 2).map((cat) => (
-            <button
+      {/* Category chips */}
+      <div className="px-4 pt-2 pb-3 shrink-0">
+        <ChipRow>
+          {CHIPS.map((cat) => (
+            <Chip
               key={cat.id}
-              className={`px-3 py-1.5 text-sm rounded-full transition-all whitespace-nowrap flex-shrink-0 ${
-                selectedCategory === cat.id
-                  ? "bg-primary/10 text-primary font-medium"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-              onClick={() => setSelectedCategory(cat.id)}
+              active={selected === cat.id}
+              onClick={() => selectCategory(cat.id)}
             >
               {cat.label}
-            </button>
+            </Chip>
           ))}
-          <Dropdown
-            menu={{
-              items: CATEGORIES.slice(2).map((cat) => ({
-                key: cat.id,
-                label: cat.label,
-                onClick: () => setSelectedCategory(cat.id),
-              })),
-            }}
-            trigger={["click"]}
-            placement="bottomRight"
-          >
-            <button
-              className="px-2 py-1.5 text-sm rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center gap-1 flex-shrink-0"
-              aria-label="Xem thêm danh mục"
-            >
-              <MoreHorizontal size={16} />
-            </button>
-          </Dropdown>
-        </div>
+        </ChipRow>
       </div>
 
-      {/* Content Sections */}
-      <div className="flex-1 overflow-y-auto px-4 pt-4">
-        {/* Show all sections when "Tất cả" is selected */}
-        {selectedCategory === "all" && (
+      <div className="flex-1 overflow-y-auto px-4 pt-1 pb-8 flex flex-col gap-5">
+        {selected === ALL ? (
           <>
-            {/* Yếu tố đám cưới Section */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Yếu tố đám cưới
-                </h3>
-                <button 
-                  className="text-sm text-gray-500 hover:text-primary"
-                  onClick={() => setSelectedCategory("wedding-elements")}
-                >
-                  Xem thêm
-                </button>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {STICKERS.slice(0, 6).map((sticker) => (
-                  <div
-                    key={sticker.id}
-                    className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary hover:bg-primary/5 transition-all p-2 flex items-center justify-center bg-gray-50"
-                    onClick={() => handleAddSticker(sticker.src)}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={sticker.src}
-                      alt={`Sticker ${sticker.id}`}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Nhân vật Section */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Nhân vật
-                </h3>
-                <button 
-                  className="text-sm text-gray-500 hover:text-primary"
-                  onClick={() => setSelectedCategory("people")}
-                >
-                  Xem thêm
-                </button>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {STOCK_IMAGES.slice(0, 3).map((src, index) => (
-                  <div
-                    key={index}
-                    className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary transition-colors bg-gray-50"
-                    onClick={() => handleAddStockImage(src)}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={src}
-                      alt={`Person ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Hình dạng Section */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Hình dạng
-                </h3>
-                <button 
-                  className="text-sm text-gray-500 hover:text-primary"
-                  onClick={() => setSelectedCategory("shapes")}
-                >
-                  Xem thêm
-                </button>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {SHAPES.slice(0, 6).map((shape) => (
-                  <button
-                    key={shape.type}
-                    onClick={() => handleAddShape(shape.type)}
-                    className="aspect-square rounded-lg border-2 border-gray-200 hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-1 p-3 group bg-gray-50"
-                  >
-                    <div className="text-2xl text-gray-600 group-hover:text-primary transition-colors">
-                      {shape.icon}
-                    </div>
-                    <span className="text-xs text-gray-600 group-hover:text-primary transition-colors">
-                      {shape.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
+            {GRAPHIC_CATEGORIES.map((cat) => (
+              <section key={cat.id}>
+                {renderSectionHeader(cat.id, cat.label)}
+                <div className="grid grid-cols-3 gap-2">
+                  {getGraphicUrls(cat.id)
+                    .slice(0, PREVIEW_COUNT)
+                    .map((src, i) => renderGraphicTile(src, cat.label, i))}
+                </div>
+              </section>
+            ))}
           </>
-        )}
-
-        {/* Yếu tố đám cưới category */}
-        {selectedCategory === "wedding-elements" && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Yếu tố đám cưới
-              </h3>
-              <button 
-                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
-                onClick={() => setSelectedCategory("all")}
-              >
-                <ArrowLeft size={14} /> Quay lại
-              </button>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {STICKERS.map((sticker) => (
-                <div
-                  key={sticker.id}
-                  className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary hover:bg-primary/5 transition-all p-2 flex items-center justify-center bg-gray-50"
-                  onClick={() => handleAddSticker(sticker.src)}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={sticker.src}
-                    alt={`Sticker ${sticker.id}`}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Nhân vật category */}
-        {selectedCategory === "people" && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Nhân vật
-              </h3>
-              <button 
-                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
-                onClick={() => setSelectedCategory("all")}
-              >
-                <ArrowLeft size={14} /> Quay lại
-              </button>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {STOCK_IMAGES.map((src, index) => (
-                <div
-                  key={index}
-                  className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary transition-colors bg-gray-50"
-                  onClick={() => handleAddStockImage(src)}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={src}
-                    alt={`Person ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Hoa cưới category */}
-        {selectedCategory === "flowers" && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Hoa cưới
-              </h3>
-              <button 
-                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
-                onClick={() => setSelectedCategory("all")}
-              >
-                <ArrowLeft size={14} /> Quay lại
-              </button>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {STICKERS.slice(0, 9).map((sticker) => (
-                <div
-                  key={sticker.id}
-                  className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary hover:bg-primary/5 transition-all p-2 flex items-center justify-center bg-gray-50"
-                  onClick={() => handleAddSticker(sticker.src)}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={sticker.src}
-                    alt={`Flower ${sticker.id}`}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Hình dạng category */}
-        {selectedCategory === "shapes" && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Hình dạng
-              </h3>
-              <button 
-                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
-                onClick={() => setSelectedCategory("all")}
-              >
-                <ArrowLeft size={14} /> Quay lại
-              </button>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {SHAPES.map((shape) => (
-                <button
-                  key={shape.type}
-                  onClick={() => handleAddShape(shape.type)}
-                  className="aspect-square rounded-lg border-2 border-gray-200 hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-1 p-3 group bg-gray-50"
-                >
-                  <div className="text-2xl text-gray-600 group-hover:text-primary transition-colors">
-                    {shape.icon}
-                  </div>
-                  <span className="text-xs text-gray-600 group-hover:text-primary transition-colors">
-                    {shape.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Chủ hý category */}
-        {selectedCategory === "notes" && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Chủ hý
-              </h3>
-              <button 
-                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
-                onClick={() => setSelectedCategory("all")}
-              >
-                <ArrowLeft size={14} /> Quay lại
-              </button>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {SHAPES.map((shape) => (
-                <button
-                  key={shape.type}
-                  onClick={() => handleAddShape(shape.type)}
-                  className="aspect-square rounded-lg border-2 border-gray-200 hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-1 p-3 group bg-gray-50"
-                >
-                  <div className="text-2xl text-gray-600 group-hover:text-primary transition-colors">
-                    {shape.icon}
-                  </div>
-                  <span className="text-xs text-gray-600 group-hover:text-primary transition-colors">
-                    {shape.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Trái tim category */}
-        {selectedCategory === "hearts" && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Trái tim
-              </h3>
-              <button 
-                className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
-                onClick={() => setSelectedCategory("all")}
-              >
-                <ArrowLeft size={14} /> Quay lại
-              </button>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {STICKERS.slice(0, 12).map((sticker) => (
-                <div
-                  key={sticker.id}
-                  className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary hover:bg-primary/5 transition-all p-2 flex items-center justify-center bg-gray-50"
-                  onClick={() => handleAddSticker(sticker.src)}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={sticker.src}
-                    alt={`Heart ${sticker.id}`}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+        ) : (
+          renderDetail()
         )}
       </div>
     </div>

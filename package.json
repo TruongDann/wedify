@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "graphics:manifest": "node scripts/generate-graphics-manifest.mjs",
+    "typecheck": "tsc --noEmit",
+    "ship": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ship.ps1"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
