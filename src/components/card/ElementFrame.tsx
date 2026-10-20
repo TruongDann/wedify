@@ -71,7 +71,7 @@ const withClickAction = (element: EditorElement, children: React.ReactNode) => {
       );
     }
     case "call": {
-      const phone = action.phone.replace(/[^d+]/g, "");
+      const phone = action.phone.replace(/[^\d+]/g, "");
       return phone ? (
         <a href={`tel:${phone}`} style={LINK_STYLE}>
           {children}
