@@ -8,7 +8,7 @@
 
 .NOTES
   Use English titles (matches repo history and avoids console-encoding issues).
-  Pull requests always target main and contain "Closes #<issue>".
+  Pull requests target dev by default (-Base main for releases) and contain "Closes #<issue>".
 #>
 [CmdletBinding()]
 param(
@@ -18,7 +18,7 @@ param(
   [string]$Scope = '',
   [string]$Body = '',
   [string[]]$Paths = @('.'),
-  [string]$Base = 'main',
+  [string]$Base = 'dev',
   [switch]$NoIssue,
   [switch]$Draft,
   [switch]$SkipChecks,

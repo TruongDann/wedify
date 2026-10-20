@@ -13,7 +13,7 @@ Next.js 16 / React 19 wedding-card editor. Node 22, npm.
 When the user asks to "up", "đẩy", "push", "ship" or "tạo PR" for a change, do the **whole** flow without asking again:
 
 1. **Scope** – decide which files belong to the request (`git status`). Never stage secrets (`.env*`), `.next/`, `*.tsbuildinfo`, or unrelated work; pass them via `-Paths`.
-2. **Run** `scripts/ship.ps1` (alias `npm run ship --`). It does: typecheck → create issue → create branch → commit → push → open PR to `main`:
+2. **Run** `scripts/ship.ps1` (alias `npm run ship --`). It does: typecheck → create issue → create branch → commit → push → open PR to `dev`:
 
    ```powershell
    npm run ship -- -Type feat -Title "add card viewer page" -Scope viewer -Body "details" -Paths src/app/preview,src/components/card
@@ -21,18 +21,18 @@ When the user asks to "up", "đẩy", "push", "ship" or "tạo PR" for a change,
 
    Useful flags: `-Draft`, `-Watch` (wait for CI), `-NoIssue`, `-DryRun`, `-SkipChecks`.
 3. **Report** the issue URL, branch, and PR URL. If CI fails, fix and push to the same branch.
-4. **Merging** to `main` only when the user explicitly asks (`gh pr merge --squash --delete-branch`).
+4. **Merging** only when the user explicitly asks (`gh pr merge --squash --delete-branch`). Release = PR `dev` -> `main` (`-Base main` / `gh pr create --base main --head dev`), which triggers the deploy.
 
 ### Conventions
 
 - Commit / PR title: Conventional Commits in English, lowercase, imperative: `type(scope): summary`
   (`feat fix refactor chore docs ci style perf test`).
 - Branch: `feature/<issue>-<slug>` for feat, otherwise `<type>/<issue>-<slug>`.
-- Base branch is `main` (`dev` is stale). Every PR contains `Closes #<issue>`.
+- Feature/fix branches branch off and PR into `dev` (integration); `main` is production and only receives `dev` via release PR. Every PR contains `Closes #<issue>`. Note: `Closes` only auto-closes issues when merged into the default branch (`main`), so close issues manually after merging to `dev`.
 - Issue labels: `bug` for fix, `documentation` for docs, `enhancement` otherwise.
 - Never force-push or push directly to `main`.
 
 ## CI/CD
 
-- `.github/workflows/ci.yml` – on PR/push to `main`: `npm ci`, lint (non-blocking for now), typecheck, build.
+- `.github/workflows/ci.yml` – on PR/push to `dev` and `main`: `npm ci`, lint (non-blocking for now), typecheck, build.
 - `.github/workflows/deploy.yml` – on push to `main`: deploys to Vercel if `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` secrets exist; otherwise skipped.
