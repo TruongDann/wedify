@@ -14,12 +14,24 @@ import {
 } from "@ant-design/icons";
 import { useEditorStore } from "@/store/editorStore";
 import { message } from "antd";
+import type { SaveStatus } from "../useDraftAutosave";
 
 interface EditorHeaderProps {
   onPreview?: () => void;
+  saveStatus?: SaveStatus;
 }
 
-export const EditorHeader: React.FC<EditorHeaderProps> = ({ onPreview }) => {
+const SAVE_STATUS_TEXT: Record<SaveStatus, { label: string; tooltip: string }> = {
+  loading: { label: "Đang tải…", tooltip: "Đang mở bản nháp" },
+  saving: { label: "Đang lưu…", tooltip: "Đang lưu thay đổi" },
+  saved: { label: "Đã lưu", tooltip: "Bản nháp được lưu trên trình duyệt này" },
+  error: { label: "Chưa lưu được", tooltip: "Không lưu được bản nháp — bộ nhớ trình duyệt có thể đã đầy" },
+};
+
+export const EditorHeader: React.FC<EditorHeaderProps> = ({
+  onPreview,
+  saveStatus = "saved",
+}) => {
   const { undo, redo, history, historyIndex } = useEditorStore();
 
   const handleExport = async (format: "png" | "jpg") => {
@@ -102,8 +114,12 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({ onPreview }) => {
       {/* Right side */}
       <div className="flex items-center gap-2">
         {/* Save status */}
-        <Tooltip title="Tất cả thay đổi đã được lưu lên cloud">
-          <div className="flex items-center gap-1.5 px-2 py-1 text-gray-500 hover:bg-gray-50 rounded cursor-default transition-colors">
+        <Tooltip title={SAVE_STATUS_TEXT[saveStatus].tooltip}>
+          <div
+            className={`flex items-center gap-1.5 px-2 py-1 hover:bg-gray-50 rounded cursor-default transition-colors ${
+              saveStatus === "error" ? "text-red-500" : "text-gray-500"
+            }`}
+          >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
               <path
                 d="M6.5 19a4.5 4.5 0 0 1-.42-8.98A6 6 0 0 1 18 10a4 4 0 0 1-.18 8H6.5Z"
@@ -119,7 +135,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({ onPreview }) => {
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="text-xs">Đã lưu</span>
+            <span className="text-xs">{SAVE_STATUS_TEXT[saveStatus].label}</span>
           </div>
         </Tooltip>
 

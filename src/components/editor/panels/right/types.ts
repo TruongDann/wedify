@@ -1,3 +1,5 @@
+import type { ElementAnimation } from "@/types/editor";
+
 // Shared types for property sections
 export interface FilterProps {
   brightness: number;
@@ -36,11 +38,7 @@ export interface ShadowProps {
   color: string;
 }
 
-export interface AnimationProps {
-  enabled: boolean;
-  continuous: boolean;
-  type: "none" | "fadeIn" | "slideIn" | "bounce" | "pulse" | "shake" | "zoom";
-}
+export type AnimationProps = ElementAnimation;
 
 export interface PositionProps {
   x: number;

@@ -61,3 +61,25 @@ export const STOCK_IMAGES: string[] = [
   "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=200",
   "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=200",
 ];
+
+export interface Decoration {
+  id: string;
+  name: string;
+  src: string;
+  /** Kích thước mặc định khi thêm vào thiệp */
+  width: number;
+  height: number;
+}
+
+/** Họa tiết SVG tự vẽ trong public/decor — dùng tự do, không phụ thuộc nguồn ngoài. */
+export const DECORATIONS: Decoration[] = [
+  { id: "laurel-left", name: "Cành lá trái", src: "/decor/laurel-left.svg", width: 30, height: 60 },
+  { id: "laurel-right", name: "Cành lá phải", src: "/decor/laurel-right.svg", width: 30, height: 60 },
+  { id: "wreath", name: "Vòng nguyệt quế", src: "/decor/wreath.svg", width: 160, height: 160 },
+  { id: "divider-flourish", name: "Đường chia hoa văn", src: "/decor/divider-flourish.svg", width: 300, height: 40 },
+  { id: "divider-heart", name: "Đường chia trái tim", src: "/decor/divider-heart.svg", width: 300, height: 30 },
+  { id: "blob-soft", name: "Nền giọt mềm", src: "/decor/blob-soft.svg", width: 280, height: 280 },
+  { id: "wave-band", name: "Dải lượn", src: "/decor/wave-band.svg", width: 500, height: 120 },
+  { id: "frame-thin", name: "Khung viền mảnh", src: "/decor/frame-thin.svg", width: 300, height: 400 },
+  { id: "doves", name: "Đôi chim", src: "/decor/doves.svg", width: 120, height: 75 },
+];

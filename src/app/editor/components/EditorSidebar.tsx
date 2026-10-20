@@ -66,7 +66,7 @@ const tabs: TabConfig[] = [
     key: "widget",
     icon: <CalendarOutlined />,
     label: "Tiện ích",
-    tooltip: "Tiện ích (sắp ra mắt)",
+    tooltip: "Lịch, đếm ngược, xác nhận tham dự, bản đồ",
   },
   {
     key: "template",
@@ -78,7 +78,7 @@ const tabs: TabConfig[] = [
     key: "effect",
     icon: <ThunderboltOutlined />,
     label: "Hiệu ứng",
-    tooltip: "Hiệu ứng (sắp ra mắt)",
+    tooltip: "Hiệu ứng động, hiệu ứng rơi, màn mở thiệp",
   },
 ];
 

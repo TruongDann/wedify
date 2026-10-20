@@ -8,7 +8,7 @@ import {
   createShapeElement,
   useEditorStore,
 } from "@/store/editorStore";
-import { STICKERS, STOCK_IMAGES } from "@/constants/assets";
+import { DECORATIONS, STICKERS, STOCK_IMAGES } from "@/constants/assets";
 import { SHAPES } from "@/constants/shapes";
 import { ShapeElement } from "@/types/editor";
 
@@ -39,6 +39,17 @@ export const StockTab: React.FC = () => {
     addElement(
       createImageElement(src, {
         size: { width: 80, height: 80 },
+        objectFit: "contain",
+      }),
+    );
+  };
+
+  const handleAddDecoration = (d: (typeof DECORATIONS)[number]) => {
+    addElement(
+      createImageElement(d.src, {
+        alt: d.name,
+        size: { width: d.width, height: d.height },
+        objectFit: "fill",
       }),
     );
   };
@@ -95,6 +106,26 @@ export const StockTab: React.FC = () => {
         {/* Show all sections when "Tất cả" is selected */}
         {selectedCategory === "all" && (
           <>
+            {/* Họa tiết Section */}
+            <div className="mb-6">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                Họa tiết
+              </h3>
+              <div className="grid grid-cols-3 gap-2">
+                {DECORATIONS.map((d) => (
+                  <button
+                    key={d.id}
+                    title={d.name}
+                    className={`aspect-square rounded-lg cursor-pointer border-2 border-transparent hover:border-primary hover:bg-primary/5 transition-all p-2 flex items-center justify-center ${d.id === "frame-thin" ? "bg-gray-400" : "bg-gray-50"}`}
+                    onClick={() => handleAddDecoration(d)}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={d.src} alt={d.name} className="max-w-full max-h-full" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Yếu tố đám cưới Section */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">

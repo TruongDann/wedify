@@ -17,7 +17,9 @@ import { useEditorStore } from "@/store/editorStore";
 import TextElementComponent from "./elements/TextElement";
 import ImageElementComponent from "./elements/ImageElement";
 import ShapeElementComponent from "./elements/ShapeElement";
+import WidgetElementComponent from "./elements/WidgetElement";
 import { EditorElement, TextElement } from "@/types/editor";
+import { loadGoogleFont } from "@/utils/fontLoader";
 import {
   useSnapLines,
   useMarqueeSelection,
@@ -129,6 +131,36 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       onSelectElement: selectElement,
       onSelectElements: selectElements,
     });
+
+  // Tải font của mọi phần tử chữ (kể cả khi mở bản nháp / template), rồi cho Konva đo lại chữ:
+  // Konva tính sẵn độ rộng từng dòng, nếu đo lúc font chưa tải thì chữ bị lệch khi font về.
+  const fontKey = Array.from(
+    new Set(
+      elements.flatMap((el) =>
+        el.type === "text" || el.type === "widget" ? [el.fontFamily] : [],
+      ),
+    ),
+  ).join("|");
+  useEffect(() => {
+    if (!fontKey) return;
+    let cancelled = false;
+    Promise.all(fontKey.split("|").map((font) => loadGoogleFont(font))).then(
+      () => {
+        const stage = stageRef.current;
+        if (cancelled || !stage) return;
+        stage
+          .find(
+            (node: Konva.Node) =>
+              node instanceof Konva.Text || node instanceof Konva.TextPath,
+          )
+          .forEach((node) => node.fire("fontFamilyChange"));
+        stage.batchDraw();
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [fontKey]);
 
   // Update transformer when selection changes
   useEffect(() => {
@@ -329,6 +361,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       case "shape":
         return (
           <ShapeElementComponent
+            key={element.id}
+            {...commonProps}
+            element={element}
+          />
+        );
+      case "widget":
+        return (
+          <WidgetElementComponent
             key={element.id}
             {...commonProps}
             element={element}
