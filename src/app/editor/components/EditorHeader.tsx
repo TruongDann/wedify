@@ -108,7 +108,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           <Image
             src="/logo-web.png"
             alt="Logo"
-            width={100}
+            width={106}
             height={28}
             style={{ objectFit: "contain" }}
             priority

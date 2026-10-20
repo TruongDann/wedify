@@ -48,7 +48,7 @@ export default function HomePage() {
             <Image
               src="/logo-web.png"
               alt="Logo"
-              width={150}
+              width={170}
               height={45}
               style={{ objectFit: "contain" }}
               priority
