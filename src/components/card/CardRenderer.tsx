@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { CanvasSettings, EditorElement } from "@/types/editor";
 import { loadGoogleFont } from "@/utils/fontLoader";
 import TextView from "./TextView";
@@ -10,6 +10,18 @@ import WidgetView from "./WidgetView";
 import { MusicButton } from "./MusicButton";
 import { FallingEffectLayer } from "./FallingEffectLayer";
 import { IntroOverlay } from "./IntroOverlay";
+import { GiftModal } from "./WidgetExtraViews";
+import { OPEN_GIFT_EVENT } from "./clickAction";
+import {
+  DEFAULT_INTERACTION,
+  DEFAULT_VIEWER,
+  FloatingWishes,
+  InteractionBar,
+  SideInfo,
+  SideWishes,
+  useAutoScroll,
+  useWishes,
+} from "./ViewerExtras";
 import "./card.css";
 
 interface CardRendererProps {
@@ -120,12 +132,37 @@ export const CardViewer: React.FC<CardRendererProps> = ({ canvasSettings, elemen
   const music = canvasSettings.backgroundMusic;
   const { fallingEffect, intro } = canvasSettings;
 
-  // Font của màn chào
+  // Hộp QR mừng cưới mở từ "Hành động khi bấm"
+  const [giftOpen, setGiftOpen] = useState(false);
   useEffect(() => {
-    if (intro) ["Great Vibes", "Cormorant Garamond"].forEach((font) => loadGoogleFont(font));
-  }, [intro]);
+    const open = () => setGiftOpen(true);
+    window.addEventListener(OPEN_GIFT_EVENT, open);
+    return () => window.removeEventListener(OPEN_GIFT_EVENT, open);
+  }, []);
+  const gift = elements.find((el) => el.type === "widget" && el.widget === "giftQr");
 
-  return (
+  const viewer = { ...DEFAULT_VIEWER, ...canvasSettings.viewer };
+  const interaction = { ...DEFAULT_INTERACTION, ...canvasSettings.interaction };
+  const split = viewer.desktopLayout === "split";
+  const { wishes, send } = useWishes();
+
+  // Tự cuộn bắt đầu khi khách mở thiệp (hoặc sau 1.5s nếu không có màn chào)
+  const [opened, setOpened] = useState(!intro);
+  const [started, setStarted] = useState(false);
+  const handleIntroDone = useCallback(() => setOpened(true), []);
+  useEffect(() => {
+    if (!opened) return;
+    const timer = setTimeout(() => setStarted(true), intro ? 300 : 1500);
+    return () => clearTimeout(timer);
+  }, [opened, intro]);
+  useAutoScroll(viewer.autoScroll, viewer.scrollSpeed, started);
+
+  // Font của màn chào và bố cục máy tính
+  useEffect(() => {
+    if (intro || split) ["Great Vibes", "Cormorant Garamond"].forEach((font) => loadGoogleFont(font));
+  }, [intro, split]);
+
+  const card = (
     <div ref={hostRef} style={{ width: "100%", maxWidth: width, margin: "0 auto" }}>
       <div
         style={{
@@ -153,7 +190,43 @@ export const CardViewer: React.FC<CardRendererProps> = ({ canvasSettings, elemen
         )}
       </div>
 
-      {intro && <IntroOverlay intro={intro} />}
     </div>
+  );
+
+  return (
+    <>
+      {split ? (
+        <div className="wc-split" style={{ ["--wc-card-width" as string]: `${width}px` }}>
+          <div className="wc-side-col">
+            <SideInfo viewer={viewer} />
+          </div>
+          {card}
+          <div className="wc-side-col">
+            {interaction.enabled && interaction.wishes && <SideWishes wishes={wishes} />}
+          </div>
+        </div>
+      ) : (
+        card
+      )}
+
+      {interaction.enabled && (
+        <>
+          <InteractionBar
+            settings={interaction}
+            hasGift={!!gift}
+            onSendWish={send}
+            cardWidth={width * s}
+          />
+          {interaction.wishes && interaction.showWishesPublicly && (
+            <FloatingWishes wishes={wishes} cardWidth={width * s} />
+          )}
+        </>
+      )}
+
+      {intro && <IntroOverlay intro={intro} onDone={handleIntroDone} />}
+      {giftOpen && gift?.type === "widget" && (
+        <GiftModal element={gift} onClose={() => setGiftOpen(false)} />
+      )}
+    </>
   );
 };

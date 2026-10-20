@@ -117,6 +117,8 @@ const Right: React.FC<RightProps> = ({
     "widgetButton",
     "widgetMedia",
     "widgetGift",
+    "viewerDisplay",
+    "viewerInteraction",
   ]);
 
   // Sync toggles

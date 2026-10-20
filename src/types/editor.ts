@@ -332,6 +332,32 @@ export interface CanvasSettings {
   fallingEffect?: FallingEffect | null;
   /** Màn chào khách trước khi vào thiệp */
   intro?: IntroSettings | null;
+  /** Cách trang xem thiệp hiển thị (tự cuộn, bố cục máy tính) */
+  viewer?: ViewerSettings;
+  /** Thanh tương tác cho khách: lời chúc, thích, mừng cưới */
+  interaction?: InteractionSettings;
+}
+
+export interface ViewerSettings {
+  /** Tự cuộn chậm xuống sau khi khách mở thiệp; khách chạm vào thì dừng */
+  autoScroll: boolean;
+  /** Tốc độ tự cuộn, px mỗi giây */
+  scrollSpeed: number;
+  /** Trên máy tính: "split" = thiệp ở giữa, thông tin + lời chúc hai bên; "classic" = chỉ thiệp */
+  desktopLayout: "classic" | "split";
+  /** Tiêu đề và lời giới thiệu hiện ở cột trái bố cục split */
+  title: string;
+  description: string;
+}
+
+export interface InteractionSettings {
+  enabled: boolean;
+  wishes: boolean;
+  like: boolean;
+  /** Nút mừng cưới — mở hộp QR của tiện ích QR mừng cưới */
+  gift: boolean;
+  /** Lời chúc hiện nổi trên thiệp cho mọi khách, hay chỉ người gửi thấy */
+  showWishesPublicly: boolean;
 }
 
 export type FallingKind = "petals" | "hearts" | "snow" | "leaves" | "confetti" | "stars";

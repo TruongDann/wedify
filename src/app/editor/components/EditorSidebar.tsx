@@ -12,6 +12,7 @@ import {
   BlockOutlined,
   ThunderboltOutlined,
   QuestionCircleOutlined,
+  AppstoreAddOutlined,
 } from "@ant-design/icons";
 
 export type TabKey =
@@ -21,6 +22,7 @@ export type TabKey =
   | "background"
   | "music"
   | "widget"
+  | "blocks"
   | "template"
   | "effect";
 
@@ -67,6 +69,12 @@ const tabs: TabConfig[] = [
     icon: <CalendarOutlined />,
     label: "Tiện ích",
     tooltip: "Lịch, đếm ngược, xác nhận tham dự, bản đồ",
+  },
+  {
+    key: "blocks",
+    icon: <AppstoreAddOutlined />,
+    label: "Khối mẫu",
+    tooltip: "Chèn phần dựng sẵn: ảnh bìa, ngày cưới, địa điểm...",
   },
   {
     key: "template",

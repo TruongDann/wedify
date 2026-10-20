@@ -5,29 +5,12 @@
  * font Google Fonts; lời văn, tên và địa chỉ là nội dung mẫu để người dùng thay.
  */
 
-import type {
-  AnimationType,
-  EditorElement,
-  ElementAnimation,
-  ImageElement,
-  Template,
-  TextElement,
-  WidgetElement,
-  WidgetKind,
-} from "@/types/editor";
-import {
-  createImageElement,
-  createTextElement,
-  createWidgetElement,
-} from "@/store/helpers/elementHelpers";
+import type { Template } from "@/types/editor";
+import { DEFAULT_MEDIA } from "@/components/widgets/widgetModel";
+import { GUEST_NAME_TOKEN } from "@/components/card/guestName";
+import { WHITE, anim, createBuilder, unsplash } from "./templateBuilder";
 
-const EVENT_DATE = "2027-05-20T11:00";
 const RED = "#b70000";
-const WHITE = "#ffffff";
-const INK = "#1f1f1f";
-
-const unsplash = (id: string, width = 1000) =>
-  `https://images.unsplash.com/photo-${id}?w=${width}&q=80&auto=format&fit=crop`;
 
 const PHOTO = {
   hero: unsplash("1537633552985-df8429e8048b"),
@@ -46,109 +29,7 @@ const PHOTO = {
   evening: unsplash("1519741497674-611481863552"),
 };
 
-/** [left, top, width, height, rotation?] — toạ độ như CSS: phần tử xoay quanh tâm. */
-type Box = [number, number, number, number, number?];
-
-/** Đổi sang toạ độ Konva: xoay quanh góc trên-trái. */
-const place = ([left, top, width, height, rotation = 0]: Box) => {
-  const r = (rotation * Math.PI) / 180;
-  const cx = left + width / 2;
-  const cy = top + height / 2;
-  const dx = -width / 2;
-  const dy = -height / 2;
-  return {
-    position: {
-      x: cx + dx * Math.cos(r) - dy * Math.sin(r),
-      y: cy + dx * Math.sin(r) + dy * Math.cos(r),
-    },
-    size: { width, height },
-    rotation,
-  };
-};
-
-const anim = (type: AnimationType, delay = 0): ElementAnimation => ({
-  enabled: true,
-  continuous: false,
-  type,
-  duration: 1.3,
-  delay,
-});
-
-interface TextStyle {
-  font: string;
-  size: number;
-  color?: string;
-  bold?: boolean;
-  italic?: boolean;
-  align?: TextElement["textAlign"];
-  spacing?: number;
-  lineHeight?: number;
-  /** Bóng mờ để chữ đọc được trên ảnh (mặc định bật cho chữ trắng) */
-  shadow?: boolean;
-}
-
-const elements: EditorElement[] = [];
-
-const push = (el: Omit<EditorElement, "id" | "zIndex">) => {
-  const index = elements.length + 1;
-  elements.push({ ...el, id: `fil-${index}`, zIndex: index } as EditorElement);
-};
-
-const text = (content: string, box: Box, s: TextStyle, animation: AnimationType = "slideUp", delay = 0) =>
-  push(
-    createTextElement({
-      content,
-      ...place(box),
-      fontFamily: s.font,
-      fontSize: s.size,
-      fontWeight: s.bold ? 700 : 400,
-      fontStyle: s.italic ? "italic" : "normal",
-      textAlign: s.align ?? "center",
-      color: s.color ?? INK,
-      letterSpacing: s.spacing ?? 0,
-      lineHeight: s.lineHeight ?? 1.3,
-      padding: { top: 0, right: 0, bottom: 0, left: 0 },
-      shadow: {
-        enabled: s.shadow ?? s.color === WHITE,
-        x: 0,
-        y: 1,
-        blur: 6,
-        color: s.color === WHITE ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.8)",
-      },
-      animation: anim(animation, delay),
-    }),
-  );
-
-const photo = (src: string, box: Box, animation: AnimationType = "slideUp", delay = 0.2, extra?: Partial<ImageElement>) =>
-  push(
-    createImageElement(src, {
-      alt: "Ảnh cưới",
-      ...place(box),
-      objectFit: "cover",
-      animation: anim(animation, delay),
-      ...extra,
-    }),
-  );
-
-const decor = (name: string, box: Box, animation: AnimationType = "slideUp", delay = 0.2) =>
-  push(
-    createImageElement(`/decor/${name}.svg`, {
-      alt: "Họa tiết",
-      ...place(box),
-      objectFit: "fill",
-      animation: anim(animation, delay),
-    }),
-  );
-
-const widget = (kind: WidgetKind, box: Box, overrides: Partial<WidgetElement>) =>
-  push(
-    createWidgetElement(kind, {
-      ...place(box),
-      eventDate: EVENT_DATE,
-      animation: anim("slideUp", 0.3),
-      ...overrides,
-    }),
-  );
+const { elements, text, photo, decor, widget } = createBuilder("fil", "2027-05-20T11:00");
 
 // ---------------------------------------------------------------------------
 // 1. Ảnh bìa + lời chào
@@ -300,18 +181,46 @@ text("AND EVER", [350, 7240, 150, 32], { font: "Italiana", size: 20, spacing: 2 
 photo(PHOTO.evening, [0, 7280, 500, 680]);
 text("You are my\nsunshine", [60, 7340, 380, 160], { font: "Great Vibes", size: 64, color: WHITE, lineHeight: 1.1 });
 
-widget("rsvp", [70, 8020, 360, 0], {
+// ---------------------------------------------------------------------------
+// 11. Album, lời mời theo tên khách, xác nhận tham dự, mừng cưới, liên hệ
+// ---------------------------------------------------------------------------
+text("ALBUM ẢNH CƯỚI", [10, 8000, 480, 32], { font: "Prata", size: 22, spacing: 2 });
+widget("album", [10, 8045, 480, 318], { animation: anim("fadeIn", 0.2), media: { ...DEFAULT_MEDIA, columns: 3 } });
+text(`Trân trọng kính mời\n${GUEST_NAME_TOKEN}`, [10, 8395, 480, 72], { font: "Cormorant Garamond", size: 22, bold: true, lineHeight: 1.4 });
+widget("rsvp", [70, 8480, 360, 0], {
   color: "#333333",
   backgroundColor: WHITE,
   borderRadius: 8,
   fontFamily: "Quicksand",
 });
-decor("doves", [190, 8470, 120, 75]);
-text("Thank you", [10, 8560, 480, 90], { font: "Pacifico", size: 56 });
-
-// Form xác nhận tham dự lấy chiều cao theo nội dung
-const rsvp = elements.find((el) => el.type === "widget" && el.widget === "rsvp") as WidgetElement;
-rsvp.size = createWidgetElement("rsvp").size;
+widget("reminder", [130, 8880, 240, 48], {
+  color: WHITE,
+  accentColor: "#940000",
+  borderRadius: 24,
+  button: { label: "Thêm vào lịch", phone: "", eventTitle: "Đám cưới Minh Anh & Hoàng Nam" },
+  map: { address: "Hồ Gươm, Hoàn Kiếm, Hà Nội", placeName: "Trung tâm tiệc cưới Hoa Sen", buttonText: "Chỉ đường" },
+});
+widget("giftQr", [120, 8970, 260, 340], {
+  color: "#333333",
+  accentColor: "#940000",
+  backgroundColor: WHITE,
+  borderRadius: 12,
+  gift: { title: "Hộp mừng cưới", bankCode: "VCB", accountNumber: "0123456789", accountName: "NGUYEN VAN A", note: "Mung cuoi Minh Anh Hoang Nam" },
+});
+widget("call", [30, 9335, 210, 46], {
+  color: WHITE,
+  accentColor: "#5c5c5c",
+  borderRadius: 23,
+  button: { label: "Gọi chú rể", phone: "0900000001", eventTitle: "" },
+});
+widget("call", [260, 9335, 210, 46], {
+  color: WHITE,
+  accentColor: "#5c5c5c",
+  borderRadius: 23,
+  button: { label: "Gọi cô dâu", phone: "0900000002", eventTitle: "" },
+});
+decor("doves", [190, 9410, 120, 75]);
+text("Thank you", [10, 9490, 480, 90], { font: "Pacifico", size: 56 });
 
 export const fallInLoveTemplate: Template = {
   id: "fall-in-love",
@@ -320,12 +229,21 @@ export const fallInLoveTemplate: Template = {
   category: "outdoor",
   canvasSettings: {
     width: 500,
-    height: 8700,
+    height: 9620,
     backgroundColor: "#ffffff",
     backgroundImage: null,
     backgroundSize: "cover",
     backgroundMusic: null,
     isMusicPlaying: false,
+    fallingEffect: { kind: "petals", density: 22, speed: 0.8 },
+    intro: {
+      style: "envelope",
+      title: "Minh Anh & Hoàng Nam",
+      subtitle: "Trân trọng kính mời",
+      buttonText: "Mở thiệp",
+      color: "#e9efe4",
+      textColor: "#3f4a36",
+    },
   },
   elements,
 };

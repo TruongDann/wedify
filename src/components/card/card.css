@@ -72,3 +72,35 @@
     animation: none !important;
   }
 }
+
+/* Lời chúc nổi */
+@keyframes wc-wish-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.wc-wish {
+  animation: wc-wish-in 0.5s ease both;
+}
+
+/* Bố cục máy tính "split": thiệp ở giữa, hai cột thông tin dính theo khi cuộn */
+.wc-split {
+  display: block;
+}
+.wc-split > .wc-side-col {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .wc-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--wc-card-width) minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+    padding: 0 32px;
+  }
+  .wc-split > .wc-side-col {
+    display: block;
+    position: sticky;
+    top: 32px;
+    padding-top: 32px;
+  }
+}

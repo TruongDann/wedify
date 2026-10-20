@@ -12,6 +12,7 @@ import {
   TemplateTab,
   EffectsTab,
   WidgetTab,
+  BlocksTab,
 } from "./left/index";
 
 interface LeftProps {
@@ -36,6 +37,8 @@ const Left: React.FC<LeftProps> = ({ activeTab, isOpen, onToggle }) => {
         return <StockTab />;
       case "background":
         return <BackgroundTab />;
+      case "blocks":
+        return <BlocksTab />;
       case "template":
         return <TemplateTab />;
       case "music":

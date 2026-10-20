@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CalendarPlus, ChevronLeft, ChevronRight, Copy, Phone, X } from "lucide-react";
 import { WidgetElement } from "@/types/editor";
 import {
@@ -50,8 +51,27 @@ export const CallView: React.FC<Props> = ({ element }) => {
 
 /** Lời nhắc lịch: bấm mở danh sách Google Calendar / file .ics cho Apple, Outlook. */
 export const ReminderView: React.FC<Props> = ({ element }) => {
-  const [open, setOpen] = useState(false);
+  const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null);
   const [icsUrl, setIcsUrl] = useState<string | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Menu nằm ngoài thiệp (thiệp đang bị thu nhỏ bằng transform) nên đóng khi cuộn / bấm ra ngoài
+  useEffect(() => {
+    if (!menuAt) return;
+    const close = () => setMenuAt(null);
+    window.addEventListener("scroll", close, { passive: true });
+    window.addEventListener("pointerdown", close);
+    return () => {
+      window.removeEventListener("scroll", close);
+      window.removeEventListener("pointerdown", close);
+    };
+  }, [menuAt]);
+
+  const toggle = () => {
+    if (menuAt) return setMenuAt(null);
+    const r = buttonRef.current?.getBoundingClientRect();
+    if (r) setMenuAt({ x: r.left + r.width / 2, y: r.bottom + 6 });
+  };
   const links = reminderLinks(element);
   const { label } = widgetButton(element);
 
@@ -76,23 +96,24 @@ export const ReminderView: React.FC<Props> = ({ element }) => {
 
   return (
     <>
-      <button type="button" style={buttonStyle(element)} onClick={() => setOpen((v) => !v)}>
+      <button ref={buttonRef} type="button" style={buttonStyle(element)} onClick={toggle}>
         <CalendarPlus size={Math.min(18, element.size.height * 0.4)} />
         {label}
       </button>
-      {open && links && (
+      {menuAt && links && createPortal(
         <div
+          onPointerDown={(e) => e.stopPropagation()}
           style={{
-            position: "absolute",
-            top: "100%",
-            left: "50%",
+            position: "fixed",
+            top: menuAt.y,
+            left: menuAt.x,
             transform: "translateX(-50%)",
-            marginTop: 6,
             background: "#fff",
             borderRadius: 8,
             boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
             overflow: "hidden",
-            zIndex: 10,
+            zIndex: 70,
+            fontFamily: "system-ui, sans-serif",
           }}
         >
           <a href={links.google} target="_blank" rel="noopener noreferrer" style={item}>
@@ -103,7 +124,8 @@ export const ReminderView: React.FC<Props> = ({ element }) => {
               Apple / Outlook (.ics)
             </a>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
@@ -234,7 +256,7 @@ export const AlbumView: React.FC<Props> = ({ element }) => {
           <img src={images[i]} alt="" loading="lazy" style={{ width: "100%", height: "100%", maxWidth: "none", objectFit: "cover" }} />
         </button>
       ))}
-      {open !== null && (
+      {open !== null && createPortal(
         <div
           role="dialog"
           aria-label="Xem ảnh"
@@ -256,7 +278,8 @@ export const AlbumView: React.FC<Props> = ({ element }) => {
               </button>
             </>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
@@ -302,5 +325,44 @@ export const GiftQrView: React.FC<Props> = ({ element }) => {
         </button>
       </div>
     </>
+  );
+};
+
+/** Hộp bật lên hiện thẻ QR mừng cưới — mở bằng hành động "Mở hộp QR mừng cưới". */
+export const GiftModal: React.FC<{ element: WidgetElement; onClose: () => void }> = ({ element, onClose }) => {
+  const { width, height } = element.size;
+  return (
+    <div
+      role="dialog"
+      aria-label="Mừng cưới"
+      onClick={onClose}
+      style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: "relative",
+          width,
+          height,
+          maxWidth: "100%",
+          borderRadius: Math.max(element.borderRadius, 12),
+          background: element.backgroundColor === "transparent" ? "#ffffff" : element.backgroundColor,
+          color: element.color,
+          fontFamily: `"${element.fontFamily}", sans-serif`,
+          overflow: "hidden",
+          boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
+        }}
+      >
+        <GiftQrView element={element} />
+        <button
+          type="button"
+          aria-label="Đóng"
+          onClick={onClose}
+          style={{ position: "absolute", top: 8, right: 8, border: 0, background: "transparent", cursor: "pointer", color: "#999" }}
+        >
+          <X size={18} />
+        </button>
+      </div>
+    </div>
   );
 };
