@@ -42,7 +42,7 @@ export const WidgetButtonSection: React.FC<SectionProps> = ({
   const set = (patch: Partial<ButtonSettings>) =>
     onUpdate({ button: { ...button, ...patch } });
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Nội dung nút"
         sectionKey="widgetButton"
@@ -108,7 +108,7 @@ export const WidgetMediaSection: React.FC<SectionProps> = ({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title={element.widget === "youtube" ? "Video" : "Ảnh"}
         sectionKey="widgetMedia"
@@ -209,7 +209,7 @@ export const WidgetGiftSection: React.FC<SectionProps> = ({
   const gift = widgetGift(element);
   const set = (patch: Partial<GiftSettings>) => onUpdate({ gift: { ...gift, ...patch } });
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Tài khoản nhận mừng"
         sectionKey="widgetGift"

@@ -1,16 +1,44 @@
 "use client";
 
 import React, { useState } from "react";
-import { X } from "lucide-react";
-import { Button, Upload } from "antd";
+import { ImagePlus, Pipette, X } from "lucide-react";
+import { Popover, Upload } from "antd";
 import { HexColorPicker, HexColorInput } from "react-colorful";
 import { useEditorStore } from "@/store/editorStore";
 import { COLOR_PALETTE, GRADIENT_PALETTE } from "@/constants/colors";
 import { STOCK_IMAGES } from "@/constants/assets";
+import { PanelTabs, SectionTitle, Tile } from "./ui";
+
+const CHECKER =
+  "linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)";
+
+const checkerStyle: React.CSSProperties = {
+  backgroundImage: CHECKER,
+  backgroundSize: "8px 8px",
+  backgroundPosition: "0 0, 0 4px, 4px -4px, -4px 0px",
+};
+
+// Style hiển thị một giá trị nền (màu, gradient, trong suốt)
+const fillStyle = (value: string): React.CSSProperties =>
+  value === "transparent"
+    ? checkerStyle
+    : value.startsWith("linear-gradient")
+      ? { backgroundImage: value }
+      : { backgroundColor: value };
 
 export const BackgroundTab: React.FC = () => {
   const { setCanvasSettings, canvasSettings } = useEditorStore();
-  const [bgSubTab, setBgSubTab] = useState<string>("color");
+  const [bgSubTab, setBgSubTab] = useState<"color" | "image">("color");
+
+  const bgColor = canvasSettings.backgroundColor || "#FFFFFF";
+  const bgImage = canvasSettings.backgroundImage;
+  const isGradient = bgColor.startsWith("linear-gradient");
+  const pickerColor =
+    bgColor === "transparent" || isGradient ? "#FFFFFF" : bgColor;
+
+  // Chọn màu thì bỏ ảnh nền để màu hiển thị được
+  const applyColor = (color: string) =>
+    setCanvasSettings({ backgroundColor: color, backgroundImage: null });
 
   const handleBackgroundUpload = (file: File) => {
     const reader = new FileReader();
@@ -21,251 +49,192 @@ export const BackgroundTab: React.FC = () => {
     return false;
   };
 
+  const current = bgImage
+    ? { label: "Hình nền", meta: "Ảnh" }
+    : bgColor === "transparent"
+      ? { label: "Trong suốt", meta: "Không có nền" }
+      : isGradient
+        ? { label: "Gradient", meta: "Màu chuyển" }
+        : { label: "Màu trơn", meta: bgColor.toUpperCase() };
+
+  const customPicker = (
+    <div className="w-56">
+      <HexColorPicker
+        color={pickerColor}
+        onChange={applyColor}
+        style={{ width: "100%" }}
+      />
+      <div className="flex items-center gap-2 mt-3">
+        <span
+          className="w-8 h-8 rounded-lg shrink-0 shadow-[inset_0_0_0_1px_var(--color-line)]"
+          style={{ backgroundColor: pickerColor }}
+        />
+        <HexColorInput
+          color={pickerColor}
+          onChange={applyColor}
+          prefixed
+          className="flex-1 min-w-0 h-8 px-3 text-sm border border-line rounded-lg uppercase focus:outline-none focus:border-primary"
+        />
+      </div>
+    </div>
+  );
+
+  const tabs = [
+    { key: "color" as const, label: "Màu nền" },
+    { key: "image" as const, label: "Hình nền" },
+  ];
+
   return (
     <div className="flex flex-col h-full">
-      {/* Tabs: Màu nền / Hình nền */}
-      <div className="border-b border-gray-100">
-        <div className="flex">
-          <button
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              bgSubTab === "color"
-                ? "text-primary border-b-2 border-primary"
-                : "text-gray-600 hover:text-gray-800"
-            }`}
-            onClick={() => setBgSubTab("color")}
-          >
-            Màu nền
-          </button>
-          <button
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              bgSubTab === "image"
-                ? "text-primary border-b-2 border-primary"
-                : "text-gray-600 hover:text-gray-800"
-            }`}
-            onClick={() => setBgSubTab("image")}
-          >
-            Hình nền
-          </button>
+      {/* Nền đang dùng */}
+      <div className="px-4 pt-3 pb-3">
+        <div className="flex items-center gap-3 rounded-xl border border-line py-2.5 pl-2.5 pr-2">
+          <span
+            className="w-10 h-10 rounded-lg shrink-0 bg-cover bg-center shadow-[inset_0_0_0_1px_var(--color-line)]"
+            style={
+              bgImage ? { backgroundImage: `url(${bgImage})` } : fillStyle(bgColor)
+            }
+          />
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-ink-3">Nền đang dùng</div>
+            <div className="text-sm font-medium text-ink leading-5">
+              {current.label}
+            </div>
+            <div className="text-xs text-ink-3 truncate">{current.meta}</div>
+          </div>
+          {bgImage && (
+            <button
+              type="button"
+              title="Xóa ảnh nền"
+              onClick={() => setCanvasSettings({ backgroundImage: null })}
+              className="w-7 h-7 rounded-full flex items-center justify-center text-ink-3 hover:bg-surface-muted hover:text-ink"
+            >
+              <X size={15} />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Content based on sub-tab */}
+      {/* Tabs: Màu nền / Hình nền */}
+      <PanelTabs tabs={tabs} active={bgSubTab} onChange={setBgSubTab} />
+
       <div className="flex-1 overflow-y-auto">
         {bgSubTab === "color" && (
-          <div className="p-4">
-            {/* Current Background Color */}
-            <div className="mb-5">
-              <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
-                Màu nền hiện tại
-              </h3>
-              <div
-                className="w-12 h-12 rounded-lg border border-gray-200 shadow-sm"
-                style={{
-                  backgroundColor:
-                    canvasSettings.backgroundColor === "transparent"
-                      ? undefined
-                      : canvasSettings.backgroundColor,
-                  backgroundImage:
-                    canvasSettings.backgroundColor === "transparent"
-                      ? "linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)"
-                      : canvasSettings.backgroundColor?.startsWith(
-                            "linear-gradient"
-                          )
-                        ? canvasSettings.backgroundColor
-                        : undefined,
-                  backgroundSize:
-                    canvasSettings.backgroundColor === "transparent"
-                      ? "8px 8px"
-                      : undefined,
-                  backgroundPosition:
-                    canvasSettings.backgroundColor === "transparent"
-                      ? "0 0, 0 4px, 4px -4px, -4px 0px"
-                      : undefined,
-                }}
+          <div className="p-4 space-y-6">
+            {/* Màu trơn */}
+            <section>
+              <SectionTitle
+                title="Màu trơn"
+                action={
+                  <Popover
+                    content={customPicker}
+                    trigger="click"
+                    placement="bottomRight"
+                    arrow={false}
+                  >
+                    <button
+                      type="button"
+                      className="h-8 px-3 rounded-full flex items-center gap-1.5 text-[13px] font-semibold text-ink-2 hover:bg-surface-muted"
+                    >
+                      <Pipette size={14} />
+                      Màu tùy chỉnh
+                    </button>
+                  </Popover>
+                }
               />
-            </div>
-
-            {/* Default Colors */}
-            <div className="mb-5">
-              <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
-                Màu nền mặc định
-              </h3>
-              <p className="text-sm text-gray-500 mb-3">Màu đơn</p>
-
               <div className="grid grid-cols-6 gap-2">
-                {COLOR_PALETTE.map((item, index) => (
-                  <button
-                    key={index}
-                    className={`aspect-square rounded-lg border-2 transition-all hover:scale-105 ${
-                      canvasSettings.backgroundColor === item.color
-                        ? "border-primary ring-2 ring-primary/30"
-                        : "border-transparent hover:border-gray-300"
-                    }`}
-                    style={{
-                      backgroundColor: item.isTransparent
-                        ? undefined
-                        : item.color,
-                      backgroundImage: item.isTransparent
-                        ? "linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)"
-                        : undefined,
-                      backgroundSize: "8px 8px",
-                      backgroundPosition: "0 0, 0 4px, 4px -4px, -4px 0px",
-                    }}
-                    onClick={() =>
-                      setCanvasSettings({ backgroundColor: item.color })
-                    }
-                  />
+                {COLOR_PALETTE.map((item) => (
+                  <Tile
+                    key={item.color}
+                    title={item.isTransparent ? "Trong suốt" : item.color}
+                    selected={!bgImage && bgColor.toLowerCase() === item.color.toLowerCase()}
+                    onClick={() => applyColor(item.color)}
+                    className="aspect-square p-0.75"
+                  >
+                    <span
+                      className="block w-full h-full rounded-[7px]"
+                      style={fillStyle(item.color)}
+                    />
+                  </Tile>
                 ))}
               </div>
-            </div>
+            </section>
 
-            {/* Gradient Colors */}
-            <div className="mb-5">
-              <p className="text-sm text-gray-500 mb-3">Màu nền gradient</p>
-
+            {/* Gradient */}
+            <section>
+              <SectionTitle title="Gradient" />
               <div className="grid grid-cols-6 gap-2">
                 {GRADIENT_PALETTE.map((item, index) => (
-                  <button
-                    key={index}
-                    className={`aspect-square rounded-lg border-2 transition-all hover:scale-105 ${
-                      canvasSettings.backgroundColor === item.gradient
-                        ? "border-primary ring-2 ring-primary/30"
-                        : "border-transparent hover:border-gray-300"
-                    }`}
-                    style={{
-                      backgroundImage: item.gradient,
-                    }}
-                    onClick={() =>
-                      setCanvasSettings({ backgroundColor: item.gradient })
-                    }
-                  />
+                  <Tile
+                    key={item.gradient}
+                    title={`Gradient ${index + 1}`}
+                    selected={!bgImage && bgColor === item.gradient}
+                    onClick={() => applyColor(item.gradient)}
+                    className="aspect-square p-0.75"
+                  >
+                    <span
+                      className="block w-full h-full rounded-[7px]"
+                      style={{ backgroundImage: item.gradient }}
+                    />
+                  </Tile>
                 ))}
               </div>
-            </div>
-
-            {/* Custom Color Picker - Inline */}
-            <div className="pt-4 border-t border-gray-100">
-              <div className="color-picker-wrapper">
-                <HexColorPicker
-                  color={
-                    canvasSettings.backgroundColor === "transparent" ||
-                    canvasSettings.backgroundColor?.startsWith("linear-gradient")
-                      ? "#6F42A3"
-                      : canvasSettings.backgroundColor
-                  }
-                  onChange={(color) =>
-                    setCanvasSettings({ backgroundColor: color })
-                  }
-                  style={{ width: "100%" }}
-                />
-                <div className="flex items-center gap-3 mt-4">
-                  <div
-                    className="w-10 h-10 rounded-lg border border-gray-200 shadow-sm shrink-0"
-                    style={{
-                      backgroundColor:
-                        canvasSettings.backgroundColor === "transparent" ||
-                        canvasSettings.backgroundColor?.startsWith(
-                          "linear-gradient"
-                        )
-                          ? "#6F42A3"
-                          : canvasSettings.backgroundColor,
-                    }}
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500 font-medium">
-                        HEX
-                      </span>
-                      <HexColorInput
-                        color={
-                          canvasSettings.backgroundColor === "transparent" ||
-                          canvasSettings.backgroundColor?.startsWith(
-                            "linear-gradient"
-                          )
-                            ? "6F42A3"
-                            : canvasSettings.backgroundColor?.replace("#", "")
-                        }
-                        onChange={(color) =>
-                          setCanvasSettings({ backgroundColor: `#${color}` })
-                        }
-                        prefixed
-                        className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary uppercase"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </section>
           </div>
         )}
 
         {bgSubTab === "image" && (
-          <div className="p-4">
-            {/* Upload Background Button */}
-            <div className="mb-4">
-              <Upload
-                accept="image/*"
-                showUploadList={false}
-                beforeUpload={handleBackgroundUpload}
-                className="block w-full [&_.ant-upload]:w-full"
+          <div className="p-4 grid grid-cols-3 gap-2">
+            {/* Ảnh của bạn */}
+            <Upload
+              accept="image/*"
+              showUploadList={false}
+              beforeUpload={handleBackgroundUpload}
+              className="block [&_.ant-upload]:block! [&_.ant-upload]:w-full [&_.ant-upload]:h-full"
+            >
+              <button
+                type="button"
+                className="w-full aspect-square rounded-[10px] border border-dashed border-line-strong bg-surface-subtle text-link flex flex-col items-center justify-center gap-1 p-2 text-[13px] font-medium leading-4 hover:bg-surface-muted transition-colors"
               >
-                <Button
-                  type="primary"
-                  size="large"
-                  className="!font-medium !text-sm !rounded-lg h-11 !w-full"
-                >
-                  Tải ảnh nền
-                </Button>
-              </Upload>
-            </div>
+                <ImagePlus size={18} />
+                Ảnh của bạn
+              </button>
+            </Upload>
 
-            {/* Current Background Image */}
-            {canvasSettings.backgroundImage && (
-              <div className="mb-5">
-                <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
-                  Ảnh nền hiện tại
-                </h3>
-                <div className="relative group rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={canvasSettings.backgroundImage}
-                    alt="Current background"
-                    className="w-full h-32 object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200" />
-                  <button
-                    className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-black/50 hover:bg-primary text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg backdrop-blur-sm"
-                    onClick={() => setCanvasSettings({ backgroundImage: null })}
-                    title="Xóa ảnh nền"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              </div>
+            {/* Ảnh tải lên (không có trong thư viện) */}
+            {bgImage && !STOCK_IMAGES.includes(bgImage) && (
+              <Tile
+                title="Ảnh của bạn"
+                selected
+                onClick={() => undefined}
+                className="aspect-square bg-surface-muted"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={bgImage}
+                  alt="Ảnh nền đã tải lên"
+                  className="w-full h-full object-cover rounded-[9px]"
+                />
+              </Tile>
             )}
 
-            {/* Stock Background Images */}
-            <div>
-              <h3 className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
-                Hình nền mẫu
-              </h3>
-              <div className="grid grid-cols-2 gap-2">
-                {STOCK_IMAGES.map((src, index) => (
-                  <div
-                    key={index}
-                    className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary transition-colors"
-                    onClick={() => setCanvasSettings({ backgroundImage: src })}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={src}
-                      alt={`Background ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
+            {STOCK_IMAGES.map((src, index) => (
+              <Tile
+                key={src}
+                title={`Hình nền ${index + 1}`}
+                selected={bgImage === src}
+                onClick={() => setCanvasSettings({ backgroundImage: src })}
+                className="aspect-square bg-surface-muted"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt={`Hình nền ${index + 1}`}
+                  className="w-full h-full object-cover rounded-[9px]"
+                />
+              </Tile>
+            ))}
+
           </div>
         )}
       </div>

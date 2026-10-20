@@ -9,6 +9,7 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import type { ShapeElement, EditorElement } from "@/types/editor";
+import { SectionHeader as SharedSectionHeader } from "@/components/editor/shared/SectionHeader";
 
 // ==================== Types ====================
 
@@ -35,27 +36,15 @@ interface PropertyRowProps {
 
 // ==================== Shared Components ====================
 
+// Header kiểu Cinelove dùng chung; bản này nhận danh sách section đang mở
 const SectionHeader: React.FC<SectionHeaderProps> = ({
-  title,
-  sectionKey,
-  icon,
   expandedSections,
-  onToggle,
+  ...props
 }) => (
-  <div
-    className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100"
-    onClick={() => onToggle(sectionKey)}
-  >
-    <div className="flex items-center gap-2">
-      {icon && <span className="text-gray-500">{icon}</span>}
-      <span className="font-medium text-sm">{title}</span>
-    </div>
-    <span
-      className={`text-gray-400 transition-transform ${expandedSections.includes(sectionKey) ? "rotate-180" : ""}`}
-    >
-      ▼
-    </span>
-  </div>
+  <SharedSectionHeader
+    {...props}
+    isExpanded={expandedSections.includes(props.sectionKey)}
+  />
 );
 
 const PropertyRow: React.FC<PropertyRowProps> = ({ label, children }) => (
@@ -80,7 +69,7 @@ export const ShapeColorSection: React.FC<ShapeColorSectionProps> = ({
   onToggle,
   onUpdate,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Màu sắc"
       sectionKey="colors"
@@ -134,7 +123,7 @@ export const ShapeShadowSection: React.FC<ShapeShadowSectionProps> = ({
   onToggle,
   onUpdate,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Đổ bóng"
       sectionKey="shadow"
@@ -231,7 +220,7 @@ export const ShapePositionSection: React.FC<ShapePositionSectionProps> = ({
   onPositionUpdate,
   onSizeUpdate,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Vị trí & Kích thước"
       sectionKey="position"

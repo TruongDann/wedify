@@ -5,7 +5,11 @@ import { Modal, Button, App } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import Cropper, { ReactCropperElement } from "react-cropper";
 import "cropperjs/dist/cropper.css";
-import { CROP_SHAPES, ASPECT_RATIOS } from "@/constants/cropShapes";
+import {
+  CROP_SHAPES,
+  ASPECT_RATIOS,
+  DEFAULT_CROP_SHAPE_ID,
+} from "@/constants/cropShapes";
 
 interface CropModalProps {
   isOpen: boolean;
@@ -27,7 +31,7 @@ const ShapeSelector: React.FC<ShapeSelectorProps> = ({
   <div>
     <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
       <span>Hình dạng cắt:</span>
-      {selectedShape !== "001" && (
+      {selectedShape !== DEFAULT_CROP_SHAPE_ID && (
         <span
           className="relative inline-flex items-center justify-center w-6 h-6 bg-gray-100 rounded cursor-pointer hover:bg-gray-200"
           style={{
@@ -36,7 +40,7 @@ const ShapeSelector: React.FC<ShapeSelectorProps> = ({
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
           }}
-          onClick={() => onSelectShape("001")}
+          onClick={() => onSelectShape(DEFAULT_CROP_SHAPE_ID)}
         >
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
             <CloseOutlined className="text-white!" style={{ fontSize: 8 }} />
@@ -102,7 +106,7 @@ export const CropModal: React.FC<CropModalProps> = ({
 }) => {
   const { message } = App.useApp();
   const cropperRef = useRef<ReactCropperElement>(null);
-  const [selectedShape, setSelectedShape] = useState<string>("001");
+  const [selectedShape, setSelectedShape] = useState<string>(DEFAULT_CROP_SHAPE_ID);
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<number | null>(
     null,
   );
@@ -110,7 +114,7 @@ export const CropModal: React.FC<CropModalProps> = ({
   const applyShapeMask = useCallback(
     (croppedCanvas: HTMLCanvasElement, shapeId: string): Promise<string> => {
       return new Promise((resolve) => {
-        if (shapeId === "001") {
+        if (shapeId === DEFAULT_CROP_SHAPE_ID) {
           resolve(croppedCanvas.toDataURL("image/png"));
           return;
         }
@@ -177,7 +181,7 @@ export const CropModal: React.FC<CropModalProps> = ({
   };
 
   const handleClose = () => {
-    setSelectedShape("001");
+    setSelectedShape(DEFAULT_CROP_SHAPE_ID);
     setSelectedAspectRatio(null);
     onClose();
   };
@@ -193,7 +197,7 @@ export const CropModal: React.FC<CropModalProps> = ({
       styles={{ body: { padding: 0 } }}
     >
       <style>
-        {selectedShape !== "001"
+        {selectedShape !== DEFAULT_CROP_SHAPE_ID
           ? `
           .cropper-view-box,
           .cropper-face {

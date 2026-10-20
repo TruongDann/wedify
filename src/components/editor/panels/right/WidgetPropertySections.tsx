@@ -56,7 +56,7 @@ export const WidgetStyleSection: React.FC<SectionProps> = ({
 }) => {
   const usesDate = ["calendar", "countdown", "reminder"].includes(element.widget);
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title={WIDGET_LABELS[element.widget]}
         sectionKey="widgetStyle"
@@ -148,7 +148,7 @@ export const WidgetRsvpSection: React.FC<SectionProps> = ({
   );
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Nội dung form"
         sectionKey="widgetRsvp"
@@ -197,7 +197,7 @@ export const WidgetMapSection: React.FC<SectionProps> = ({
 }) => {
   const set = (patch: Partial<MapSettings>) => onUpdate({ map: { ...element.map, ...patch } });
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Địa điểm"
         sectionKey="widgetMap"

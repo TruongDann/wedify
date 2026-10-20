@@ -15,6 +15,7 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import type { ImageElement, EditorElement } from "@/types/editor";
+import { SectionHeader as SharedSectionHeader } from "@/components/editor/shared/SectionHeader";
 
 const { Option } = Select;
 
@@ -72,27 +73,15 @@ interface PropertyRowProps {
 
 // ==================== Shared Components ====================
 
+// Header kiểu Cinelove dùng chung; bản này nhận danh sách section đang mở
 const SectionHeader: React.FC<SectionHeaderProps> = ({
-  title,
-  sectionKey,
-  icon,
   expandedSections,
-  onToggle,
+  ...props
 }) => (
-  <div
-    className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100"
-    onClick={() => onToggle(sectionKey)}
-  >
-    <div className="flex items-center gap-2">
-      {icon && <span className="text-gray-500">{icon}</span>}
-      <span className="font-medium text-sm">{title}</span>
-    </div>
-    <span
-      className={`text-gray-400 transition-transform ${expandedSections.includes(sectionKey) ? "rotate-180" : ""}`}
-    >
-      ▼
-    </span>
-  </div>
+  <SharedSectionHeader
+    {...props}
+    isExpanded={expandedSections.includes(props.sectionKey)}
+  />
 );
 
 const PropertyRow: React.FC<PropertyRowProps> = ({ label, children }) => (
@@ -117,7 +106,7 @@ export const ImageActionSection: React.FC<ImageActionSectionProps> = ({
   onCropImage,
   onSwitchToImageTab,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <div className="px-4 py-3 font-medium text-sm border-b border-gray-100">
       <div className="flex items-center gap-2">
         <EditOutlined className="text-gray-500" />
@@ -144,7 +133,7 @@ export const ImageActionSection: React.FC<ImageActionSectionProps> = ({
       </div>
       <Button
         block
-        className="bg-linear-to-r from-purple-500 to-pink-500 text-white border-0 hover:from-purple-600 hover:to-pink-600"
+        className="bg-linear-to-r from-primary to-accent text-white border-0 hover:from-primary-dark hover:to-primary"
       >
         <ThunderboltOutlined /> Xóa nền (AI)
       </Button>
@@ -184,7 +173,7 @@ export const ImageFilterSection: React.FC<ImageFilterSectionProps> = ({
   onToggle,
   onUpdate,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Màu sắc"
       sectionKey="imageColors"
@@ -331,7 +320,7 @@ export const ImagePaddingSection: React.FC<ImagePaddingSectionProps> = ({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Khoảng đệm"
         sectionKey="imagePadding"
@@ -430,7 +419,7 @@ export const ImageBorderSection: React.FC<ImageBorderSectionProps> = ({
   onUpdate,
   onToggleBorderRadiusLinked,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Đường viền"
       sectionKey="imageBorder"
@@ -589,7 +578,7 @@ export const ImageShadowSection: React.FC<ImageShadowSectionProps> = ({
   onToggle,
   onUpdate,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Đổ bóng"
       sectionKey="imageShadow"
@@ -688,7 +677,7 @@ export const ImagePositionSection: React.FC<ImagePositionSectionProps> = ({
   onPositionUpdate,
   onSizeUpdate,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Vị trí & Kích thước"
       sectionKey="imagePosition"

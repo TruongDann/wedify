@@ -18,8 +18,8 @@ export const CanvasHeightControl: React.FC<CanvasHeightControlProps> = ({
   step = 100,
 }) => {
   return (
-    <div className="mt-4 flex items-center justify-center">
-      <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200">
+    <div className="mt-6 flex items-center justify-center">
+      <div className="flex items-center gap-2 bg-white rounded-full px-2 py-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.12)] border border-line">
         <Tooltip title="Giảm chiều dài">
           <Button
             type="text"

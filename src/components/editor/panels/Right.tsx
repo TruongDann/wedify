@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from "react";
 import { Button } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined } from "@ant-design/icons";
 import { useEditorStore } from "@/store/editorStore";
 import {
   TextElement,
@@ -202,7 +202,7 @@ const Right: React.FC<RightProps> = ({
     };
 
     return (
-      <div className="p-3 space-y-3">
+      <div className="p-4 space-y-3">
         <TextEffectSection
           element={element}
           isExpanded={expandedSections.includes("textEffect")}
@@ -315,7 +315,7 @@ const Right: React.FC<RightProps> = ({
     };
 
     return (
-      <div className="p-3 space-y-3">
+      <div className="p-4 space-y-3">
         <ImageActionSection
           objectFit={element.objectFit}
           onObjectFitChange={(objectFit) => handleUpdate({ objectFit })}
@@ -402,7 +402,7 @@ const Right: React.FC<RightProps> = ({
     };
 
     return (
-      <div className="p-3 space-y-3">
+      <div className="p-4 space-y-3">
         <ShapeColorSection
           element={element}
           expandedSections={expandedSections}
@@ -457,7 +457,7 @@ const Right: React.FC<RightProps> = ({
       onUpdate: handleUpdate as (updates: Partial<WidgetElement>) => void,
     };
     return (
-      <div className="p-3 space-y-3">
+      <div className="p-4 space-y-3">
         <WidgetStyleSection
           {...sectionProps}
           isExpanded={expandedSections.includes("widgetStyle")}
@@ -560,22 +560,38 @@ const Right: React.FC<RightProps> = ({
     }
   };
 
-  // Get header text based on context
-  const getHeaderText = () => {
-    if (activeTab === "music") return "Tùy chỉnh nhạc nền";
-    if (selectedElement) return "Tùy chỉnh phần tử";
-    return "Tùy chỉnh";
+  // Tiêu đề panel theo ngữ cảnh: eyebrow nhỏ + tiêu đề chính
+  const ELEMENT_TITLES: Record<EditorElement["type"], string> = {
+    text: "Văn bản",
+    image: "Hình ảnh",
+    shape: "Hình dạng",
+    sticker: "Sticker",
+    widget: "Tiện ích",
   };
+
+  const getHeader = () => {
+    if (activeTab === "music") return { eyebrow: "Âm nhạc", title: "Nhạc nền" };
+    if (selectedElement)
+      return {
+        eyebrow: "Đang chỉnh sửa",
+        title: ELEMENT_TITLES[selectedElement.type] ?? "Phần tử",
+      };
+    return { eyebrow: "Thiết lập chung", title: "Cài đặt thiệp" };
+  };
+
+  const header = getHeader();
 
   // ==================== Main Render ====================
 
   return (
-    <div className="w-80 bg-white border-l border-gray-200 flex flex-col shrink-0 overflow-hidden h-full">
+    <aside className="w-[350px] bg-white border-l border-line flex flex-col shrink-0 overflow-hidden h-full">
       {/* Header */}
-      <div className="h-12 px-4 border-b border-gray-200 flex items-center gap-2 shrink-0">
-        <EditOutlined className="text-gray-400" />
-        <span className="font-semibold text-sm">{getHeaderText()}</span>
-      </div>
+      <header className="px-4 pt-4 pb-1 shrink-0">
+        <p className="text-[13px] leading-5 text-ink-3">{header.eyebrow}</p>
+        <h2 className="text-base font-semibold leading-6 text-ink">
+          {header.title}
+        </h2>
+      </header>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto min-h-0">{renderProperties()}</div>
@@ -587,7 +603,7 @@ const Right: React.FC<RightProps> = ({
         onClose={() => setIsCropModalOpen(false)}
         onCropComplete={handleCropComplete}
       />
-    </div>
+    </aside>
   );
 };
 

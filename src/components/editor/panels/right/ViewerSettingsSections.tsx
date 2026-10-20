@@ -36,7 +36,7 @@ export const ViewerDisplaySection: React.FC<Props> = ({ expandedSections, onTogg
   const isExpanded = expandedSections.includes("viewerDisplay");
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader title="Hiển thị" sectionKey="viewerDisplay" icon={<DesktopOutlined />} isExpanded={isExpanded} onToggle={onToggle} />
       {isExpanded && (
         <div className="px-4 pt-3 pb-1">
@@ -96,7 +96,7 @@ export const ViewerInteractionSection: React.FC<Props> = ({ expandedSections, on
   const hasGift = elements.some((el) => el.type === "widget" && el.widget === "giftQr");
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader title="Tương tác" sectionKey="viewerInteraction" icon={<MessageOutlined />} isExpanded={isExpanded} onToggle={onToggle} />
       {isExpanded && (
         <div className="px-4 pt-3 pb-1">
