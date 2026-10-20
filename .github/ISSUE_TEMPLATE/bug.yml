@@ -1,0 +1,21 @@
+name: Bug
+description: Báo lỗi
+labels: [bug]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Mô tả lỗi
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Các bước tái hiện
+      placeholder: |
+        1. ...
+        2. ...
+  - type: textarea
+    id: expected
+    attributes:
+      label: Kết quả mong đợi
