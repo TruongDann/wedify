@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "graphics:manifest": "node scripts/generate-graphics-manifest.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
