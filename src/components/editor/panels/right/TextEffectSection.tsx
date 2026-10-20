@@ -54,7 +54,7 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Hiệu ứng chữ"
         sectionKey="textEffect"

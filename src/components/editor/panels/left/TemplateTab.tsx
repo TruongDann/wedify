@@ -12,7 +12,6 @@ import {
 import type { EditorElement, Template } from "@/types/editor";
 import { weddingTemplates } from "@/data/templates";
 import { fallInLoveTemplate } from "@/data/fallInLoveTemplate";
-import { Section } from "../../shared";
 
 const TEMPLATES: Template[] = [fallInLoveTemplate, ...weddingTemplates];
 
@@ -58,28 +57,27 @@ export const TemplateTab: React.FC = () => {
   };
 
   return (
-    <Section title="Mẫu thiệp cưới">
-      <div className="grid grid-cols-2 gap-2">
-        {TEMPLATES.map((template) => (
-          <button
-            key={template.id}
-            onClick={() => apply(template)}
-            className="text-left group"
-          >
-            <div className="aspect-3/4 rounded-lg overflow-hidden border-2 border-transparent group-hover:border-primary transition-colors">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={template.thumbnail}
-                alt={template.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <span className="block mt-1 text-xs text-gray-600 truncate">
-              {template.name}
-            </span>
-          </button>
-        ))}
-      </div>
-    </Section>
+    <div className="px-4 pt-2 pb-8 grid grid-cols-2 gap-x-2 gap-y-4">
+      {TEMPLATES.map((template) => (
+        <button
+          key={template.id}
+          type="button"
+          onClick={() => apply(template)}
+          className="text-left group"
+        >
+          <div className="aspect-3/4 rounded-[10px] overflow-hidden border border-line bg-surface-muted group-hover:border-line-strong transition-colors">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={template.thumbnail}
+              alt={template.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <span className="block mt-1.5 text-[13px] font-medium leading-4 text-ink line-clamp-2">
+            {template.name}
+          </span>
+        </button>
+      ))}
+    </div>
   );
 };

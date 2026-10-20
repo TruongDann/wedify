@@ -113,22 +113,14 @@ const EditorPage: React.FC = () => {
   ]);
 
   return (
-    <ConfigProvider
-      locale={viVN}
-      theme={{
-        token: {
-          colorPrimary: "#FFA5B4",
-          borderRadius: 6,
-        },
-      }}
-    >
+    <ConfigProvider locale={viVN}>
       <App>
-        <div className="flex flex-col h-screen overflow-hidden bg-gray-100">
+        <div className="flex flex-col h-screen overflow-hidden bg-white text-ink">
           {/* Header */}
           <EditorHeader onPreview={handlePreview} saveStatus={saveStatus} />
 
           {/* Body */}
-          <div className="flex flex-1 mt-14 overflow-hidden">
+          <div className="flex flex-1 mt-16 overflow-hidden">
             {/* Left Sidebar - Toolbox with vertical tabs */}
             <EditorSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
@@ -140,8 +132,8 @@ const EditorPage: React.FC = () => {
             />
 
             {/* Canvas Area */}
-            <div className="flex-1 flex flex-col bg-gray-200 overflow-hidden">
-              <div className="flex-1 overflow-auto p-6 flex flex-col items-center">
+            <div className="flex-1 min-w-0 flex flex-col bg-canvas overflow-hidden">
+              <div className="flex-1 overflow-auto px-6 pt-14 pb-12 flex flex-col items-center">
                 <div className="relative">
                   <EditorCanvas canvasHeight={canvasSettings.height} />
                   {/* Chạy thử hiệu ứng rơi khi đang ở tab Hiệu ứng */}

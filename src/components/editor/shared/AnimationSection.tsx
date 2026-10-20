@@ -56,7 +56,7 @@ export const AnimationSection: React.FC<AnimationSectionProps> = ({
     animation.duration ?? DEFAULT_APPEAR_DURATION[animation.type] ?? 1;
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Hiệu ứng chuyển động"
         sectionKey={sectionKey}

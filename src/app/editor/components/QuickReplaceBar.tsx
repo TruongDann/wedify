@@ -29,7 +29,7 @@ const ImageThumbnail: React.FC<ImageThumbnailProps> = ({
   <Tooltip title="Click để chọn ảnh này">
     <div
       onClick={onClick}
-      className="relative w-14 h-14 rounded-lg overflow-hidden border-2 border-transparent hover:border-primary cursor-pointer group shrink-0 transition-all"
+      className="relative w-14 h-14 rounded-lg overflow-hidden border-2 border-transparent hover:border-ink cursor-pointer group shrink-0 transition-all"
     >
       <Image
         src={src}
@@ -63,9 +63,9 @@ export const QuickReplaceBar: React.FC<QuickReplaceBarProps> = ({
   ];
 
   return (
-    <div className="h-20 bg-white border-t border-gray-200 flex items-center px-4 gap-3">
+    <div className="h-20 bg-white border-t border-line flex items-center px-4 gap-3">
       <Dropdown menu={{ items: dropdownItems }} trigger={["click"]}>
-        <Button type="text" className="flex items-center gap-1 text-gray-600">
+        <Button type="text" className="flex items-center gap-1 text-ink-2">
           <span className="text-sm font-medium">Thay ảnh nhanh</span>
           <DownOutlined className="text-xs" />
         </Button>
@@ -95,7 +95,7 @@ export const QuickReplaceBar: React.FC<QuickReplaceBarProps> = ({
           type="text"
           shape="circle"
           icon={<RightOutlined className="text-gray-500" />}
-          className="bg-gray-100 hover:bg-gray-200"
+          className="bg-surface-muted hover:bg-line"
         />
       </Tooltip>
     </div>

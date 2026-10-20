@@ -17,6 +17,7 @@ import {
   ViewerDisplaySection,
   ViewerInteractionSection,
 } from "./ViewerSettingsSections";
+import { SectionHeader as SharedSectionHeader } from "@/components/editor/shared/SectionHeader";
 
 const { Option } = Select;
 
@@ -50,27 +51,15 @@ interface CardInfoSectionProps {
 
 // ==================== Shared Components ====================
 
+// Header kiểu Cinelove dùng chung; bản này nhận danh sách section đang mở
 const SectionHeader: React.FC<SectionHeaderProps> = ({
-  title,
-  sectionKey,
-  icon,
   expandedSections,
-  onToggle,
+  ...props
 }) => (
-  <div
-    className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100"
-    onClick={() => onToggle(sectionKey)}
-  >
-    <div className="flex items-center gap-2">
-      {icon && <span className="text-gray-500">{icon}</span>}
-      <span className="font-medium text-sm">{title}</span>
-    </div>
-    <span
-      className={`text-gray-400 transition-transform ${expandedSections.includes(sectionKey) ? "rotate-180" : ""}`}
-    >
-      ▼
-    </span>
-  </div>
+  <SharedSectionHeader
+    {...props}
+    isExpanded={expandedSections.includes(props.sectionKey)}
+  />
 );
 
 const PropertyRow: React.FC<PropertyRowProps> = ({ label, children }) => (
@@ -108,7 +97,7 @@ export const CardInfoSection: React.FC<CardInfoSectionProps> = ({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Thông tin thiệp"
         sectionKey="cardInfo"
@@ -235,7 +224,7 @@ export const CanvasSizeSection: React.FC<CanvasSizeSectionProps> = ({
   ];
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Kích thước canvas"
         sectionKey="canvasSize"
@@ -351,7 +340,7 @@ export const BackgroundSection: React.FC<BackgroundSectionProps> = ({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Nền"
         sectionKey="background"
@@ -476,7 +465,7 @@ export const PageSettings: React.FC<PageSettingsProps> = ({
   sizeLinked,
   onToggleSizeLinked,
 }) => (
-  <div className="p-3 space-y-3">
+  <div className="p-4 space-y-3">
     <CardInfoSection
       cardTitle={cardTitle}
       cardCategory={cardCategory}

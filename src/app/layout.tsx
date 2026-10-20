@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { ConfigProvider } from "antd";
+import { appTheme } from "@/constants/theme";
 
 export const metadata: Metadata = {
   title: "Wedding Card Editor - Tạo thiệp cưới online",
@@ -15,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body>
-        <AntdRegistry>{children}</AntdRegistry>
+        <AntdRegistry>
+          <ConfigProvider theme={appTheme}>{children}</ConfigProvider>
+        </AntdRegistry>
       </body>
     </html>
   );

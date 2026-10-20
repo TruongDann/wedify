@@ -38,7 +38,7 @@ export const TextStyleSection: React.FC<TextStyleSectionProps> = ({
   onToggle,
   onUpdate,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Kiểu chữ"
       sectionKey="style"
@@ -173,7 +173,7 @@ export const PaddingSection: React.FC<PaddingSectionProps> = ({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white border border-line rounded-2xl overflow-hidden">
       <SectionHeader
         title="Khoảng đệm"
         sectionKey="padding"
@@ -308,7 +308,7 @@ export const BorderSection: React.FC<BorderSectionProps> = ({
   borderRadiusLinked,
   setBorderRadiusLinked,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Đường viền"
       sectionKey="border"
@@ -471,7 +471,7 @@ export const ShadowSection: React.FC<ShadowSectionProps> = ({
   onToggle,
   onUpdate,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Đổ bóng"
       sectionKey="shadow"
@@ -570,7 +570,7 @@ export const PositionSection: React.FC<PositionSectionProps> = ({
   onSizeChange,
   onRotationChange,
 }) => (
-  <div className="border border-gray-200 rounded-lg overflow-hidden">
+  <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <SectionHeader
       title="Vị trí & Kích thước"
       sectionKey="position"
