@@ -220,6 +220,15 @@ export default function PublicInvitationPage() {
     return raw.filter((el) => el && !isRsvpElement(el));
   }, [invitation]);
 
+  // Tài khoản nhận quà mừng: ưu tiên hồ sơ thiệp (form "Dùng mẫu này" / Hồ sơ cưới); nếu chưa có thì lấy từ
+  // tiện ích "Quà mừng QR" mà chủ thiệp đã thêm trong editor.
+  const giftProfile = useMemo(() => {
+    if (profile.accountNumber) return profile;
+    const widget = elements.find((el) => el.type === "widget" && el.widget === "giftQr") as { gift?: { bankCode?: string; accountNumber?: string; accountName?: string } } | undefined;
+    const gift = widget?.gift;
+    return gift?.accountNumber ? { ...profile, bankName: gift.bankCode, accountNumber: gift.accountNumber, accountHolder: gift.accountName } : profile;
+  }, [profile, elements]);
+
   // Đo bề rộng khung để scale canvas vừa khít, giữ nguyên tỉ lệ như editor.
   useEffect(() => {
     const node = frameRef.current;
@@ -744,7 +753,7 @@ export default function PublicInvitationPage() {
         open={modal === "gift"}
         onClose={() => setModal(null)}
         slug={slug}
-        profile={profile}
+        profile={giftProfile}
         catalog={catalog}
         onSent={handleGiftSent}
         notify={msgApi}
