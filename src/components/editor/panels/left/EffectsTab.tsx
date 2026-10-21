@@ -32,19 +32,19 @@ const CATEGORIES: {
     key: "animation",
     title: "Hiệu ứng động",
     description: "Chuyển động của phần tử khi cuộn trang",
-    icon: "/effects/animation.webp",
+    icon: "/assets/images/effects/animation.webp",
   },
   {
     key: "intro",
     title: "Hiệu ứng mở màn",
     description: "Màn chào khách trước khi vào thiệp",
-    icon: "/effects/intro.webp",
+    icon: "/assets/images/effects/intro.webp",
   },
   {
     key: "falling",
     title: "Hiệu ứng rơi",
     description: "Cánh hoa, trái tim, tuyết rơi trên thiệp",
-    icon: "/effects/falling.webp",
+    icon: "/assets/images/effects/falling.webp",
   },
 ];
 

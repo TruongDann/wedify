@@ -111,7 +111,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
 
         <Link href="/" className="flex items-center">
           <Image
-            src="/logo-web.png"
+            src="/assets/images/brand/logo-web.png"
             alt="Logo"
             width={106}
             height={28}
@@ -196,7 +196,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           className="ml-1 flex items-center gap-1 p-0.5 pr-2 rounded-full border border-line hover:bg-surface-muted transition-colors"
         >
           <Image
-            src="/avatar.jpg"
+            src="/assets/images/brand/avatar.jpg"
             alt="Avatar"
             width={32}
             height={32}

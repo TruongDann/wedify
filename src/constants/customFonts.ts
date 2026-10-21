@@ -1,6 +1,6 @@
 /**
- * Bộ font riêng (tiếng Việt) — file nằm ở public/fonts/custom, nạp bằng @font-face (xem utils/fontLoader.ts).
- * Tự sinh từ thư mục font nguồn; thêm font mới: chép file .woff2 vào public/fonts/custom rồi khai báo thêm ở đây.
+ * Bộ font riêng (tiếng Việt) — file nằm ở public/assets/fonts/custom, nạp bằng @font-face (xem utils/fontLoader.ts).
+ * Tự sinh từ thư mục font nguồn; thêm font mới: chép file .woff2 vào public/assets/fonts/custom rồi khai báo thêm ở đây.
  */
 export interface CustomFontFace {
   file: string;

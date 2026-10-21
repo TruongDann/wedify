@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Type } from "lucide-react";
 import { Button } from "antd";
 import { createTextElement, useEditorStore } from "@/store/editorStore";
 import { TEXT_TEMPLATES } from "@/data/textTemplates";
+import { loadGoogleFonts } from "@/utils/fontLoader";
 import { SectionTitle } from "./ui";
 
 const STYLE_CARD =
@@ -12,6 +13,10 @@ const STYLE_CARD =
 
 export const TextTab: React.FC = () => {
   const { addElement } = useEditorStore();
+
+  useEffect(() => {
+    void loadGoogleFonts(TEXT_TEMPLATES.map((template) => template.fontFamily));
+  }, []);
 
   const handleAddText = (
     options: {
@@ -82,19 +87,27 @@ export const TextTab: React.FC = () => {
             <button
               key={template.id}
               type="button"
-              className="aspect-square p-3 rounded-xl border border-line bg-white hover:border-line-strong transition-colors flex items-center justify-center overflow-hidden"
+              className="aspect-square min-h-28 p-3 rounded-xl border border-line bg-white hover:border-line-strong transition-colors flex items-center justify-center overflow-hidden"
               onClick={() =>
-                handleAddText({
-                  content: template.content,
-                  fontSize: template.fontSize,
-                  fontWeight: template.fontWeight,
-                  fontFamily: template.fontFamily,
-                })
+                void loadGoogleFonts([template.fontFamily]).then(() =>
+                  handleAddText({
+                    content: template.content,
+                    fontSize: template.fontSize,
+                    fontWeight: template.fontWeight,
+                    fontFamily: template.fontFamily,
+                  }),
+                )
               }
+              title={`${template.name} · ${template.fontFamily}`}
             >
               <span
-                className="text-base font-bold text-center wrap-break-word w-full"
-                style={template.previewStyle}
+                className="min-w-0 w-full text-center whitespace-pre-line"
+                style={{
+                  ...template.previewStyle,
+                  fontSize: `${Math.max(14, Math.min(template.fontSize * 0.56, 24))}px`,
+                  lineHeight: 1.2,
+                  overflowWrap: "break-word",
+                }}
               >
                 {template.content}
               </span>
