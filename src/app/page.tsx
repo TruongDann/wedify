@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button, Card, Row, Col, Space, Modal } from "antd";
+import { Heart } from "lucide-react";
 import {
   EditOutlined,
   HeartOutlined,
@@ -320,7 +321,7 @@ export default function HomePage() {
             <span className="text-lg font-semibold">Wedding Card Editor</span>
           </div>
           <p className="text-gray-400">
-            © 2025 Wedding Card Editor. Made with ❤️
+            © 2025 Wedding Card Editor. Made with <Heart size={14} className="inline fill-rose-500 text-rose-500 align-[-2px]" />
           </p>
         </div>
       </footer>

@@ -152,7 +152,7 @@ export const ExtraStock: React.FC<{ category: string; onBack: () => void }> = ({
               onClick={() => addPreset(preset.id)}
               className="flex aspect-[4/3] flex-col items-center justify-center gap-1 rounded-lg border-2 border-gray-200 bg-gray-50 p-2 text-xs text-gray-600 transition-all hover:border-primary hover:bg-primary/5"
             >
-              <span className="text-3xl">{preset.icon}</span>
+              <preset.icon size={30} />
               {preset.label}
             </button>
           ))}

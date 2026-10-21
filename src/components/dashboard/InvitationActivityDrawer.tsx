@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Alert, Button, Card, Col, Drawer, Empty, Row, Skeleton, Switch, Table, Tabs, Tag, Typography } from "antd";
+import { Heart } from "lucide-react";
 import { userAuth } from "@/lib/auth";
 
 interface Activity {
@@ -135,7 +136,7 @@ export const InvitationActivityDrawer: React.FC<Props> = ({ invitationId, title,
           columns={[
             { title: "Người tặng", dataIndex: "senderName", render: (v: string) => <b>{v}</b> },
             { title: "Quà", render: (_: unknown, r: Activity["gifts"][number]) => <span><span className="mr-1 text-lg">{r.emoji}</span>{r.giftName}</span> },
-            { title: "Tim", dataIndex: "hearts", align: "right" as const, render: (v: number) => (v ? `${v} ♥` : "—") },
+            { title: "Tim", dataIndex: "hearts", align: "right" as const, render: (v: number) => (v ? <span className="inline-flex items-center gap-1">{v} <Heart size={12} className="fill-rose-500 text-rose-500" /></span> : "—") },
             { title: "Quy đổi", dataIndex: "amount", align: "right" as const, render: (v: number) => vnd(v) },
             { title: "Lời nhắn", dataIndex: "message", render: (v?: string | null) => v || "—" },
             { title: "Thời gian", dataIndex: "createdAt", render: dateTime },

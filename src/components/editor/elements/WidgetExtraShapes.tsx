@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Group, Rect, Text, Image as KonvaImage, Circle, RegularPolygon } from "react-konva";
+import { Group, Rect, Text, Path, Image as KonvaImage, Circle, RegularPolygon } from "react-konva";
 import useImage from "use-image";
 import { WidgetElement } from "@/types/editor";
 import { fitImage } from "./ImageElement";
@@ -33,16 +33,36 @@ const CoverImage: React.FC<{ src: string; x: number; y: number; width: number; h
   return <KonvaImage image={image} x={x + fit.x} y={y + fit.y} width={fit.width} height={fit.height} crop={fit.crop} />;
 };
 
-const ButtonShape: React.FC<{ element: WidgetElement; icon: string }> = ({ element, icon }) => {
+// Dữ liệu path lấy từ lucide (viewBox 24x24), vẽ bằng Konva Path.
+const PHONE_PATH =
+  "M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384";
+const CALENDAR_PATH =
+  "M8 2v4M16 2v4M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01";
+
+const ButtonShape: React.FC<{ element: WidgetElement; iconPath: string }> = ({ element, iconPath }) => {
   const { width, height } = element.size;
   const { label } = widgetButton(element);
+  const iconSize = Math.min(20, height * 0.42);
+  const scale = iconSize / 24;
   return (
     <>
       <Rect width={width} height={height} fill={element.accentColor} cornerRadius={element.borderRadius} shadowColor="rgba(0,0,0,0.12)" shadowBlur={8} shadowOffsetY={2} />
+      <Path
+        data={iconPath}
+        x={Math.max(10, width * 0.08)}
+        y={(height - iconSize) / 2}
+        scaleX={scale}
+        scaleY={scale}
+        stroke={element.color}
+        strokeWidth={2}
+        lineCap="round"
+        lineJoin="round"
+        listening={false}
+      />
       <Text
         width={width}
         height={height}
-        text={`${icon}  ${label}`}
+        text={label}
         fontFamily={element.fontFamily}
         fontSize={Math.min(16, height * 0.36)}
         fontStyle="bold"
@@ -56,8 +76,8 @@ const ButtonShape: React.FC<{ element: WidgetElement; icon: string }> = ({ eleme
   );
 };
 
-export const CallShape: React.FC<BodyProps> = ({ element }) => <ButtonShape element={element} icon="📞" />;
-export const ReminderShape: React.FC<BodyProps> = ({ element }) => <ButtonShape element={element} icon="📅" />;
+export const CallShape: React.FC<BodyProps> = ({ element }) => <ButtonShape element={element} iconPath={PHONE_PATH} />;
+export const ReminderShape: React.FC<BodyProps> = ({ element }) => <ButtonShape element={element} iconPath={CALENDAR_PATH} />;
 
 export const YoutubeShape: React.FC<BodyProps> = ({ element }) => {
   const { width, height } = element.size;

@@ -4,7 +4,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { App, Button, Input, Modal, Result, Select, Spin } from "antd";
-import { ArrowLeft, Camera, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Camera, ChevronDown, Crown, Plus, Trash2 } from "lucide-react";
 import { MUSIC_LIBRARY } from "@/constants/music";
 import { userAuth } from "@/lib/auth";
 import { REQUIRE_PREMIUM, isPremiumProfile } from "@/lib/premium";
@@ -163,7 +163,7 @@ function GuidedCreateInner() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-pink-50 to-white px-4">
         <Result
-          icon={<span className="text-6xl">👑</span>}
+          icon={<Crown size={56} className="mx-auto text-amber-500" />}
           title="Tính năng dành cho gói Premium"
           subTitle="Chọn mẫu và điền thông tin để có ngay thiệp hoàn chỉnh dành cho tài khoản Premium. Vui lòng nâng cấp gói để tiếp tục."
           extra={[

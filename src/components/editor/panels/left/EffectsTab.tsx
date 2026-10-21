@@ -3,9 +3,12 @@
 import React from "react";
 import { ColorPicker, Input, Modal, Slider } from "antd";
 import {
+  Ban,
   ChevronLeft,
   ChevronRight,
+  Drama,
   Eye,
+  Mail,
 } from "lucide-react";
 import { ANIMATION_EFFECTS, AnimationEffect } from "@/data/animationEffects";
 import { useEditorStore } from "@/store/editorStore";
@@ -109,7 +112,7 @@ const applyAnimationPreset = (
 
 const DEFAULT_FALLING: FallingEffect = { kind: "petals", density: 30, speed: 1 };
 
-const NONE_ICON = <span className="text-xl leading-none text-ink-3">⊘</span>;
+const NONE_ICON = <Ban size={22} className="text-ink-3" />;
 
 export const EffectsTab: React.FC = () => {
   const [activeTab, setActiveTab] = React.useState<TabKey | null>(null);
@@ -258,7 +261,7 @@ export const EffectsTab: React.FC = () => {
                 className={OPTION}
                 onClick={() => setIntro({ style: "envelope" })}
               >
-                <span className="text-xl leading-none">✉️</span>
+                <Mail size={22} />
                 Phong bì
               </Tile>
               <Tile
@@ -266,7 +269,7 @@ export const EffectsTab: React.FC = () => {
                 className={OPTION}
                 onClick={() => setIntro({ style: "curtain" })}
               >
-                <span className="text-xl leading-none">🎭</span>
+                <Drama size={22} />
                 Rèm
               </Tile>
             </div>
