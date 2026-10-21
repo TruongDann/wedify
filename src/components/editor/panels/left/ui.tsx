@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Check, Search, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 
 // Các thành phần giao diện dùng chung cho panel trái (phong cách Cinelove)
 
@@ -60,12 +60,92 @@ export const Chip: React.FC<{
   </button>
 );
 
-/** Hàng chip cuộn ngang */
+/**
+ * Hàng chip cuộn ngang. Có nút mũi tên hai bên (chỉ hiện khi còn chip bị khuất), lăn chuột dọc
+ * hoặc kéo chuột đều cuộn ngang được — thanh cuộn bị ẩn nên không có nút thì máy tính không cuộn được.
+ */
 export const ChipRow: React.FC<{ children: React.ReactNode }> = ({
   children,
-}) => (
-  <div className="flex gap-2 overflow-x-auto scrollbar-hide">{children}</div>
-);
+}) => {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const drag = React.useRef({ active: false, moved: false, startX: 0, startLeft: 0 });
+  const [edge, setEdge] = React.useState({ left: false, right: false });
+
+  const update = React.useCallback(() => {
+    const node = ref.current;
+    if (!node) return;
+    setEdge({
+      left: node.scrollLeft > 4,
+      right: node.scrollLeft + node.clientWidth < node.scrollWidth - 4,
+    });
+  }, []);
+
+  React.useEffect(() => {
+    update();
+    const node = ref.current;
+    if (!node) return;
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [update, children]);
+
+  const scrollBy = (direction: 1 | -1) =>
+    ref.current?.scrollBy({ left: direction * 180, behavior: "smooth" });
+
+  const arrow =
+    "absolute top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white border border-line-strong shadow-sm flex items-center justify-center text-ink-2 hover:bg-surface-muted";
+
+  return (
+    <div className="relative">
+      {edge.left && (
+        <button type="button" aria-label="Cuộn sang trái" className={`${arrow} left-0`} onClick={() => scrollBy(-1)}>
+          <ChevronLeft size={16} />
+        </button>
+      )}
+      <div
+        ref={ref}
+        className="flex gap-2 overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing select-none"
+        onScroll={update}
+        onWheel={(e) => {
+          // Lăn chuột dọc trên hàng chip thì cuộn ngang
+          if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) ref.current?.scrollBy({ left: e.deltaY });
+        }}
+        onPointerDown={(e) => {
+          if (e.pointerType !== "mouse" || !ref.current) return;
+          drag.current = { active: true, moved: false, startX: e.clientX, startLeft: ref.current.scrollLeft };
+        }}
+        onPointerMove={(e) => {
+          const d = drag.current;
+          if (!d.active || !ref.current) return;
+          const dx = e.clientX - d.startX;
+          if (Math.abs(dx) > 4) d.moved = true;
+          ref.current.scrollLeft = d.startLeft - dx;
+        }}
+        onPointerUp={() => {
+          drag.current.active = false;
+        }}
+        onPointerLeave={() => {
+          drag.current.active = false;
+        }}
+        // Vừa kéo xong thì không coi là bấm vào chip
+        onClickCapture={(e) => {
+          if (drag.current.moved) {
+            e.stopPropagation();
+            e.preventDefault();
+            drag.current.moved = false;
+          }
+        }}
+      >
+        {children}
+      </div>
+      {edge.right && (
+        <button type="button" aria-label="Cuộn sang phải" className={`${arrow} right-0`} onClick={() => scrollBy(1)}>
+          <ChevronRight size={16} />
+        </button>
+      )}
+    </div>
+  );
+};
 
 /** Tiêu đề mục nhỏ + hành động bên phải (vd: "Xem tất cả") */
 export const SectionTitle: React.FC<{
