@@ -15,9 +15,19 @@ import {
   type StockTextCombo,
 } from "@/constants/stockVector";
 import { loadGoogleFonts } from "@/utils/fontLoader";
+import {
+  ANIMATED_GROUP_LABELS,
+  ANIMATED_STICKERS,
+  NOTO_ANIMATED_ATTRIBUTION,
+  notoAnimatedUrl,
+  type AnimatedSticker,
+} from "@/constants/animatedStock";
+import { ANIMATED_PRESETS } from "@/data/animatedPresets";
 
 /** Các danh mục stock mở rộng: sticker (Noto Emoji), khung viền, nền họa tiết, kết hợp chữ. */
 export const EXTRA_STOCK_CATEGORIES: Array<{ id: string; label: string }> = [
+  { id: "animated", label: "Ảnh động" },
+  { id: "motion", label: "Hình động" },
   ...STOCK_EMOJI_CATEGORIES.map((category) => ({ id: category.id, label: category.label })),
   { id: "frames", label: "Khung viền" },
   { id: "patterns", label: "Nền họa tiết" },
@@ -57,7 +67,7 @@ export const ExtraStock: React.FC<{ category: string; onBack: () => void }> = ({
         alt,
         size: { width: w, height: h },
         position: centered(w),
-        animation: { enabled: true, continuous: false, type: "zoomIn", delay: 0 },
+        animation: { enabled: true, continuous: false, type: "zoom", delay: 0 },
       }),
     );
   };
@@ -82,6 +92,75 @@ export const ExtraStock: React.FC<{ category: string; onBack: () => void }> = ({
       }),
     );
   };
+
+  const addAnimated = (sticker: AnimatedSticker) => {
+    addElement(
+      createImageElement(notoAnimatedUrl(sticker.code), {
+        alt: sticker.label,
+        size: { width: 140, height: 140 },
+        position: { x: Math.round((canvasWidth - 140) / 2), y: 220 },
+        animation: { enabled: true, continuous: false, type: "zoom", delay: 0 },
+      }),
+    );
+  };
+
+  const addPreset = (presetId: string) => {
+    const preset = ANIMATED_PRESETS.find((item) => item.id === presetId);
+    if (!preset) return;
+    // Thêm cả cụm; mỗi phần tử vẫn kéo/đổi màu/đổi hiệu ứng riêng được
+    preset.build(canvasWidth, 220).forEach((element) => {
+      const { id: _id, zIndex: _zIndex, ...rest } = element as unknown as Record<string, unknown>;
+      void _id;
+      void _zIndex;
+      addElement(rest as unknown as Parameters<typeof addElement>[0]);
+    });
+  };
+
+  // ---------------------------------------------------------------- Ảnh động
+  if (category === "animated") {
+    return (
+      <div className="mb-6">
+        <Header title="Ảnh động" onBack={onBack} />
+        {(Object.keys(ANIMATED_GROUP_LABELS) as AnimatedSticker["group"][]).map((group) => (
+          <div key={group} className="mb-4">
+            <div className="mb-2 text-xs font-medium text-gray-500">{ANIMATED_GROUP_LABELS[group]}</div>
+            <div className="grid grid-cols-3 gap-2">
+              {ANIMATED_STICKERS.filter((sticker) => sticker.group === group).map((sticker) => (
+                <button key={sticker.code} type="button" title={sticker.label} className={tile} onClick={() => addAnimated(sticker)}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={notoAnimatedUrl(sticker.code)} alt={sticker.label} loading="lazy" className="h-full w-full object-contain" />
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+        <p className="text-[10px] leading-relaxed text-gray-400">{NOTO_ANIMATED_ATTRIBUTION}. Dòng ghi nguồn tự hiện trên trang thiệp.</p>
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------- Hình động tự vẽ
+  if (category === "motion") {
+    return (
+      <div className="mb-6">
+        <Header title="Hình động" onBack={onBack} />
+        <div className="grid grid-cols-2 gap-2">
+          {ANIMATED_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => addPreset(preset.id)}
+              className="flex aspect-[4/3] flex-col items-center justify-center gap-1 rounded-lg border-2 border-gray-200 bg-gray-50 p-2 text-xs text-gray-600 transition-all hover:border-primary hover:bg-primary/5"
+            >
+              <span className="text-3xl">{preset.icon}</span>
+              {preset.label}
+            </button>
+          ))}
+        </div>
+        <p className="mt-3 text-[10px] leading-relaxed text-gray-400">Cụm hình tự vẽ — thêm vào rồi kéo, đổi màu hoặc đổi hiệu ứng từng phần tử ở panel bên phải.</p>
+      </div>
+    );
+  }
 
   // ---------------------------------------------------------------- Sticker
   const emojiCategory = STOCK_EMOJI_CATEGORIES.find((item) => item.id === category);

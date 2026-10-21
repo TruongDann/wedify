@@ -1,11 +1,11 @@
-import type { WidgetElement, WidgetKind } from "@/types/editor";
+import type { ToolElement, ToolKind } from "@/types/editor";
 
-export interface WidgetPreset {
+export interface ToolPreset {
   id: string;
   label: string;
   icon: string;
   description?: string;
-  build: (canvasWidth: number) => Omit<WidgetElement, "id" | "zIndex">;
+  build: (canvasWidth: number) => Omit<ToolElement, "id" | "zIndex">;
 }
 
 const isoDate = (offsetDays: number) => {
@@ -15,14 +15,14 @@ const isoDate = (offsetDays: number) => {
 };
 
 const make = (
-  widget: WidgetKind,
+  tool: ToolKind,
   canvasWidth: number,
   size: { width: number; height: number },
   props: Record<string, any>,
   y = 160,
-): Omit<WidgetElement, "id" | "zIndex"> => ({
-  type: "widget",
-  widget,
+): Omit<ToolElement, "id" | "zIndex"> => ({
+  type: "tool",
+  tool,
   props,
   position: { x: Math.max(0, Math.round((canvasWidth - size.width) / 2)), y },
   size,
@@ -41,19 +41,7 @@ const SAMPLE_PHOTOS = [
   "https://images.unsplash.com/photo-1519741497674-611481863552?w=900&h=700&fit=crop&q=80",
 ];
 
-export const WIDGET_PRESETS: WidgetPreset[] = [
-  {
-    id: "calendar",
-    label: "Lịch",
-    icon: "📅",
-    build: (w) => make("calendar", w, { width: 320, height: 300 }, { date: isoDate(30), marker: "heart", accent: "#ef4565", textColor: "#3b1d2a", bgColor: "rgba(255,255,255,0.88)", fontFamily: "Playfair Display" }),
-  },
-  {
-    id: "countdown",
-    label: "Đếm ngược",
-    icon: "⏳",
-    build: (w) => make("countdown", w, { width: 480, height: 96 }, { date: isoDate(30), time: "17:00", accent: "#ef4565", textColor: "#3b1d2a", bgColor: "rgba(255,255,255,0.88)", fontFamily: "Playfair Display", style: "boxed", labels: ["Ngày", "Giờ", "Phút", "Giây"] }),
-  },
+export const TOOL_PRESETS: ToolPreset[] = [
   {
     id: "rsvp",
     label: "Form tham dự",

@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { Rect, Circle, Ellipse, Line, Star, Shape, Group } from "react-konva";
 import Konva from "konva";
 import { ShapeElement } from "@/types/editor";
-import { runElementAnimation } from "../animation/elementAnimation";
+import { useElementAnimation } from "../hooks/useElementAnimation";
 import { parseCssGradient } from "@/utils/gradient";
 
 interface ShapeElementProps {
@@ -27,7 +27,7 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
   onTransformEnd,
 }) => {
   const nodeRef = useRef<Konva.Node | null>(null);
-  const animation = (element as any).animation ?? { enabled: false, continuous: false, type: "none" };
+  const animation = element.animation ?? { enabled: false, continuous: false, type: "none" as const };
 
   // Default shadow values
   const shadow = element.shadow || {
@@ -38,23 +38,7 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
     color: "rgba(0,0,0,0.2)",
   };
 
-  useEffect(() => {
-    const node = nodeRef.current;
-    if (!node) return;
-    return runElementAnimation(
-      node,
-      {
-        x: element.position.x,
-        y: element.position.y,
-        opacity: element.opacity,
-        rotation: element.rotation,
-        width: element.size.width,
-        height: element.size.height,
-      },
-      animation,
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animation.enabled, animation.continuous, animation.type, animation.delay, element.position.x, element.position.y, element.rotation, element.opacity, element.size.width, element.size.height]);
+  useElementAnimation(nodeRef, { ...element, animation });
 
   const commonProps = {
     id: element.id,

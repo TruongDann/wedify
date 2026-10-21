@@ -9,7 +9,11 @@ import { useBackgroundImage } from "@/components/editor/hooks/useBackgroundImage
 import { loadGoogleFonts } from "@/utils/fontLoader";
 import { parseCssGradient } from "@/utils/gradient";
 import AmbientEffect from "@/components/editor/effects/AmbientEffect";
-import WidgetElementComponent from "@/components/editor/elements/WidgetElement";
+import ToolElementComponent from "@/components/editor/elements/ToolElement";
+import { Group } from "react-konva";
+import { Html } from "react-konva-utils";
+import WidgetView from "@/components/card/WidgetView";
+import "@/components/card/card.css";
 import { ViewerContext, type ViewerData } from "@/components/editor/ViewerContext";
 
 export type PublicCanvasSettings = {
@@ -21,6 +25,9 @@ export type PublicCanvasSettings = {
 };
 
 const noop = () => undefined;
+
+const FALLING_TO_AMBIENT = { petals: "petals", hearts: "hearts", snow: "snow", leaves: "petals", confetti: "confetti", stars: "sparkles" } as const;
+const FALLING_COLORS: Record<string, string> = { petals: "#f9a8d4", hearts: "#fb7185", snow: "#ffffff", leaves: "#84cc16", confetti: "#f59e0b", stars: "#fde68a" };
 
 interface PublicCanvasProps {
   elements: Array<Record<string, any>>;
@@ -88,7 +95,16 @@ const PublicCanvas: React.FC<PublicCanvasProps> = ({ elements, canvasSettings, d
   };
 
   // Chỉ bật bắt sự kiện khi thiệp có nút/liên kết để bấm (đỡ tốn tài nguyên vẽ lớp "hit").
-  const interactive = elements.some((el) => (el.type === "widget" && el.widget === "button") || Boolean(el.hyperlink));
+  const interactive = elements.some(
+    (el) => (el.type === "tool" && el.tool === "button") || Boolean(el.hyperlink) || (el.clickAction && el.clickAction.type !== "none"),
+  );
+
+  // Hiệu ứng rơi cấu hình ở editor (fallingEffect) -> lớp hạt của trình xem
+  const ambient = useMemo(() => {
+    const falling = canvasSettings.fallingEffect;
+    if (falling?.kind) return { type: FALLING_TO_AMBIENT[falling.kind as keyof typeof FALLING_TO_AMBIENT] ?? "petals", color: falling.color || FALLING_COLORS[falling.kind] };
+    return canvasSettings.ambientEffect ?? null;
+  }, [canvasSettings.fallingEffect, canvasSettings.ambientEffect]);
   const viewerValue = useMemo(() => ({ readOnly: true, onAction, data: viewerData }), [onAction, viewerData]);
 
   const prepare = (element: Record<string, any>) => {
@@ -98,8 +114,13 @@ const PublicCanvas: React.FC<PublicCanvasProps> = ({ elements, canvasSettings, d
     }
     return next;
   };
+  // Khách bấm vào phần tử: liên kết, gọi điện hoặc mở hộp quà (clickAction của editor)
   const openLink = (element: Record<string, any>) => () => {
-    if (element.hyperlink) window.open(element.hyperlink, "_blank", "noopener,noreferrer");
+    const action = element.clickAction;
+    if (action?.type === "link" && /^https?:\/\//i.test(action.url ?? "")) window.open(action.url, "_blank", "noopener,noreferrer");
+    else if (action?.type === "call" && action.phone) window.location.href = "tel:" + String(action.phone).replace(/[^0-9+]/g, "");
+    else if (action?.type === "gift") onAction?.("gift", {});
+    else if (element.hyperlink) window.open(element.hyperlink, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -145,14 +166,25 @@ const PublicCanvas: React.FC<PublicCanvasProps> = ({ elements, canvasSettings, d
                   return <ImageElementComponent key={element.id} {...props} element={element as any} />;
                 case "shape":
                   return <ShapeElementComponent key={element.id} {...props} element={element as any} />;
+                case "tool":
+                  return <ToolElementComponent key={element.id} {...props} element={element as any} />;
                 case "widget":
-                  return <WidgetElementComponent key={element.id} {...props} element={element as any} />;
+                  // Tiện ích gốc của nhánh dev (lịch, đếm ngược, form tham dự, bản đồ...) là HTML nên đặt lên canvas bằng <Html>
+                  return (
+                    <Group key={element.id} x={element.position.x} y={element.position.y} rotation={element.rotation} opacity={element.opacity}>
+                      <Html divProps={{ style: { pointerEvents: "auto" } }}>
+                        <div style={{ width: element.size.width, height: element.size.height, position: "relative" }}>
+                          <WidgetView element={element as any} />
+                        </div>
+                      </Html>
+                    </Group>
+                  );
                 default:
                   return null;
               }
             })}
           </Layer>
-          <AmbientEffect settings={canvasSettings.ambientEffect} width={width} height={height} />
+          <AmbientEffect settings={ambient as any} width={width} height={height} />
         </Stage>
         </ViewerContext.Provider>
       ) : null}

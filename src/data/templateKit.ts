@@ -1,8 +1,19 @@
-import type { AnimationType } from "@/components/editor/animation/elementAnimation";
-import type { EditorElement } from "@/types/editor";
+import type { AnimationType as DevAnimationType, EditorElement } from "@/types/editor";
+
+/** Tên hiệu ứng dùng khi viết mẫu; một số tên được đổi sang hiệu ứng tương đương mà editor/trình xem hỗ trợ. */
+export type AnimationType = DevAnimationType | "zoomIn" | "rotateIn" | "float" | "sway" | "twinkle" | "heartbeat";
 
 /** Cấu hình hiệu ứng rút gọn: [kiểu, trễ(giây), lặp liên tục?] */
 export type Anim = [AnimationType, number?, boolean?];
+
+const ANIMATION_ALIASES: Record<string, DevAnimationType> = {
+  zoomIn: "zoom",
+  rotateIn: "zoom",
+  float: "bounce",
+  sway: "shake",
+  twinkle: "fadeIn",
+  heartbeat: "pulse",
+};
 
 type Corner = number | { tl?: number; tr?: number; br?: number; bl?: number };
 
@@ -101,8 +112,8 @@ const radiusOf = (corner?: Corner) => {
 
 const animOf = (anim?: Anim) =>
   anim
-    ? { enabled: true, continuous: Boolean(anim[2]), type: anim[0], delay: anim[1] ?? 0 }
-    : { enabled: false, continuous: false, type: "none" as AnimationType, delay: 0 };
+    ? { enabled: true, continuous: Boolean(anim[2]), type: (ANIMATION_ALIASES[anim[0]] ?? anim[0]) as DevAnimationType, delay: anim[1] ?? 0 }
+    : { enabled: false, continuous: false, type: "none" as DevAnimationType, delay: 0 };
 
 /**
  * Bộ dựng phần tử cho mẫu thiệp: tự gán id/zIndex và ước lượng chiều cao chữ,

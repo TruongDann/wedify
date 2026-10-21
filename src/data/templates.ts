@@ -1,5 +1,15 @@
 ﻿import type { CanvasSettings, Template } from "@/types/editor";
-import type { AmbientEffectSettings } from "@/components/editor/effects/AmbientEffect";
+import type { FallingEffect } from "@/types/editor";
+
+type AmbientEffectSettings = { type: "petals" | "hearts" | "sparkles" | "confetti" | "bubbles" | "snow"; color?: string; density?: number };
+
+/** Đổi sang hiệu ứng rơi của editor/trình xem thiệp (nhánh dev). */
+const toFallingEffect = (ambient: AmbientEffectSettings): FallingEffect => ({
+  kind: ({ petals: "petals", hearts: "hearts", sparkles: "stars", confetti: "confetti", bubbles: "snow", snow: "snow" } as const)[ambient.type],
+  density: ambient.density ?? 30,
+  speed: 1,
+  color: ambient.color,
+});
 import { TemplateBuilder, photoUrl, type Anim } from "./templateKit";
 
 type Kind = "wedding" | "engagement" | "birthday" | "baby";
@@ -482,7 +492,7 @@ const buildTemplate = (theme: Theme, content: TemplateContent = defaultContent(t
       iconColor: theme.accent,
     },
     isMusicPlaying: false,
-    ambientEffect: theme.ambient,
+    fallingEffect: toFallingEffect(theme.ambient),
   };
 
   return {
