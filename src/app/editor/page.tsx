@@ -10,11 +10,13 @@ import { useEditorStore } from "@/store/editorStore";
 import {
   EditorHeader,
   EditorSidebar,
+  PublishModal,
   QuickReplaceBar,
   CanvasHeightControl,
   type TabKey,
 } from "./components";
 import { useDraftAutosave } from "./useDraftAutosave";
+import { userAuth } from "@/lib/auth";
 import { FallingEffectLayer } from "@/components/card/FallingEffectLayer";
 
 // Dynamic import EditorCanvas vì Konva cần window
@@ -50,6 +52,39 @@ const EditorPage: React.FC = () => {
   } = useEditorStore();
 
   const { status: saveStatus, flush } = useDraftAutosave();
+
+  // Lưu / xuất bản lên tài khoản (API)
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [invitationId, setInvitationId] = useState<string | null>(null);
+  const [existingProfile, setExistingProfile] = useState<Record<string, any> | null>(null);
+  const [existingEventDate, setExistingEventDate] = useState<string | undefined>();
+
+  // Mở thiệp đã lưu: /editor?id=...
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("id");
+    if (!id || !userAuth.getAccess()) return;
+    setInvitationId(id);
+    userAuth
+      .apiFetch<{ title?: string; eventDate?: string; profileJson?: Record<string, any>; contentJson?: { elements?: any[]; canvasSettings?: any } }>(`/invitations/${id}`)
+      .then((invitation) => {
+        if (invitation.title) setCardTitle(invitation.title);
+        if (invitation.eventDate) setExistingEventDate(invitation.eventDate.slice(0, 10));
+        setExistingProfile(invitation.profileJson && typeof invitation.profileJson === "object" ? invitation.profileJson : null);
+        const content = invitation.contentJson;
+        if (Array.isArray(content?.elements) && content.elements.length > 0) {
+          useEditorStore.setState({
+            elements: content.elements,
+            canvasSettings: { ...useEditorStore.getState().canvasSettings, ...content.canvasSettings, isMusicPlaying: false },
+            selectedElementId: null,
+            selectedElementIds: [],
+            history: [],
+            historyIndex: -1,
+          });
+          useEditorStore.getState().saveHistory();
+        }
+      })
+      .catch(() => undefined);
+  }, []);
 
   // Lưu ngay rồi mở trang xem thiệp ở tab riêng (tab đó tự cập nhật khi thiệp thay đổi)
   const handlePreview = () => {
@@ -117,7 +152,16 @@ const EditorPage: React.FC = () => {
       <App>
         <div className="flex flex-col h-screen overflow-hidden bg-white text-ink">
           {/* Header */}
-          <EditorHeader onPreview={handlePreview} saveStatus={saveStatus} />
+          <EditorHeader onPreview={handlePreview} onPublish={() => setPublishOpen(true)} saveStatus={saveStatus} />
+          <PublishModal
+            open={publishOpen}
+            onClose={() => setPublishOpen(false)}
+            initialTitle={cardTitle}
+            invitationId={invitationId}
+            existingProfile={existingProfile}
+            initialEventDate={existingEventDate}
+            onSaved={(id) => setInvitationId(id)}
+          />
 
           {/* Body */}
           <div className="flex flex-1 mt-16 overflow-hidden">

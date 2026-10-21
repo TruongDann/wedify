@@ -1,5 +1,6 @@
 "use client";
 
+import { ViewerContext } from "../ViewerContext";
 import React, { useRef, useMemo } from "react";
 import { Text, Group, Rect, Line, Path, TextPath } from "react-konva";
 import Konva from "konva";
@@ -45,6 +46,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
   onDragEnd,
   onTransformEnd,
 }) => {
+  const viewer = React.useContext(ViewerContext);
   const groupRef = useRef<Konva.Group>(null);
   const textRef = useRef<Konva.Text>(null);
   const textPathRef = useRef<Konva.TextPath>(null);
@@ -117,6 +119,8 @@ const TextElementComponent: React.FC<TextElementProps> = ({
    * Tạo một textarea tạm thời đè lên canvas để người dùng nhập liệu.
    */
   const handleDblClick = () => {
+    // Trang xuất bản chỉ để xem: không mở ô sửa chữ
+    if (viewer?.readOnly) return;
     if (!textRef.current || !groupRef.current) return;
 
     const groupNode = groupRef.current;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { Button } from "antd";
+import { App, Button } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useEditorStore } from "@/store/editorStore";
 import {
@@ -9,6 +9,7 @@ import {
   ImageElement,
   ShapeElement,
   WidgetElement,
+  ToolElement,
   EditorElement,
 } from "@/types/editor";
 
@@ -46,6 +47,7 @@ import {
   WidgetRsvpSection,
   WidgetMapSection,
 } from "./right/WidgetPropertySections";
+import { ToolSettingsSection } from "./right/ToolPropertySections";
 import {
   WidgetButtonSection,
   WidgetMediaSection,
@@ -122,6 +124,7 @@ const Right: React.FC<RightProps> = ({
   ]);
 
   // Sync toggles
+  const { message } = App.useApp();
   const [paddingLinked, setPaddingLinked] = useState(true);
   const [borderRadiusLinked, setBorderRadiusLinked] = useState(true);
   const [sizeLinked, setSizeLinked] = useState(true);
@@ -519,6 +522,39 @@ const Right: React.FC<RightProps> = ({
     );
   };
 
+  const renderToolProperties = (element: ToolElement) => (
+    <div className="p-4 space-y-3">
+      <ToolSettingsSection
+        element={element}
+        onUpdate={handleUpdate as (updates: Partial<ToolElement>) => void}
+        onError={(text) => message.error(text)}
+      />
+
+      <AnimationSection
+        animation={element.animation}
+        sectionKey="animation"
+        isExpanded={expandedSections.includes("animation")}
+        onToggle={toggleSection}
+        onChange={(animation) => handleUpdate({ animation })}
+      />
+
+      <PositionSection
+        position={{ x: element.position.x, y: element.position.y }}
+        size={{ width: element.size.width, height: element.size.height }}
+        rotation={element.rotation}
+        isExpanded={expandedSections.includes("position")}
+        onToggle={toggleSection}
+        onPositionChange={handlePositionUpdate}
+        onSizeChange={handleSizeUpdate}
+        onRotationChange={(value) => handleUpdate({ rotation: value })}
+      />
+
+      <DeleteButton
+        onDelete={() => selectedElement && deleteElement(selectedElement.id)}
+      />
+    </div>
+  );
+
   const renderPageSettings = () => (
     <PageSettings
       cardTitle={cardTitle}
@@ -555,6 +591,8 @@ const Right: React.FC<RightProps> = ({
         return renderShapeProperties(selectedElement as ShapeElement);
       case "widget":
         return renderWidgetProperties(selectedElement);
+      case "tool":
+        return renderToolProperties(selectedElement as ToolElement);
       default:
         return renderPageSettings();
     }
@@ -567,6 +605,7 @@ const Right: React.FC<RightProps> = ({
     shape: "Hình dạng",
     sticker: "Sticker",
     widget: "Tiện ích",
+    tool: "Tiện ích mở rộng",
   };
 
   const getHeader = () => {

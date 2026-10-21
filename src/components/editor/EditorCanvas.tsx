@@ -18,6 +18,7 @@ import TextElementComponent from "./elements/TextElement";
 import ImageElementComponent from "./elements/ImageElement";
 import ShapeElementComponent from "./elements/ShapeElement";
 import WidgetElementComponent from "./elements/WidgetElement";
+import ToolElementComponent from "./elements/ToolElement";
 import { EditorElement, TextElement } from "@/types/editor";
 import { loadGoogleFont } from "@/utils/fontLoader";
 import {
@@ -369,6 +370,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       case "widget":
         return (
           <WidgetElementComponent
+            key={element.id}
+            {...commonProps}
+            element={element}
+          />
+        );
+      case "tool":
+        return (
+          <ToolElementComponent
             key={element.id}
             {...commonProps}
             element={element}

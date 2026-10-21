@@ -9,107 +9,32 @@ export interface MusicTrack {
   name: string;
   artist: string;
   duration: string;
-  src?: string; // Optional URL to music file
+  src?: string;
   category: MusicCategory;
 }
 
+const sampleTrack = (index: number, name: string, artist: string, duration: string, category: MusicCategory) => ({
+  id: index,
+  name,
+  artist,
+  duration,
+  category,
+  src: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${index}.mp3`,
+});
+
 export const MUSIC_LIBRARY: MusicTrack[] = [
-  {
-    id: 1,
-    name: "50 Năm Về Sau",
-    artist: "Phan Mạnh Quỳnh",
-    duration: "03:54",
-    category: "vpop",
-  },
-  {
-    id: 2,
-    name: "A Little Love",
-    artist: "Fiona Fung",
-    duration: "03:11",
-    category: "international",
-  },
-  {
-    id: 3,
-    name: "A Thousand Years",
-    artist: "Christina Perri",
-    duration: "04:48",
-    category: "international",
-  },
-  {
-    id: 4,
-    name: "All of Me",
-    artist: "John Legend",
-    duration: "04:30",
-    category: "international",
-  },
-  {
-    id: 5,
-    name: "Beautiful In White",
-    artist: "Westlife",
-    duration: "03:58",
-    category: "international",
-  },
-  {
-    id: 6,
-    name: "Can't Help Falling In Love",
-    artist: "Elvis Presley",
-    duration: "03:07",
-    category: "international",
-  },
-  {
-    id: 7,
-    name: "Perfect",
-    artist: "Ed Sheeran",
-    duration: "04:23",
-    category: "international",
-  },
-  {
-    id: 8,
-    name: "Thinking Out Loud",
-    artist: "Ed Sheeran",
-    duration: "04:41",
-    category: "international",
-  },
-  {
-    id: 9,
-    name: "You Can Trust Me",
-    artist: "The Piano Guys",
-    duration: "03:03",
-    category: "international",
-  },
-  {
-    id: 10,
-    name: "You Got Me",
-    artist: "Colbie Caillat",
-    duration: "04:03",
-    category: "international",
-  },
-  {
-    id: 11,
-    name: "잘하고있잖아",
-    artist: "Radwimps",
-    duration: "03:50",
-    category: "international",
-  },
-  {
-    id: 12,
-    name: "周杰倫 Jay Chou",
-    artist: "Jay Chou",
-    duration: "04:02",
-    category: "international",
-  },
-  {
-    id: 13,
-    name: "Lạ Lùng",
-    artist: "Vũ",
-    duration: "04:15",
-    category: "vpop",
-  },
-  {
-    id: 14,
-    name: "Mình Cưới Nhau Đi",
-    artist: "Huỳnh James x Pjnboys",
-    duration: "03:42",
-    category: "vpop",
-  },
+  sampleTrack(1, "50 Năm Về Sau", "Phan Mạnh Quỳnh", "03:54", "vpop"),
+  sampleTrack(2, "A Little Love", "Fiona Fung", "03:11", "international"),
+  sampleTrack(3, "A Thousand Years", "Christina Perri", "04:48", "international"),
+  sampleTrack(4, "All of Me", "John Legend", "04:30", "international"),
+  sampleTrack(5, "Beautiful In White", "Westlife", "03:58", "international"),
+  sampleTrack(6, "Can't Help Falling In Love", "Elvis Presley", "03:07", "international"),
+  sampleTrack(7, "Perfect", "Ed Sheeran", "04:23", "international"),
+  sampleTrack(8, "Thinking Out Loud", "Ed Sheeran", "04:41", "international"),
+  sampleTrack(9, "You Can Trust Me", "The Piano Guys", "03:03", "international"),
+  sampleTrack(10, "You Got Me", "Colbie Caillat", "04:03", "international"),
+  sampleTrack(11, "잘하고있잖아", "Radwimps", "03:50", "international"),
+  sampleTrack(12, "周杰倫 Jay Chou", "Jay Chou", "04:02", "international"),
+  sampleTrack(13, "Lạ Lùng", "Vũ", "04:15", "vpop"),
+  sampleTrack(14, "Mình Cưới Nhau Đi", "Huỳnh James x Pjnboys", "03:42", "vpop"),
 ];

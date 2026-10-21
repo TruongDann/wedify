@@ -66,6 +66,87 @@ body {
   display: none;
 }
 
+/* Live preview animations for template cards and effect tester */
+@keyframes wedifyFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes wedifySlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes wedifyZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes wedifyPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.9;
+  }
+}
+
+@keyframes wedifyBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(3px);
+  }
+}
+
+.wedify-live-preview {
+  will-change: opacity, transform;
+}
+
+.wedify-animate-fadeInUp {
+  animation: wedifyFadeInUp 1.1s ease-out both;
+}
+
+.wedify-animate-slideInLeft {
+  animation: wedifySlideInLeft 1.1s ease-out both;
+}
+
+.wedify-animate-zoomIn {
+  animation: wedifyZoomIn 1.1s ease-out both;
+}
+
+.wedify-animate-pulse {
+  animation: wedifyPulse 1.6s ease-in-out infinite;
+}
+
+.wedify-animate-bounce {
+  animation: wedifyBounce 1.3s ease-in-out both;
+}
+
 /* Custom components that need specific styling */
 .canvas-wrapper {
   @apply bg-white shadow-lg rounded-sm;

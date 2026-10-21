@@ -22,6 +22,8 @@ import type { SaveStatus } from "../useDraftAutosave";
 
 interface EditorHeaderProps {
   onPreview?: () => void;
+  /** Mở hộp thoại lưu/xuất bản thiệp lên tài khoản Wedify (API). */
+  onPublish?: () => void;
   saveStatus?: SaveStatus;
 }
 
@@ -63,6 +65,7 @@ const iconBtn =
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
   onPreview,
+  onPublish,
   saveStatus = "saved",
 }) => {
   const { undo, redo, history, historyIndex } = useEditorStore();
@@ -92,6 +95,8 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   };
 
   const exportMenuItems = [
+    { key: "publish", label: "Xuất bản lên Wedify…", onClick: () => onPublish?.() },
+    { type: "divider" as const },
     { key: "png", label: "Xuất PNG", onClick: () => handleExport("png") },
     { key: "jpg", label: "Xuất JPG", onClick: () => handleExport("jpg") },
   ];

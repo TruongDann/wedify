@@ -5,6 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import { createImageElement, useEditorStore } from "@/store/editorStore";
 import { GRAPHIC_CATEGORIES, getGraphicUrls } from "@/constants/graphics";
 import { Chip, ChipRow, LinkButton, SectionTitle } from "./ui";
+import { EXTRA_STOCK_CATEGORIES, ExtraStock } from "./StockExtras";
 
 type CategoryId = string;
 
@@ -13,6 +14,8 @@ const ALL = "all";
 const CHIPS: { id: CategoryId; label: string }[] = [
   { id: ALL, label: "Tất cả" },
   ...GRAPHIC_CATEGORIES,
+  // Kho bổ sung của Wedify: ảnh động, hình động, sticker, khung viền, nền họa tiết, kết hợp chữ
+  ...EXTRA_STOCK_CATEGORIES,
 ];
 
 const PREVIEW_COUNT = 6;
@@ -133,7 +136,9 @@ export const StockTab: React.FC = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pt-1 pb-8 flex flex-col gap-5">
-        {selected === ALL ? (
+        {EXTRA_STOCK_CATEGORIES.some((cat) => cat.id === selected) ? (
+          <ExtraStock category={selected} onBack={() => selectCategory(ALL)} />
+        ) : selected === ALL ? (
           <>
             {GRAPHIC_CATEGORIES.map((cat) => (
               <section key={cat.id}>

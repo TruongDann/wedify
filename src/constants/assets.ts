@@ -54,6 +54,7 @@ export const STICKERS: Sticker[] = [
 
 // Stock images from Unsplash
 export const STOCK_IMAGES: string[] = [
+  "/stock/nhan-vat-01.webp",
   "https://images.unsplash.com/photo-1519741497674-611481863552?w=200",
   "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=200",
   "https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=200",

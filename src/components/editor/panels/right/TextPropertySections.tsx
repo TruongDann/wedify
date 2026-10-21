@@ -13,7 +13,7 @@ import {
   DragOutlined,
 } from "@ant-design/icons";
 import { TextElement } from "@/types/editor";
-import { loadGoogleFont } from "@/utils/fontLoader";
+import { loadGoogleFont, preloadFontPreviews } from "@/utils/fontLoader";
 import { FONTS } from "@/constants/fonts";
 import {
   SectionHeader,
