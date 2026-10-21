@@ -3,6 +3,8 @@
  * Centralized location for all available fonts
  */
 
+import { CUSTOM_FONTS } from "./customFonts";
+
 export interface FontConfig {
   name: string;
   label: string;
@@ -13,6 +15,7 @@ export interface FontConfig {
     | "decorative"
     | "vietnamese"
     | "chinese"
+    | "custom"
     | "system";
   supportsVietnamese?: boolean; // Whether this font has good Vietnamese character support
 }
@@ -413,6 +416,11 @@ export const FONTS: FontConfig[] = [
   { name: "Bevan", label: "Bevan", category: "decorative", supportsVietnamese: true },
 ];
 
+/** Bộ font riêng (đã kiểm tra đủ dấu tiếng Việt) — nạp từ public/fonts/custom. */
+FONTS.push(
+  ...CUSTOM_FONTS.map((font) => ({ name: font.name, label: font.name, category: "custom" as const, supportsVietnamese: true })),
+);
+
 /**
  * Get fonts by category
  */
@@ -434,6 +442,7 @@ export const FONT_CATEGORY_LABELS: Record<FontConfig["category"], string> = {
   decorative: "Trang trí",
   vietnamese: "Font tiếng Việt",
   chinese: "Thư pháp Trung Hoa (囍 福 愛)",
+  custom: "Font của bạn (tiếng Việt)",
   system: "Font hệ thống",
 };
 
