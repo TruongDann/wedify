@@ -74,7 +74,7 @@ const injectCustomFontFace = (family: string) => {
   injectedCustomFaces.add(family);
   const style = document.createElement("style");
   style.textContent = font.faces
-    .map((face) => `@font-face{font-family:"${family}";src:url("/fonts/custom/${face.file}") format("woff2");font-weight:${face.weight};font-style:${face.italic ? "italic" : "normal"};font-display:swap;}`)
+    .map((face) => `@font-face{font-family:"${family}";src:url("/assets/fonts/custom/${face.file}") format("woff2");font-weight:${face.weight};font-style:${face.italic ? "italic" : "normal"};font-display:swap;}`)
     .join("");
   document.head.appendChild(style);
 };

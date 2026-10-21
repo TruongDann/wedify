@@ -21,27 +21,27 @@ const GROUPS: { title: string; items: WidgetItem[] }[] = [
   {
     title: "Thông tin sự kiện",
     items: [
-      { kind: "calendar", label: "Lịch", description: "Lịch tháng, đánh dấu ngày cưới bằng trái tim", icon: "/widgets/calendar.webp" },
-      { kind: "countdown", label: "Đếm ngược", description: "Ngày, giờ, phút, giây tới lễ cưới", icon: "/widgets/countdown.webp" },
-      { kind: "map", label: "Bản đồ", description: "Google Maps và nút chỉ đường", icon: "/widgets/map.webp" },
-      { kind: "reminder", label: "Lời nhắc lịch", description: "Khách thêm lễ cưới vào lịch điện thoại", icon: "/widgets/reminder.webp" },
-      { kind: "call", label: "Nút gọi", description: "Bấm để gọi cô dâu / chú rể", icon: "/widgets/call.webp" },
+      { kind: "calendar", label: "Lịch", description: "Lịch tháng, đánh dấu ngày cưới bằng trái tim", icon: "/assets/images/widgets/calendar.webp" },
+      { kind: "countdown", label: "Đếm ngược", description: "Ngày, giờ, phút, giây tới lễ cưới", icon: "/assets/images/widgets/countdown.webp" },
+      { kind: "map", label: "Bản đồ", description: "Google Maps và nút chỉ đường", icon: "/assets/images/widgets/map.webp" },
+      { kind: "reminder", label: "Lời nhắc lịch", description: "Khách thêm lễ cưới vào lịch điện thoại", icon: "/assets/images/widgets/reminder.webp" },
+      { kind: "call", label: "Nút gọi", description: "Bấm để gọi cô dâu / chú rể", icon: "/assets/images/widgets/call.webp" },
     ],
   },
   {
     title: "Khách mời",
     items: [
-      { kind: "rsvp", label: "Xác nhận tham dự", description: "Form để khách báo có đến hay không", icon: "/widgets/rsvp.webp" },
-      { kind: "guestName", label: "Tên khách mời tự động", description: "Hiện tên khách theo link mời riêng", icon: "/widgets/guest-name.webp" },
-      { kind: "giftQr", label: "QR mừng cưới", description: "Mã QR chuyển khoản tiền mừng", icon: "/widgets/gift-qr.webp" },
+      { kind: "rsvp", label: "Xác nhận tham dự", description: "Form để khách báo có đến hay không", icon: "/assets/images/widgets/rsvp.webp" },
+      { kind: "guestName", label: "Tên khách mời tự động", description: "Hiện tên khách theo link mời riêng", icon: "/assets/images/widgets/guest-name.webp" },
+      { kind: "giftQr", label: "QR mừng cưới", description: "Mã QR chuyển khoản tiền mừng", icon: "/assets/images/widgets/gift-qr.webp" },
     ],
   },
   {
     title: "Ảnh và video",
     items: [
-      { kind: "album", label: "Album ảnh", description: "Lưới ảnh, bấm để xem lớn", icon: "/widgets/album.webp" },
-      { kind: "slideshow", label: "Trình chiếu ảnh", description: "Ảnh tự chuyển, mờ dần", icon: "/widgets/slideshow.webp" },
-      { kind: "youtube", label: "Video YouTube", description: "Nhúng video từ YouTube", icon: "/widgets/youtube.webp" },
+      { kind: "album", label: "Album ảnh", description: "Lưới ảnh, bấm để xem lớn", icon: "/assets/images/widgets/album.webp" },
+      { kind: "slideshow", label: "Trình chiếu ảnh", description: "Ảnh tự chuyển, mờ dần", icon: "/assets/images/widgets/slideshow.webp" },
+      { kind: "youtube", label: "Video YouTube", description: "Nhúng video từ YouTube", icon: "/assets/images/widgets/youtube.webp" },
     ],
   },
 ];

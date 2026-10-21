@@ -115,7 +115,7 @@ export const createBuilder = (idPrefix: string, eventDate = "2027-05-20T11:00") 
 
   const decor = (name: string, box: Box, animation: AnimationType = "slideUp", delay = 0.2) =>
     push(
-      createImageElement(`/decor/${name}.svg`, {
+      createImageElement(`/assets/images/decor/${name}.svg`, {
         alt: "Họa tiết",
         ...place(box),
         objectFit: "fill",

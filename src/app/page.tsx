@@ -64,7 +64,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Image
-              src="/logo-web.png"
+              src="/assets/images/brand/logo-web.png"
               alt="Logo"
               width={170}
               height={45}

@@ -416,7 +416,7 @@ export const FONTS: FontConfig[] = [
   { name: "Bevan", label: "Bevan", category: "decorative", supportsVietnamese: true },
 ];
 
-/** Bộ font riêng (đã kiểm tra đủ dấu tiếng Việt) — nạp từ public/fonts/custom. */
+/** Bộ font riêng (đã kiểm tra đủ dấu tiếng Việt) — nạp từ public/assets/fonts/custom. */
 FONTS.push(
   ...CUSTOM_FONTS.map((font) => ({ name: font.name, label: font.name, category: "custom" as const, supportsVietnamese: true })),
 );

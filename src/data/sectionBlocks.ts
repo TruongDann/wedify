@@ -14,7 +14,7 @@ export interface SectionBlock {
   id: string;
   name: string;
   description: string;
-  /** Ảnh biểu tượng hiển thị trên thẻ chọn khối (public/blocks/<id>.webp) */
+  /** Ảnh biểu tượng hiển thị trên thẻ chọn khối (public/assets/images/blocks/<id>.webp) */
   icon: string;
   height: number;
   build: () => EditorElement[];
@@ -30,7 +30,7 @@ const block = (
   id,
   name,
   description,
-  icon: `/blocks/${id}.webp`,
+  icon: `/assets/images/blocks/${id}.webp`,
   height,
   build: () => {
     const b = createBuilder(id);
