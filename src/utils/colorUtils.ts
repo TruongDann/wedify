@@ -9,14 +9,66 @@
 export const hexToRgb = (
   hex: string,
 ): { r: number; g: number; b: number } | null => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : null;
+  const normalized = hex.trim();
+  if (!normalized) return null;
+
+  const namedColors: Record<string, string> = {
+    black: "#000000",
+    white: "#ffffff",
+    red: "#ff0000",
+    green: "#008000",
+    blue: "#0000ff",
+    yellow: "#ffff00",
+    gray: "#808080",
+    grey: "#808080",
+    transparent: "#000000",
+  };
+
+  const directNamed = namedColors[normalized.toLowerCase()];
+  if (directNamed) {
+    const namedHex = directNamed;
+    const namedMatch = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(namedHex);
+    if (namedMatch) {
+      return {
+        r: parseInt(namedMatch[1], 16),
+        g: parseInt(namedMatch[2], 16),
+        b: parseInt(namedMatch[3], 16),
+      };
+    }
+  }
+
+  const shortHex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i.exec(normalized);
+  if (shortHex) {
+    return {
+      r: parseInt(shortHex[1] + shortHex[1], 16),
+      g: parseInt(shortHex[2] + shortHex[2], 16),
+      b: parseInt(shortHex[3] + shortHex[3], 16),
+    };
+  }
+
+  const fullHex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(normalized);
+  if (fullHex) {
+    return {
+      r: parseInt(fullHex[1], 16),
+      g: parseInt(fullHex[2], 16),
+      b: parseInt(fullHex[3], 16),
+    };
+  }
+
+  const rgbaMatch = normalized.match(/^rgba?\(([^)]+)\)$/i);
+  if (rgbaMatch) {
+    const parts = rgbaMatch[1].split(",").map((n) => Number.parseFloat(n.trim()));
+    const [r, g, b] = parts;
+    if ([r, g, b].every((value) => Number.isFinite(value))) {
+      return {
+        r: Math.max(0, Math.min(255, r)),
+        g: Math.max(0, Math.min(255, g)),
+        b: Math.max(0, Math.min(255, b)),
+      };
+    }
+  }
+
+  return null;
 };
 
 /**
@@ -72,10 +124,51 @@ export const darkenColor = (hex: string, percent: number): string => {
 };
 
 /**
+ * Extract a usable RGB value from a CSS color or gradient string.
+ */
+const parseCssColorToRgb = (value: string): { r: number; g: number; b: number } | null => {
+  const cleaned = (value ?? "").trim();
+  if (!cleaned || cleaned === "transparent") return null;
+
+  const direct = hexToRgb(cleaned);
+  if (direct) return direct;
+
+  const gradientMatches = [...cleaned.matchAll(/#([0-9a-f]{3}|[0-9a-f]{6})|rgba?\(([^)]+)\)/gi)];
+  if (gradientMatches.length > 0) {
+    const samples = gradientMatches
+      .map((match) => {
+        const raw = match[0];
+        const rgb = raw.startsWith("#") ? hexToRgb(raw) : hexToRgb(`rgb(${raw.replace(/^rgba?\(/i, "").replace(/\)$/i, "")})`);
+        return rgb;
+      })
+      .filter(Boolean) as Array<{ r: number; g: number; b: number }>;
+
+    if (samples.length > 0) {
+      const avg = samples.reduce(
+        (acc, sample) => ({
+          r: acc.r + sample.r,
+          g: acc.g + sample.g,
+          b: acc.b + sample.b,
+        }),
+        { r: 0, g: 0, b: 0 },
+      );
+
+      return {
+        r: Math.round(avg.r / samples.length),
+        g: Math.round(avg.g / samples.length),
+        b: Math.round(avg.b / samples.length),
+      };
+    }
+  }
+
+  return null;
+};
+
+/**
  * Check if a color is light or dark
  */
-export const isLightColor = (hex: string): boolean => {
-  const rgb = hexToRgb(hex);
+export const isLightColor = (value: string): boolean => {
+  const rgb = parseCssColorToRgb(value);
   if (!rgb) return true;
 
   // Using luminance formula
@@ -86,6 +179,6 @@ export const isLightColor = (hex: string): boolean => {
 /**
  * Get contrast color (black or white) for given background
  */
-export const getContrastColor = (hex: string): string => {
-  return isLightColor(hex) ? "#000000" : "#ffffff";
+export const getContrastColor = (value: string): string => {
+  return isLightColor(value) ? "#000000" : "#ffffff";
 };

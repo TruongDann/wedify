@@ -1,14 +1,17 @@
 "use client";
 
-import React from "react";
-import { Rect, Circle, Ellipse, Line, Star, Shape } from "react-konva";
+import React, { useEffect, useRef } from "react";
+import { Rect, Circle, Ellipse, Line, Star, Shape, Group } from "react-konva";
 import Konva from "konva";
 import { ShapeElement } from "@/types/editor";
+import { runElementAnimation } from "../animation/elementAnimation";
+import { parseCssGradient } from "@/utils/gradient";
 
 interface ShapeElementProps {
   element: ShapeElement;
   isSelected: boolean;
-  onSelect: () => void;
+  onSelect: (e?: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => void;
+  onDragStart?: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragMove?: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onTransformEnd: (e: Konva.KonvaEventObject<Event>) => void;
@@ -18,10 +21,14 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
   element,
   isSelected,
   onSelect,
+  onDragStart,
   onDragMove,
   onDragEnd,
   onTransformEnd,
 }) => {
+  const nodeRef = useRef<Konva.Node | null>(null);
+  const animation = (element as any).animation ?? { enabled: false, continuous: false, type: "none" };
+
   // Default shadow values
   const shadow = element.shadow || {
     enabled: false,
@@ -31,8 +38,27 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
     color: "rgba(0,0,0,0.2)",
   };
 
+  useEffect(() => {
+    const node = nodeRef.current;
+    if (!node) return;
+    return runElementAnimation(
+      node,
+      {
+        x: element.position.x,
+        y: element.position.y,
+        opacity: element.opacity,
+        rotation: element.rotation,
+        width: element.size.width,
+        height: element.size.height,
+      },
+      animation,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animation.enabled, animation.continuous, animation.type, animation.delay, element.position.x, element.position.y, element.rotation, element.opacity, element.size.width, element.size.height]);
+
   const commonProps = {
     id: element.id,
+    ref: nodeRef as any,
     x: element.position.x,
     y: element.position.y,
     rotation: element.rotation,
@@ -40,10 +66,19 @@ const ShapeElementComponent: React.FC<ShapeElementProps> = ({
     draggable: !element.locked,
     onClick: onSelect,
     onTap: onSelect,
+    onDragStart,
     onDragMove,
     onDragEnd,
     onTransformEnd,
-    fill: element.fill,
+    // fill dạng CSS gradient (linear/radial) được đổi sang thuộc tính gradient của Konva
+    ...(parseCssGradient(
+      element.fill,
+      element.size.width,
+      element.size.height,
+      element.shapeType === "circle" || element.shapeType === "star"
+        ? { x: -element.size.width / 2, y: -element.size.height / 2 }
+        : { x: 0, y: 0 },
+    ) ?? { fill: element.fill }),
     stroke: element.stroke,
     strokeWidth: element.strokeWidth,
     // Shadow properties

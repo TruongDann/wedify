@@ -13,6 +13,8 @@ const STORAGE_KEYS = {
 export interface EditorSaveData {
   elements: unknown[];
   canvasSettings: unknown;
+  cardTitle?: string;
+  cardEventDate?: string;
   savedAt: string;
   version: string;
 }

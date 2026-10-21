@@ -1,0 +1,1468 @@
+{
+  "info": {
+    "_postman_id": "6e6b7a2a-2f1a-4a1a-9d3a-wedify0000001",
+    "name": "Wedify API",
+    "description": "Postman collection cho toan bo REST API cua Wedify (NestJS + Prisma + MySQL). Server mac dinh chay o http://localhost:4000/api/v1 (npm run start:dev trong thu muc api/).\n\nCach dung nhanh (dung theo thu tu):\n1. Auth > Register (Host) hoac Login (Host) - tu dong luu accessToken/refreshToken/userId vao collection variable.\n2. Invitations > Create Invitation - tu dong luu invitationId/invitationSlug.\n3. Guests > Create Guest - tu dong luu guestId/guestToken (dung cho cac request Guest-facing/RSVP/Wishes).\n4. De test nhom Admin (Users/Plans/Templates admin, Withdrawals, Affiliates duyet...): tao 1 user role=ADMIN thu cong qua Prisma Studio (npm run db:studio, sua truc tiep cot role), roi chay Auth > Login (Admin) de lay adminAccessToken rieng.\n\nCac request public (khong can dang nhap: Guest-facing, RSVP, Wishes cong khai, danh sach Plans/Templates) da danh dau auth = No Auth.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (Host)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{hostEmail}}\",\n  \"password\": \"{{hostPassword}}\",\n  \"name\": \"Minh Anh\",\n  \"phone\": \"0901234567\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Dang ky Host moi. Tu dong luu accessToken/refreshToken/userId."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "if (json.accessToken) {",
+                  "  pm.environment.set('accessToken', json.accessToken);",
+                  "  pm.environment.set('refreshToken', json.refreshToken);",
+                  "  pm.environment.set('userId', json.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login (Host)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{hostEmail}}\",\n  \"password\": \"{{hostPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('accessToken', json.accessToken);",
+                  "pm.environment.set('refreshToken', json.refreshToken);",
+                  "pm.environment.set('userId', json.user.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login (Admin)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Can tao truoc 1 user co role=ADMIN thu cong (Prisma Studio) truoc khi goi request nay."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('adminAccessToken', json.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('accessToken', json.accessToken);",
+                  "pm.environment.set('refreshToken', json.refreshToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{hostEmail}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Hien tai chua noi email that - token reset duoc log ra console server (xem AuthService.forgotPassword). Copy token do dan vao bien resetToken de test Reset Password."
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"newPassword\": \"MatKhauMoiManh123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Me (thông tin tài khoản hiện tại)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users (Admin)",
+      "item": [
+        {
+          "name": "Danh sách user",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users?search=&page=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Chi tiết 1 user",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{targetUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{targetUserId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Khóa / mở tài khoản",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isLocked\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{targetUserId}}/lock",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{targetUserId}}",
+                "lock"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Plans",
+      "item": [
+        {
+          "name": "Danh sách gói dịch vụ (public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cập nhật gói (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 199000,\n  \"maxInvitations\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plans/BASIC",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "plans",
+                "BASIC"
+              ]
+            },
+            "description": "tier trong URL nhan gia tri: FREE | BASIC | PREMIUM"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Templates",
+      "item": [
+        {
+          "name": "Danh sách mẫu thiệp (public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/templates?category=wedding&tier=FREE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "templates"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "wedding"
+                },
+                {
+                  "key": "tier",
+                  "value": "FREE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Chi tiết 1 mẫu (public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/templates/{{templateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "templates",
+                "{{templateId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tạo mẫu mới (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hoa hồng lãng mạn\",\n  \"category\": \"wedding\",\n  \"style\": \"romantic\",\n  \"tier\": \"FREE\",\n  \"thumbnailUrl\": \"https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=300&h=400&fit=crop\",\n  \"contentJson\": {\n    \"canvasSettings\": { \"width\": 600, \"height\": 800, \"backgroundColor\": \"#fff5f5\" },\n    \"elements\": []\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "templates"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('templateId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cập nhật mẫu (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hoa hồng lãng mạn (đã sửa)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/templates/{{templateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "templates",
+                "{{templateId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xóa mềm mẫu (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/templates/{{templateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "templates",
+                "{{templateId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invitations",
+      "item": [
+        {
+          "name": "Tạo thiệp mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Đám cưới Minh Anh & Hoàng Nam\",\n  \"eventDate\": \"2026-12-20T09:00:00.000Z\",\n  \"location\": \"123 Đường ABC, Quận 1, TP.HCM\",\n  \"contentJson\": {\n    \"canvasSettings\": { \"width\": 600, \"height\": 800, \"backgroundColor\": \"#ffffff\" },\n    \"elements\": []\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('invitationId', json.id);",
+                  "pm.environment.set('invitationSlug', json.slug);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Thiệp của tôi (đã tạo + được chia sẻ)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/invitations/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "mine"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xem thiệp theo slug (public - guest-facing)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/invitations/by-slug/{{invitationSlug}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "by-slug",
+                "{{invitationSlug}}"
+              ]
+            },
+            "description": "Chi tra ve thiep neu status = PUBLISHED (goi Publish truoc)."
+          }
+        },
+        {
+          "name": "Chi tiết 1 thiệp (owner/collaborator)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cập nhật nội dung thiệp",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Đám cưới Minh Anh & Hoàng Nam (đã sửa)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Công bố thiệp (Publish)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}",
+                "publish"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mời người quản lý chung (Collaborator)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"collaborator@example.com\",\n  \"role\": \"EDITOR\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}/collaborators",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}",
+                "collaborators"
+              ]
+            },
+            "description": "Email phai la 1 user DA ton tai san (dang ky truoc)."
+          }
+        },
+        {
+          "name": "Gỡ người quản lý chung",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}/collaborators/{{collaboratorUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}",
+                "collaborators",
+                "{{collaboratorUserId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xóa thiệp",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guests",
+      "item": [
+        {
+          "name": "Thêm 1 khách mời",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Huy\",\n  \"honorific\": \"anh\",\n  \"phone\": \"0909999999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}/guests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}",
+                "guests"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('guestId', json.id);",
+                  "pm.environment.set('guestToken', json.personalizedToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nhập hàng loạt khách mời (Excel/CSV -> JSON)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"guests\": [\n    { \"name\": \"Linh\", \"honorific\": \"bạn\" },\n    { \"name\": \"Trang\", \"honorific\": \"chị\", \"phone\": \"0912345678\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}/guests/bulk",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}",
+                "guests",
+                "bulk"
+              ]
+            },
+            "description": "FE tu doc file Excel/CSV thanh mang JSON nay (backend khong tu parse file)."
+          }
+        },
+        {
+          "name": "Danh sách khách mời của 1 thiệp",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}/guests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}",
+                "guests"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cập nhật thông tin khách mời",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"honorific\": \"chị\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/guests/{{guestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guests",
+                "{{guestId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Đánh dấu đã gửi link",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/guests/{{guestId}}/mark-sent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guests",
+                "{{guestId}}",
+                "mark-sent"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xóa khách mời",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/guests/{{guestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guests",
+                "{{guestId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Guest mở link cá nhân hóa (public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/guest-links/{{guestToken}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guest-links",
+                "{{guestToken}}"
+              ]
+            },
+            "description": "Tra ve ten/cach xung ho + thong tin thiep - dung dung 1 lan de FE render trang ca nhan hoa."
+          }
+        }
+      ]
+    },
+    {
+      "name": "RSVP",
+      "item": [
+        {
+          "name": "Guest xác nhận tham dự (public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ATTENDING\",\n  \"numberOfCompanions\": 1,\n  \"note\": \"Sẽ đến sớm để phụ giúp\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/guest-links/{{guestToken}}/rsvp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guest-links",
+                "{{guestToken}}",
+                "rsvp"
+              ]
+            },
+            "description": "status nhan gia tri: PENDING | ATTENDING | NOT_ATTENDING"
+          }
+        },
+        {
+          "name": "Thống kê RSVP (Host)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}/rsvp-stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}",
+                "rsvp-stats"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wishes (Lời chúc)",
+      "item": [
+        {
+          "name": "Guest gửi lời chúc (public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Chúc hai bạn trăm năm hạnh phúc!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/guest-links/{{guestToken}}/wishes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "guest-links",
+                "{{guestToken}}",
+                "wishes"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.environment.set('wishId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Danh sách lời chúc công khai (public - theo slug)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/invitations/by-slug/{{invitationSlug}}/wishes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "by-slug",
+                "{{invitationSlug}}",
+                "wishes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toàn bộ lời chúc để duyệt (Host)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}/wishes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}",
+                "wishes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ẩn / hiện 1 lời chúc",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isHidden\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/wishes/{{wishId}}/hidden",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "wishes",
+                "{{wishId}}",
+                "hidden"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gifts (Quà mừng)",
+      "item": [
+        {
+          "name": "Host xác nhận đã nhận chuyển khoản QR ngân hàng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"BANK_QR\",\n  \"amount\": 500000,\n  \"guestId\": \"{{guestId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}/gifts/bank-qr",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}",
+                "gifts",
+                "bank-qr"
+              ]
+            },
+            "description": "Ghi nhan THU CONG - tien da chuyen THANG vao tai khoan ngan hang cua Host, he thong khong tu xac nhan duoc."
+          }
+        },
+        {
+          "name": "Danh sách quà mừng của 1 thiệp",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/invitations/{{invitationId}}/gifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invitations",
+                "{{invitationId}}",
+                "gifts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "[STUB] Webhook quà ảo từ cổng thanh toán",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invitationId\": \"{{invitationId}}\",\n  \"guestId\": \"{{guestId}}\",\n  \"amount\": 100000,\n  \"animationType\": \"confetti\",\n  \"signature\": \"CHUA-TICH-HOP-THAT-xem-TODO-trong-payments-webhook.controller.ts\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/payments/virtual-gift",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                "payments",
+                "virtual-gift"
+              ]
+            },
+            "description": "CHUA tich hop cong thanh toan that (VNPay/Momo/PayOS) - xem TODO trong api/src/gifts/payments-webhook.controller.ts truoc khi dung that."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wallet & Withdrawals",
+      "item": [
+        {
+          "name": "Ví của tôi",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/wallet/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "wallet",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Yêu cầu rút tiền",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 100000,\n  \"bankInfo\": {\n    \"bankName\": \"Vietcombank\",\n    \"accountNumber\": \"0123456789\",\n    \"accountHolder\": \"NGUYEN VAN A\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/wallet/withdrawals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "wallet",
+                "withdrawals"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.environment.set('withdrawalId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[Admin] Danh sách yêu cầu rút tiền",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/admin/withdrawals?status=PENDING",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "withdrawals"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "[Admin] Duyệt / từ chối rút tiền",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/withdrawals/{{withdrawalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "withdrawals",
+                "{{withdrawalId}}"
+              ]
+            },
+            "description": "status nhan gia tri: PENDING | APPROVED | PAID | REJECTED"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Affiliates",
+      "item": [
+        {
+          "name": "Đăng ký làm Affiliate",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/affiliates/apply",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "affiliates",
+                "apply"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.environment.set('affiliateId', json.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard Affiliate của tôi",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/affiliates/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "affiliates",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "[Admin] Danh sách đối tác Affiliate",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/affiliates?status=PENDING",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "affiliates"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "[Admin] Duyệt / từ chối đối tác",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/affiliates/{{affiliateId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "affiliates",
+                "{{affiliateId}}",
+                "status"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
