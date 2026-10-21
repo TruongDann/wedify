@@ -54,6 +54,7 @@ export const STICKERS: Sticker[] = [
 
 // Stock images from Unsplash
 export const STOCK_IMAGES: string[] = [
+  "/assets/images/stock/nhan-vat-01.webp",
   "https://images.unsplash.com/photo-1519741497674-611481863552?w=200",
   "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=200",
   "https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=200",
@@ -71,15 +72,15 @@ export interface Decoration {
   height: number;
 }
 
-/** Họa tiết SVG tự vẽ trong public/decor — dùng tự do, không phụ thuộc nguồn ngoài. */
+/** Họa tiết SVG tự vẽ trong public/assets/images/decor — dùng tự do, không phụ thuộc nguồn ngoài. */
 export const DECORATIONS: Decoration[] = [
-  { id: "laurel-left", name: "Cành lá trái", src: "/decor/laurel-left.svg", width: 30, height: 60 },
-  { id: "laurel-right", name: "Cành lá phải", src: "/decor/laurel-right.svg", width: 30, height: 60 },
-  { id: "wreath", name: "Vòng nguyệt quế", src: "/decor/wreath.svg", width: 160, height: 160 },
-  { id: "divider-flourish", name: "Đường chia hoa văn", src: "/decor/divider-flourish.svg", width: 300, height: 40 },
-  { id: "divider-heart", name: "Đường chia trái tim", src: "/decor/divider-heart.svg", width: 300, height: 30 },
-  { id: "blob-soft", name: "Nền giọt mềm", src: "/decor/blob-soft.svg", width: 280, height: 280 },
-  { id: "wave-band", name: "Dải lượn", src: "/decor/wave-band.svg", width: 500, height: 120 },
-  { id: "frame-thin", name: "Khung viền mảnh", src: "/decor/frame-thin.svg", width: 300, height: 400 },
-  { id: "doves", name: "Đôi chim", src: "/decor/doves.svg", width: 120, height: 75 },
+  { id: "laurel-left", name: "Cành lá trái", src: "/assets/images/decor/laurel-left.svg", width: 30, height: 60 },
+  { id: "laurel-right", name: "Cành lá phải", src: "/assets/images/decor/laurel-right.svg", width: 30, height: 60 },
+  { id: "wreath", name: "Vòng nguyệt quế", src: "/assets/images/decor/wreath.svg", width: 160, height: 160 },
+  { id: "divider-flourish", name: "Đường chia hoa văn", src: "/assets/images/decor/divider-flourish.svg", width: 300, height: 40 },
+  { id: "divider-heart", name: "Đường chia trái tim", src: "/assets/images/decor/divider-heart.svg", width: 300, height: 30 },
+  { id: "blob-soft", name: "Nền giọt mềm", src: "/assets/images/decor/blob-soft.svg", width: 280, height: 280 },
+  { id: "wave-band", name: "Dải lượn", src: "/assets/images/decor/wave-band.svg", width: 500, height: 120 },
+  { id: "frame-thin", name: "Khung viền mảnh", src: "/assets/images/decor/frame-thin.svg", width: 300, height: 400 },
+  { id: "doves", name: "Đôi chim", src: "/assets/images/decor/doves.svg", width: 120, height: 75 },
 ];

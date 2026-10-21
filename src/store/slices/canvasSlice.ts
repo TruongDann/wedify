@@ -12,7 +12,7 @@ export interface CanvasSlice {
 
 export const defaultCanvasSettings: CanvasSettings = {
   width: 600,
-  height: 800,
+  height: 4200,
   backgroundColor: "#ffffff",
   backgroundImage: null,
   backgroundSize: "cover",

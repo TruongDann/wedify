@@ -18,6 +18,7 @@ import TextElementComponent from "./elements/TextElement";
 import ImageElementComponent from "./elements/ImageElement";
 import ShapeElementComponent from "./elements/ShapeElement";
 import WidgetElementComponent from "./elements/WidgetElement";
+import ToolElementComponent from "./elements/ToolElement";
 import { EditorElement, TextElement } from "@/types/editor";
 import { loadGoogleFont } from "@/utils/fontLoader";
 import {
@@ -218,6 +219,9 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
     if (selectionBox.width > 5 || selectionBox.height > 5) return;
+    const container = e.target.getStage()?.container();
+    const nativeTarget = e.evt?.target as Node | null;
+    if (container && nativeTarget && !container.contains(nativeTarget)) return;
     if (e.target === e.target.getStage() || e.target.name() === "background") {
       selectElement(null);
     }
@@ -369,6 +373,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       case "widget":
         return (
           <WidgetElementComponent
+            key={element.id}
+            {...commonProps}
+            element={element}
+          />
+        );
+      case "tool":
+        return (
+          <ToolElementComponent
             key={element.id}
             {...commonProps}
             element={element}
@@ -527,13 +539,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
                 if (newBox.height < 5 && oldBox.height >= 20) return oldBox;
                 return newBox;
               }}
-              anchorStyleFunc={(anchor) => {
-                anchor.cornerRadius(10);
-                if (anchor.hasName("rotater")) {
-                  anchor.fill("#ff6b35");
-                  anchor.stroke("#ff6b35");
-                }
-              }}
+              rotateEnabled={false}
+              borderStroke="#3b9cff"
+              borderStrokeWidth={1.5}
+              anchorSize={12}
+              anchorFill="#3b9cff"
+              anchorStroke="#ffffff"
+              anchorStrokeWidth={1.5}
+              anchorCornerRadius={6}
             />
           </Layer>
         </Stage>

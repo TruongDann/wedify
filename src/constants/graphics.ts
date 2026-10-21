@@ -1,7 +1,7 @@
 import { GRAPHICS_MANIFEST } from "@/data/graphicsManifest";
 
 export interface GraphicCategory {
-  /** Trùng tên thư mục trong public/graphics */
+  /** Trùng tên thư mục trong public/assets/images/graphics */
   id: string;
   label: string;
 }
@@ -29,7 +29,7 @@ export const GRAPHIC_CATEGORIES: GraphicCategory[] = [
 ];
 
 export const getGraphicUrl = (categoryId: string, file: string) =>
-  `/graphics/${categoryId}/${encodeURIComponent(file)}`;
+  `/assets/images/graphics/${categoryId}/${encodeURIComponent(file)}`;
 
 export const getGraphicUrls = (categoryId: string): string[] =>
   (GRAPHICS_MANIFEST[categoryId] ?? []).map((f) => getGraphicUrl(categoryId, f));

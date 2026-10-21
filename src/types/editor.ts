@@ -34,7 +34,7 @@ export interface ElementAnimation {
 
 export interface BaseElement {
   id: string;
-  type: "text" | "image" | "shape" | "sticker" | "widget";
+  type: "text" | "image" | "shape" | "sticker" | "widget" | "tool";
   position: Position;
   size: Size;
   rotation: number;
@@ -304,12 +304,27 @@ export interface WidgetElement extends BaseElement {
   gift?: GiftSettings;
 }
 
+export type ToolKind = "contactCard" | "guestbook";
+
+/**
+ * Tiện ích mở rộng của Wedify mà nhánh dev chưa có (thẻ liên hệ nhiều kênh, sổ lưu bút kết nối API).
+ * Cấu hình nằm trong `props`.
+ * Tách khỏi `WidgetElement` (tiện ích gốc của nhánh dev) để hai hệ cùng tồn tại.
+ */
+export interface ToolElement extends BaseElement {
+  type: "tool";
+  tool: ToolKind;
+  props: Record<string, any>;
+  animation?: ElementAnimation;
+}
+
 export type EditorElement =
   | TextElement
   | ImageElement
   | ShapeElement
   | StickerElement
-  | WidgetElement;
+  | WidgetElement
+  | ToolElement;
 
 export interface BackgroundMusic {
   name: string;
@@ -390,6 +405,8 @@ export interface Template {
   name: string;
   thumbnail: string;
   category: string;
+  /** Màu nhấn của mẫu, dùng cho nhãn/thẻ mẫu */
+  accent?: string;
   canvasSettings: CanvasSettings;
   elements: EditorElement[];
 }

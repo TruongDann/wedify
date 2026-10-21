@@ -1,7 +1,7 @@
 /**
  * Mẫu "Fall in love" — thiệp dài một trang cuộn, ảnh cưới ngoài trời, chữ viết tay đỏ.
  * Bố cục dựng theo kiểu thiệp cuộn phổ biến (ảnh lớn đầu trang, chuyện tình, lịch, đếm ngược,
- * bản đồ, xác nhận tham dự). Ảnh từ Unsplash (giấy phép Unsplash), họa tiết trong public/decor,
+ * bản đồ, xác nhận tham dự). Ảnh từ Unsplash (giấy phép Unsplash), họa tiết trong public/assets/images/decor,
  * font Google Fonts; lời văn, tên và địa chỉ là nội dung mẫu để người dùng thay.
  */
 
