@@ -9,6 +9,7 @@ import { useBackgroundImage } from "@/components/editor/hooks/useBackgroundImage
 import { loadGoogleFonts } from "@/utils/fontLoader";
 import { parseCssGradient } from "@/utils/gradient";
 import { FallingEffectLayer } from "@/components/card/FallingEffectLayer";
+import { fillGuestName } from "@/components/card/guestName";
 import ToolElementComponent from "@/components/editor/elements/ToolElement";
 import { Group } from "react-konva";
 import { Html } from "react-konva-utils";
@@ -100,8 +101,11 @@ const PublicCanvas: React.FC<PublicCanvasProps> = ({ elements, canvasSettings, d
 
   const prepare = (element: Record<string, any>) => {
     let next: Record<string, any> = { ...element, locked: true };
-    if (element.type === "text" && placeholders && typeof element.content === "string" && element.content.includes("{{")) {
-      next = { ...next, content: element.content.replace(/\{\{(\w+)\}\}/g, (match: string, key: string) => placeholders[key] ?? match) };
+    if (element.type === "text" && placeholders && typeof element.content === "string") {
+      let content: string = element.content;
+      if (content.includes("{{")) content = content.replace(/\{\{(\w+)\}\}/g, (match: string, key: string) => placeholders[key] ?? match);
+      if (placeholders.guest) content = fillGuestName(content, placeholders.guest);
+      next = { ...next, content };
     }
     return next;
   };
@@ -115,7 +119,7 @@ const PublicCanvas: React.FC<PublicCanvasProps> = ({ elements, canvasSettings, d
   };
 
   return (
-    <div style={{ position: "relative", width: displayWidth, height: height * scale, background: canvasSettings.backgroundColor || "#fff" }}>
+    <div style={{ position: "relative", overflow: "clip", width: displayWidth, height: height * scale, background: canvasSettings.backgroundColor || "#fff" }}>
       {canvasSettings.fallingEffect ? <FallingEffectLayer effect={canvasSettings.fallingEffect} scale={scale} /> : null}
       {fontsReady && displayWidth > 0 ? (
         <ViewerContext.Provider value={viewerValue}>
@@ -163,10 +167,11 @@ const PublicCanvas: React.FC<PublicCanvasProps> = ({ elements, canvasSettings, d
                 case "widget":
                   // Tiện ích gốc của nhánh dev (lịch, đếm ngược, form tham dự, bản đồ...) là HTML nên đặt lên canvas bằng <Html>
                   return (
-                    <Group key={element.id} x={element.position.x} y={element.position.y} rotation={element.rotation} opacity={element.opacity}>
+                    <Group key={element.id} x={element.position.x} y={element.position.y} rotation={element.rotation}>
                       <Html divProps={{ style: { pointerEvents: "auto" } }}>
                         <div style={{ width: element.size.width, height: element.size.height, position: "relative" }}>
-                          <WidgetView element={element as any} />
+                          {/* WidgetView -> ElementFrame tự đặt phần tử theo position/rotation của nó; vị trí đã do <Group> lo nên đưa về 0 */}
+                          <WidgetView element={{ ...(element as any), position: { x: 0, y: 0 }, rotation: 0 }} />
                         </div>
                       </Html>
                     </Group>
