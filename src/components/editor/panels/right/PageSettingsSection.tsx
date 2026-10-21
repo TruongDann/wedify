@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Input, Select, ColorPicker, message } from "antd";
+import dayjs from "dayjs";
+import { Input, Select, ColorPicker, DatePicker, App, Switch, InputNumber } from "antd";
 import {
   FileImageOutlined,
   BgColorsOutlined,
@@ -13,6 +14,7 @@ import {
 
 import { useEditorStore } from "@/store/editorStore";
 import { COLOR_PALETTE } from "@/constants/colors";
+import { AMBIENT_EFFECT_OPTIONS, type AmbientEffectType } from "@/components/editor/effects/AmbientEffect";
 
 const { Option } = Select;
 
@@ -33,10 +35,12 @@ interface PropertyRowProps {
 
 interface CardInfoSectionProps {
   cardTitle: string;
+  cardEventDate: string;
   cardCategory: string;
   cardStatus: string;
   previewImage: string;
   onTitleChange?: (title: string) => void;
+  onEventDateChange?: (eventDate: string) => void;
   onCategoryChange?: (category: string) => void;
   onStatusChange?: (status: string) => void;
   onPreviewImageChange?: (image: string) => void;
@@ -80,16 +84,20 @@ const PropertyRow: React.FC<PropertyRowProps> = ({ label, children }) => (
 
 export const CardInfoSection: React.FC<CardInfoSectionProps> = ({
   cardTitle,
+  cardEventDate,
   cardCategory,
   cardStatus,
   previewImage,
   onTitleChange,
+  onEventDateChange,
   onCategoryChange,
   onStatusChange,
   onPreviewImageChange,
   expandedSections,
   onToggle,
 }) => {
+  const { message } = App.useApp();
+
   const handlePreviewImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -120,6 +128,16 @@ export const CardInfoSection: React.FC<CardInfoSectionProps> = ({
               onChange={(e) => onTitleChange?.(e.target.value)}
               placeholder="Nhập tên thiệp..."
               className="flex-1"
+            />
+          </PropertyRow>
+
+          <PropertyRow label="Ngày sự kiện">
+            <DatePicker
+              value={cardEventDate ? dayjs(cardEventDate) : null}
+              onChange={(value) => onEventDateChange?.(value ? value.format("YYYY-MM-DD") : "")}
+              format="DD/MM/YYYY"
+              className="flex-1"
+              placeholder="Chọn ngày sự kiện"
             />
           </PropertyRow>
 
@@ -327,6 +345,7 @@ export const BackgroundSection: React.FC<BackgroundSectionProps> = ({
   expandedSections,
   onToggle,
 }) => {
+  const { message } = App.useApp();
   const { canvasSettings, setCanvasSettings } = useEditorStore();
   const backgroundColor = canvasSettings.backgroundColor;
   const backgroundImage = canvasSettings.backgroundImage;
@@ -441,14 +460,96 @@ export const BackgroundSection: React.FC<BackgroundSectionProps> = ({
   );
 };
 
+// ==================== Grid Settings Section ====================
+
+interface GridSettingsSectionProps {
+  expandedSections: string[];
+  onToggle: (key: string) => void;
+}
+
+export const GridSettingsSection: React.FC<GridSettingsSectionProps> = ({
+  expandedSections,
+  onToggle,
+}) => {
+  const { canvasSettings, setCanvasSettings } = useEditorStore();
+
+  return (
+    <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <SectionHeader
+        title="Lưới & hiệu ứng nền"
+        sectionKey="grid"
+        icon={<ExpandOutlined />}
+        expandedSections={expandedSections}
+        onToggle={onToggle}
+      />
+      {expandedSections.includes("grid") && (
+        <div className="px-4 pt-3 pb-4 space-y-4">
+          <PropertyRow label="Hiệu ứng nền">
+            <Select
+              value={canvasSettings.ambientEffect?.type ?? "none"}
+              onChange={(value: AmbientEffectType) =>
+                setCanvasSettings({
+                  ambientEffect: value === "none" ? null : { type: value, color: canvasSettings.ambientEffect?.color ?? "#f9a8d4" },
+                })
+              }
+              className="flex-1"
+            >
+              {AMBIENT_EFFECT_OPTIONS.map((option) => (
+                <Option key={option.value} value={option.value}>{option.label}</Option>
+              ))}
+            </Select>
+          </PropertyRow>
+
+          {canvasSettings.ambientEffect ? (
+            <PropertyRow label="Màu hiệu ứng">
+              <ColorPicker
+                value={canvasSettings.ambientEffect.color ?? "#f9a8d4"}
+                onChange={(color) =>
+                  setCanvasSettings({ ambientEffect: { ...canvasSettings.ambientEffect!, color: color.toHexString() } })
+                }
+              />
+            </PropertyRow>
+          ) : null}
+
+          <PropertyRow label="Hiển thị lưới">
+            <Switch
+              checked={Boolean(canvasSettings.showGrid)}
+              onChange={(checked) => setCanvasSettings({ showGrid: checked })}
+            />
+          </PropertyRow>
+
+          <PropertyRow label="Snap to grid">
+            <Switch
+              checked={Boolean(canvasSettings.snapToGrid)}
+              onChange={(checked) => setCanvasSettings({ snapToGrid: checked })}
+            />
+          </PropertyRow>
+
+          <PropertyRow label="Khoảng cách">
+            <InputNumber
+              min={5}
+              max={80}
+              step={5}
+              value={canvasSettings.gridSize ?? 20}
+              onChange={(value) => setCanvasSettings({ gridSize: Number(value) || 20 })}
+            />
+          </PropertyRow>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ==================== Main Page Settings Component ====================
 
 interface PageSettingsProps {
   cardTitle: string;
+  cardEventDate: string;
   cardCategory: string;
   cardStatus: string;
   previewImage: string;
   onTitleChange?: (title: string) => void;
+  onEventDateChange?: (eventDate: string) => void;
   onCategoryChange?: (category: string) => void;
   onStatusChange?: (status: string) => void;
   onPreviewImageChange?: (image: string) => void;
@@ -460,10 +561,12 @@ interface PageSettingsProps {
 
 export const PageSettings: React.FC<PageSettingsProps> = ({
   cardTitle,
+  cardEventDate,
   cardCategory,
   cardStatus,
   previewImage,
   onTitleChange,
+  onEventDateChange,
   onCategoryChange,
   onStatusChange,
   onPreviewImageChange,
@@ -475,10 +578,12 @@ export const PageSettings: React.FC<PageSettingsProps> = ({
   <div className="p-3 space-y-3">
     <CardInfoSection
       cardTitle={cardTitle}
+      cardEventDate={cardEventDate}
       cardCategory={cardCategory}
       cardStatus={cardStatus}
       previewImage={previewImage}
       onTitleChange={onTitleChange}
+      onEventDateChange={onEventDateChange}
       onCategoryChange={onCategoryChange}
       onStatusChange={onStatusChange}
       onPreviewImageChange={onPreviewImageChange}
@@ -494,6 +599,11 @@ export const PageSettings: React.FC<PageSettingsProps> = ({
     />
 
     <BackgroundSection
+      expandedSections={expandedSections}
+      onToggle={onToggle}
+    />
+
+    <GridSettingsSection
       expandedSections={expandedSections}
       onToggle={onToggle}
     />

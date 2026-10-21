@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { ANIMATION_OPTIONS, type AnimationConfig } from "@/components/editor/animation/elementAnimation";
 import { Button, Slider, Select, Switch, Input, ColorPicker } from "antd";
 import {
   EditOutlined,
@@ -59,11 +60,7 @@ interface ShadowProps {
   color: string;
 }
 
-interface AnimationProps {
-  enabled: boolean;
-  continuous: boolean;
-  type: "none" | "fadeIn" | "slideIn" | "bounce" | "pulse" | "shake" | "zoom";
-}
+type AnimationProps = AnimationConfig;
 
 interface SectionHeaderProps {
   title: string;
@@ -258,7 +255,7 @@ export const ImageFilterSection: React.FC<ImageFilterSectionProps> = ({
 
         <PropertyRow label="Độ mờ">
           <Slider
-            value={opacity}
+            value={Number(opacity ?? 1)}
             onChange={(value) => onUpdate({ opacity: value })}
             min={0}
             max={1}
@@ -266,7 +263,7 @@ export const ImageFilterSection: React.FC<ImageFilterSectionProps> = ({
             className="flex-1"
           />
           <span className="text-xs text-gray-500 w-10">
-            {opacity.toFixed(2)}
+            {(Number(opacity ?? 1)).toFixed(2)}
           </span>
         </PropertyRow>
 
@@ -760,14 +757,24 @@ export const ImageAnimationSection: React.FC<ImageAnimationSectionProps> = ({
                 }
                 className="flex-1"
               >
-                <Option value="none">Không có</Option>
-                <Option value="fadeIn">Fade In</Option>
-                <Option value="slideIn">Slide In</Option>
-                <Option value="bounce">Bounce</Option>
-                <Option value="pulse">Pulse</Option>
-                <Option value="shake">Shake</Option>
-                <Option value="zoom">Zoom</Option>
+                {ANIMATION_OPTIONS.map((option) => (
+                  <Option key={option.value} value={option.value}>{option.label}</Option>
+                ))}
               </Select>
+            </PropertyRow>
+
+            <PropertyRow label="Trễ (giây)">
+              <input
+                type="number"
+                min={0}
+                max={10}
+                step={0.1}
+                className="w-20 h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                value={animation.delay ?? 0}
+                onChange={(e) =>
+                  onUpdate({ animation: { ...animation, delay: Math.max(0, Number(e.target.value) || 0) } })
+                }
+              />
             </PropertyRow>
           </>
         )}

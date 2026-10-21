@@ -22,6 +22,21 @@ export class CreateInvitationDto {
   location?: string;
 
   @ApiProperty({
+    required: false,
+    description: 'Hồ sơ cưới: thông tin cô dâu, chú rể, ngày cưới, ngân hàng, QR...',
+    example: {
+      groomName: 'Nguyễn Văn An',
+      brideName: 'Trần Thị Bình',
+      weddingDate: '2026-12-18',
+      weddingTime: '18:00',
+      location: 'Riverside',
+    },
+  })
+  @IsOptional()
+  @IsObject()
+  profileJson?: Record<string, unknown>;
+
+  @ApiProperty({
     description: 'Snapshot { canvasSettings, elements[] } - lay tu Zustand store cua editor',
   })
   @IsObject()

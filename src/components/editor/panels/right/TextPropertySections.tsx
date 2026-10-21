@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { ANIMATION_OPTIONS, type AnimationConfig } from "@/components/editor/animation/elementAnimation";
 import { Slider, ColorPicker, Select, Switch, Button, Input } from "antd";
 import {
   FontColorsOutlined,
@@ -16,7 +17,7 @@ import {
 } from "@ant-design/icons";
 import { TextElement } from "@/types/editor";
 import { loadGoogleFont } from "@/utils/fontLoader";
-import { FONTS } from "@/constants/fonts";
+import { FONT_SELECT_GROUPS } from "@/constants/fonts";
 import {
   SectionHeader,
   PropertyRow,
@@ -39,7 +40,15 @@ export const TextStyleSection: React.FC<TextStyleSectionProps> = ({
   isExpanded,
   onToggle,
   onUpdate,
-}) => (
+}) => {
+  const opacity = Number(element?.opacity ?? 1);
+  const fontSize = Number(element?.fontSize ?? 16);
+  const fontFamily = element?.fontFamily ?? "Times New Roman";
+  const textAlign = element?.textAlign ?? "center";
+  const backgroundColor = element?.backgroundColor ?? "transparent";
+  const color = element?.color ?? "#333333";
+
+  return (
   <div className="border border-gray-200 rounded-lg overflow-hidden">
     <SectionHeader
       title="Kiểu chữ"
@@ -64,7 +73,7 @@ export const TextStyleSection: React.FC<TextStyleSectionProps> = ({
             <button
               className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 transition-colors"
               onClick={() =>
-                onUpdate({ fontSize: Math.max(8, element.fontSize - 1) })
+                onUpdate({ fontSize: Math.max(8, fontSize - 1) })
               }
             >
               <MinusOutlined className="text-xs" />
@@ -72,14 +81,14 @@ export const TextStyleSection: React.FC<TextStyleSectionProps> = ({
             <input
               type="number"
               className="w-14 h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-              value={element.fontSize}
+              value={fontSize}
               onChange={(e) =>
                 onUpdate({ fontSize: Number(e.target.value) || 16 })
               }
             />
             <button
               className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200 transition-colors"
-              onClick={() => onUpdate({ fontSize: element.fontSize + 1 })}
+              onClick={() => onUpdate({ fontSize: fontSize + 1 })}
             >
               <PlusOutlined className="text-xs" />
             </button>
@@ -88,25 +97,31 @@ export const TextStyleSection: React.FC<TextStyleSectionProps> = ({
 
         <PropertyRow label="Font">
           <Select
-            value={element.fontFamily}
+            value={fontFamily}
+            showSearch
+            optionFilterProp="label"
             onChange={async (value) => {
               await loadGoogleFont(value);
               setTimeout(() => onUpdate({ fontFamily: value }), 50);
             }}
             className="flex-1"
             virtual={false}
-          >
-            {FONTS.map((font) => (
-              <Option key={font.name} value={font.name}>
-                <span style={{ fontFamily: font.name }}>{font.label}</span>
-              </Option>
-            ))}
-          </Select>
+            options={FONT_SELECT_GROUPS.map((group) => ({
+              label: group.label,
+              options: group.options.map((option) => ({
+                value: option.value,
+                label: option.label,
+              })),
+            }))}
+            optionRender={(option) => (
+              <span style={{ fontFamily: String(option.value) }}>{option.label}</span>
+            )}
+          />
         </PropertyRow>
 
         <PropertyRow label="Màu chữ">
           <ColorPicker
-            value={element.color}
+            value={color}
             onChange={(color) => onUpdate({ color: color.toHexString() })}
           />
         </PropertyRow>
@@ -114,7 +129,7 @@ export const TextStyleSection: React.FC<TextStyleSectionProps> = ({
         <PropertyRow label="Màu nền">
           <div className="flex items-center gap-2">
             <ColorPicker
-              value={element.backgroundColor || "transparent"}
+              value={backgroundColor || "transparent"}
               onChange={(color) =>
                 onUpdate({ backgroundColor: color.toHexString() })
               }
@@ -129,7 +144,7 @@ export const TextStyleSection: React.FC<TextStyleSectionProps> = ({
 
         <PropertyRow label="Độ mờ">
           <Slider
-            value={element.opacity}
+            value={opacity}
             onChange={(value) => onUpdate({ opacity: value })}
             min={0}
             max={1}
@@ -137,13 +152,14 @@ export const TextStyleSection: React.FC<TextStyleSectionProps> = ({
             className="flex-1"
           />
           <span className="text-xs text-gray-500 w-10">
-            {element.opacity.toFixed(2)}
+            {opacity.toFixed(2)}
           </span>
         </PropertyRow>
       </div>
     )}
   </div>
-);
+  );
+};
 
 interface PaddingSectionProps {
   element: TextElement;
@@ -596,11 +612,7 @@ export const LinkSection: React.FC<LinkSectionProps> = ({
   </div>
 );
 
-interface AnimationProps {
-  enabled: boolean;
-  continuous: boolean;
-  type: "none" | "fadeIn" | "slideIn" | "bounce" | "pulse" | "shake" | "zoom";
-}
+type AnimationProps = AnimationConfig;
 
 interface AnimationSectionProps {
   animation: AnimationProps;
@@ -657,14 +669,24 @@ export const AnimationSection: React.FC<AnimationSectionProps> = ({
                 }
                 className="flex-1"
               >
-                <Option value="none">Không có</Option>
-                <Option value="fadeIn">Fade In</Option>
-                <Option value="slideIn">Slide In</Option>
-                <Option value="bounce">Bounce</Option>
-                <Option value="pulse">Pulse</Option>
-                <Option value="shake">Shake</Option>
-                <Option value="zoom">Zoom</Option>
+                {ANIMATION_OPTIONS.map((option) => (
+                  <Option key={option.value} value={option.value}>{option.label}</Option>
+                ))}
               </Select>
+            </PropertyRow>
+
+            <PropertyRow label="Trễ (giây)">
+              <input
+                type="number"
+                min={0}
+                max={10}
+                step={0.1}
+                className="w-20 h-8 text-center bg-gray-100 rounded px-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                value={animation.delay ?? 0}
+                onChange={(e) =>
+                  onUpdate({ animation: { ...animation, delay: Math.max(0, Number(e.target.value) || 0) } })
+                }
+              />
             </PropertyRow>
           </>
         )}

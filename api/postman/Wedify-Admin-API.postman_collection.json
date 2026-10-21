@@ -1,0 +1,111 @@
+{
+  "info": {
+    "_postman_id": "6b707bed-6c54-4ddd-b2bd-wedifyadmin01",
+    "name": "Wedify Admin API v1",
+    "description": "Collection API-first cho Auth và toàn bộ Admin Portal Wedify. Chạy Admin Login trước; accessToken/refreshToken được tự động lưu vào collection variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000/api/v1" },
+    { "key": "adminEmail", "value": "admin@wedify.vn" },
+    { "key": "adminPassword", "value": "Admin@123456" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "templateId", "value": "" },
+    { "key": "subscriptionId", "value": "" },
+    { "key": "withdrawalId", "value": "" },
+    { "key": "affiliateId", "value": "" },
+    { "key": "wishId", "value": "" },
+    { "key": "sessionId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 - Auth & Sessions",
+      "item": [
+        {
+          "name": "Admin Login",
+          "auth": { "type": "noauth" },
+          "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw","raw":"{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"}, "url": "{{baseUrl}}/auth/login" },
+          "event": [{"listen":"test","script":{"exec":["pm.test('Login thành công', () => pm.response.to.have.status(200));","const json = pm.response.json();","pm.collectionVariables.set('accessToken', json.accessToken);","pm.collectionVariables.set('refreshToken', json.refreshToken);","pm.test('Đúng tài khoản ADMIN', () => pm.expect(json.user.role).to.eql('ADMIN'));"],"type":"text/javascript"}}]
+        },
+        { "name": "Current Admin", "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" } },
+        { "name": "Refresh Token", "auth":{"type":"noauth"}, "request": { "method": "POST", "header":[{"key":"Content-Type","value":"application/json"}], "body":{"mode":"raw","raw":"{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"}, "url":"{{baseUrl}}/auth/refresh" }, "event":[{"listen":"test","script":{"exec":["const json = pm.response.json();","if (json.accessToken) pm.collectionVariables.set('accessToken', json.accessToken);","if (json.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"],"type":"text/javascript"}}] },
+        { "name": "List Sessions", "request": { "method":"GET", "url":"{{baseUrl}}/auth/sessions" }, "event":[{"listen":"test","script":{"exec":["const rows=pm.response.json();","if(rows[0]) pm.collectionVariables.set('sessionId',rows[0].id);"],"type":"text/javascript"}}] },
+        { "name": "Revoke Session", "request": { "method":"DELETE", "url":"{{baseUrl}}/auth/sessions/{{sessionId}}" } },
+        { "name": "Change Password", "request": { "method":"POST", "header":[{"key":"Content-Type","value":"application/json"}], "body":{"mode":"raw","raw":"{\n  \"currentPassword\": \"{{adminPassword}}\",\n  \"newPassword\": \"AdminNew@123456\"\n}"}, "url":"{{baseUrl}}/auth/change-password" } },
+        { "name": "Send Email Verification", "request": { "method":"POST", "url":"{{baseUrl}}/auth/email/send-verification" } },
+        { "name": "Logout", "request": { "method":"POST", "url":"{{baseUrl}}/auth/logout" } },
+        { "name": "Logout All", "request": { "method":"POST", "url":"{{baseUrl}}/auth/logout-all" } }
+      ]
+    },
+    {
+      "name": "02 - Dashboard & System",
+      "item": [
+        { "name":"Dashboard", "request":{"method":"GET","url":"{{baseUrl}}/admin/dashboard"} },
+        { "name":"System Health", "request":{"method":"GET","url":"{{baseUrl}}/admin/system/health"} }
+      ]
+    },
+    {
+      "name": "03 - Users",
+      "item": [
+        { "name":"List Users", "request":{"method":"GET","url":"{{baseUrl}}/users?search=&page=1"}, "event":[{"listen":"test","script":{"exec":["const json=pm.response.json();","if(json.items && json.items[0]) pm.collectionVariables.set('userId',json.items[0].id);"],"type":"text/javascript"}}] },
+        { "name":"User Detail", "request":{"method":"GET","url":"{{baseUrl}}/users/{{userId}}"} },
+        { "name":"Lock User", "request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"isLocked\": true\n}"},"url":"{{baseUrl}}/users/{{userId}}/lock"} },
+        { "name":"Unlock User", "request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"isLocked\": false\n}"},"url":"{{baseUrl}}/users/{{userId}}/lock"} }
+      ]
+    },
+    {
+      "name": "04 - Invitations",
+      "item": [
+        { "name":"All Invitations", "request":{"method":"GET","url":"{{baseUrl}}/admin/invitations?page=1"} },
+        { "name":"Published Invitations", "request":{"method":"GET","url":"{{baseUrl}}/admin/invitations?status=PUBLISHED&page=1"} },
+        { "name":"Search Invitations", "request":{"method":"GET","url":"{{baseUrl}}/admin/invitations?search=thiep&page=1"} }
+      ]
+    },
+    {
+      "name": "05 - Templates",
+      "item": [
+        { "name":"List Templates", "request":{"method":"GET","url":"{{baseUrl}}/templates"}, "event":[{"listen":"test","script":{"exec":["const rows=pm.response.json();","if(rows[0]) pm.collectionVariables.set('templateId',rows[0].id);"],"type":"text/javascript"}}] },
+        { "name":"Create Template", "request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Thiệp cưới Admin Demo\",\n  \"category\": \"wedding\",\n  \"style\": \"modern\",\n  \"tier\": \"FREE\",\n  \"thumbnailUrl\": \"https://images.unsplash.com/photo-1519741497674-611481863552\",\n  \"contentJson\": {\"canvasSettings\": {\"width\": 800, \"height\": 1200}, \"elements\": []}\n}"},"url":"{{baseUrl}}/templates"}, "event":[{"listen":"test","script":{"exec":["const json=pm.response.json();","if(json.id) pm.collectionVariables.set('templateId',json.id);"],"type":"text/javascript"}}] },
+        { "name":"Update Template", "request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Thiệp cưới Admin Demo Updated\"\n}"},"url":"{{baseUrl}}/templates/{{templateId}}"} },
+        { "name":"Deactivate Template", "request":{"method":"DELETE","url":"{{baseUrl}}/templates/{{templateId}}"} }
+      ]
+    },
+    {
+      "name": "06 - Plans & Subscriptions",
+      "item": [
+        { "name":"List Plans", "auth":{"type":"noauth"}, "request":{"method":"GET","url":"{{baseUrl}}/plans"} },
+        { "name":"Update Basic Plan", "request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"price\": 169000,\n  \"maxImages\": 50,\n  \"maxViews\": 10000,\n  \"maxInvitations\": 5\n}"},"url":"{{baseUrl}}/plans/BASIC"} },
+        { "name":"List Subscriptions", "request":{"method":"GET","url":"{{baseUrl}}/admin/subscriptions?page=1"}, "event":[{"listen":"test","script":{"exec":["const json=pm.response.json();","if(json.items && json.items[0]) pm.collectionVariables.set('subscriptionId',json.items[0].id);"],"type":"text/javascript"}}] },
+        { "name":"Approve Subscription", "request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"paymentStatus\": \"PAID\"\n}"},"url":"{{baseUrl}}/admin/subscriptions/{{subscriptionId}}"} }
+      ]
+    },
+    {
+      "name": "07 - Finance",
+      "item": [
+        { "name":"List Withdrawals", "request":{"method":"GET","url":"{{baseUrl}}/admin/withdrawals"}, "event":[{"listen":"test","script":{"exec":["const rows=pm.response.json();","if(rows[0]) pm.collectionVariables.set('withdrawalId',rows[0].id);"],"type":"text/javascript"}}] },
+        { "name":"Approve Withdrawal", "request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"status\": \"APPROVED\"\n}"},"url":"{{baseUrl}}/admin/withdrawals/{{withdrawalId}}"} },
+        { "name":"Mark Withdrawal Paid", "request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"status\": \"PAID\"\n}"},"url":"{{baseUrl}}/admin/withdrawals/{{withdrawalId}}"} },
+        { "name":"All Gifts", "request":{"method":"GET","url":"{{baseUrl}}/admin/gifts?page=1"} }
+      ]
+    },
+    {
+      "name": "08 - Affiliates",
+      "item": [
+        { "name":"List Affiliates", "request":{"method":"GET","url":"{{baseUrl}}/affiliates"}, "event":[{"listen":"test","script":{"exec":["const rows=pm.response.json();","if(rows[0]) pm.collectionVariables.set('affiliateId',rows[0].id);"],"type":"text/javascript"}}] },
+        { "name":"Approve Affiliate", "request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"status\": \"APPROVED\"\n}"},"url":"{{baseUrl}}/affiliates/{{affiliateId}}/status"} },
+        { "name":"Reject Affiliate", "request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"status\": \"REJECTED\"\n}"},"url":"{{baseUrl}}/affiliates/{{affiliateId}}/status"} }
+      ]
+    },
+    {
+      "name": "09 - Moderation",
+      "item": [
+        { "name":"List Wishes", "request":{"method":"GET","url":"{{baseUrl}}/admin/wishes?page=1"}, "event":[{"listen":"test","script":{"exec":["const json=pm.response.json();","if(json.items && json.items[0]) pm.collectionVariables.set('wishId',json.items[0].id);"],"type":"text/javascript"}}] },
+        { "name":"Hide Wish", "request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"isHidden\": true\n}"},"url":"{{baseUrl}}/admin/wishes/{{wishId}}/hidden"} },
+        { "name":"Restore Wish", "request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"isHidden\": false\n}"},"url":"{{baseUrl}}/admin/wishes/{{wishId}}/hidden"} }
+      ]
+    }
+  ]
+}

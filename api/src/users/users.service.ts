@@ -1,11 +1,35 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 const PAGE_SIZE = 20;
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
+
+  getProfile(userId: string) {
+    return this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        emailVerified: true,
+        name: true,
+        phone: true,
+        avatarUrl: true,
+        role: true,
+        plan: true,
+        planExpiresAt: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    await this.prisma.user.update({ where: { id: userId }, data: dto });
+    return this.getProfile(userId);
+  }
 
   // Danh sach user cho Admin Panel (muc 3.15): tim kiem + phan trang.
   async findAll(search?: string, page = 1) {
@@ -28,6 +52,7 @@ export class UsersService {
           phone: true,
           role: true,
           isLocked: true,
+          planId: true,
           createdAt: true,
           plan: { select: { tier: true, name: true } },
           _count: { select: { invitations: true } },
@@ -59,10 +84,14 @@ export class UsersService {
 
   async setLocked(id: string, isLocked: boolean) {
     await this.findOne(id);
-    return this.prisma.user.update({
-      where: { id },
-      data: { isLocked },
-      select: { id: true, email: true, isLocked: true },
+    return this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.update({
+        where: { id },
+        data: { isLocked },
+        select: { id: true, email: true, isLocked: true },
+      });
+      if (isLocked) await tx.session.deleteMany({ where: { userId: id } });
+      return user;
     });
   }
 }

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { GuestGroup } from '@prisma/client';
+import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class CreateGuestDto {
   @ApiProperty({ example: 'Huy' })
@@ -15,4 +16,19 @@ export class CreateGuestDto {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  @ApiProperty({ example: 'FAMILY', required: false, enum: GuestGroup, description: 'Nhóm khách: FAMILY / FRIEND / COLLEAGUE / OTHER' })
+  @IsOptional()
+  @IsEnum(GuestGroup)
+  group?: GuestGroup;
+
+  @ApiProperty({ example: 'huy@example.com', required: false })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiProperty({ example: 'Khách thân thiết', required: false })
+  @IsOptional()
+  @IsString()
+  note?: string;
 }

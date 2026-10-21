@@ -36,11 +36,7 @@ export interface ShadowProps {
   color: string;
 }
 
-export interface AnimationProps {
-  enabled: boolean;
-  continuous: boolean;
-  type: "none" | "fadeIn" | "slideIn" | "bounce" | "pulse" | "shake" | "zoom";
-}
+export type AnimationProps = import("@/components/editor/animation/elementAnimation").AnimationConfig;
 
 export interface PositionProps {
   x: number;

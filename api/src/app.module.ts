@@ -3,8 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AffiliatesModule } from './affiliates/affiliates.module';
 import { AuthModule } from './auth/auth.module';
+import { ComponentsModule } from './components/components.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { GiftsModule } from './gifts/gifts.module';
+import { HeartsModule } from './hearts/hearts.module';
 import { GuestsModule } from './guests/guests.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { PlansModule } from './plans/plans.module';
@@ -14,6 +16,8 @@ import { TemplatesModule } from './templates/templates.module';
 import { UsersModule } from './users/users.module';
 import { WalletsModule } from './wallets/wallets.module';
 import { WishesModule } from './wishes/wishes.module';
+import { AdminModule } from './admin/admin.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -23,13 +27,17 @@ import { WishesModule } from './wishes/wishes.module';
     UsersModule,
     PlansModule,
     TemplatesModule,
+    ComponentsModule,
     InvitationsModule,
     GuestsModule,
     RsvpModule,
     WishesModule,
     GiftsModule,
+    HeartsModule,
     WalletsModule,
     AffiliatesModule,
+    AdminModule,
+    UploadsModule,
   ],
   providers: [
     // JwtAuthGuard gan GLOBAL - MOI route mac dinh yeu cau Bearer token hop le, tru route nao

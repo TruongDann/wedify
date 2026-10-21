@@ -287,7 +287,7 @@ export const ShapePositionSection: React.FC<ShapePositionSectionProps> = ({
         </PropertyRow>
         <PropertyRow label="Độ mờ">
           <Slider
-            value={element.opacity}
+            value={Number(element.opacity ?? 1)}
             onChange={(value) => onUpdate({ opacity: value })}
             min={0}
             max={1}
@@ -295,7 +295,7 @@ export const ShapePositionSection: React.FC<ShapePositionSectionProps> = ({
             className="flex-1"
           />
           <span className="text-xs text-gray-500 w-10">
-            {element.opacity.toFixed(2)}
+            {(Number(element.opacity ?? 1)).toFixed(2)}
           </span>
         </PropertyRow>
       </div>

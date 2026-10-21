@@ -5,6 +5,8 @@ import { Text, Group, Rect, Line, Path, TextPath } from "react-konva";
 import Konva from "konva";
 import { TextElement } from "@/types/editor";
 import { useEditorStore } from "@/store/editorStore";
+import { runElementAnimation } from "../animation/elementAnimation";
+import { ViewerContext } from "../ViewerContext";
 
 /**
  * Props của TextElement
@@ -12,7 +14,8 @@ import { useEditorStore } from "@/store/editorStore";
 interface TextElementProps {
   element: TextElement;
   isSelected: boolean;
-  onSelect: () => void;
+  onSelect: (e?: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => void;
+  onDragStart?: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragMove?: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onTransformEnd: (e: Konva.KonvaEventObject<Event>) => void;
@@ -40,6 +43,7 @@ const calculateOffset = (offset: number, direction: number) => {
 const TextElementComponent: React.FC<TextElementProps> = ({
   element,
   onSelect,
+  onDragStart,
   onDragMove,
   onDragEnd,
   onTransformEnd,
@@ -48,6 +52,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
   const textRef = useRef<Konva.Text>(null);
   const textPathRef = useRef<Konva.TextPath>(null);
   const { updateElement } = useEditorStore();
+  const viewer = React.useContext(ViewerContext);
 
   // Lấy giá trị mặc định nếu chưa có
   const padding = element.padding || { top: 0, right: 0, bottom: 0, left: 0 };
@@ -102,13 +107,12 @@ const TextElementComponent: React.FC<TextElementProps> = ({
   }, [border.style]);
 
   const handleClick = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-    // Cast to any to access ctrlKey safely as it might not be present on TouchEvent
     const evt = e.evt as any;
     if ((evt.ctrlKey || evt.metaKey) && element.hyperlink) {
       window.open(element.hyperlink, "_blank");
       return;
     }
-    onSelect();
+    onSelect(e);
   };
 
   /**
@@ -116,6 +120,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
    * Tạo một textarea tạm thời đè lên canvas để người dùng nhập liệu.
    */
   const handleDblClick = () => {
+    if (viewer?.readOnly) return;
     if (!textRef.current || !groupRef.current) return;
 
     const groupNode = groupRef.current;
@@ -578,128 +583,24 @@ const TextElementComponent: React.FC<TextElementProps> = ({
     }
   };
 
-  // Xử lý Hiệu ứng (Animation)
+  // Hiệu ứng chuyển động (dùng chung với Image/Shape)
   React.useEffect(() => {
     const node = groupRef.current;
     if (!node) return;
-
-    // Reset trạng thái ban đầu
-    node.opacity(element.opacity);
-    node.scale({ x: 1, y: 1 });
-    node.rotation(element.rotation);
-    node.position(element.position);
-
-    const animConfig = element.animation;
-    if (!animConfig || !animConfig.enabled || animConfig.type === "none") {
-      return;
-    }
-
-    let anim: Konva.Animation | null = null;
-    let tween: Konva.Tween | null = null;
-
-    // Hiệu ứng xuất hiện (Chạy 1 lần)
-    if (!animConfig.continuous) {
-      switch (animConfig.type) {
-        case "fadeIn":
-          node.opacity(0);
-          tween = new Konva.Tween({
-            node: node,
-            opacity: element.opacity,
-            duration: 1,
-            easing: Konva.Easings.EaseInOut,
-          });
-          tween.play();
-          break;
-        case "slideIn":
-          const originalY = element.position.y;
-          node.y(originalY + 50);
-          node.opacity(0);
-          tween = new Konva.Tween({
-            node: node,
-            y: originalY,
-            opacity: element.opacity,
-            duration: 0.8,
-            easing: Konva.Easings.BackEaseOut,
-          });
-          tween.play();
-          break;
-        case "zoom":
-          node.scale({ x: 0, y: 0 });
-          tween = new Konva.Tween({
-            node: node,
-            scaleX: 1,
-            scaleY: 1,
-            duration: 0.6,
-            easing: Konva.Easings.BackEaseOut,
-          });
-          tween.play();
-          break;
-        case "bounce":
-          const startY = element.position.y;
-          node.y(startY - 30);
-          tween = new Konva.Tween({
-            node: node,
-            y: startY,
-            duration: 1,
-            easing: Konva.Easings.BounceEaseOut,
-          });
-          tween.play();
-          break;
-      }
-    } else {
-      // Hiệu ứng liên tục (Lặp lại)
-      switch (animConfig.type) {
-        case "pulse":
-          anim = new Konva.Animation((frame) => {
-            if (!frame) return;
-            const scale = 1 + Math.sin(frame.time * 0.005) * 0.05;
-            node.scale({ x: scale, y: scale });
-          }, node.getLayer());
-          anim.start();
-          break;
-        case "shake":
-          const baseRot = element.rotation;
-          anim = new Konva.Animation((frame) => {
-            if (!frame) return;
-            const rot = baseRot + Math.sin(frame.time * 0.01) * 5;
-            node.rotation(rot);
-          }, node.getLayer());
-          anim.start();
-          break;
-        case "bounce":
-          const baseY = element.position.y;
-          anim = new Konva.Animation((frame) => {
-            if (!frame) return;
-            const y = baseY + Math.sin(frame.time * 0.005) * 10;
-            node.y(y);
-          }, node.getLayer());
-          anim.start();
-          break;
-        case "fadeIn":
-          anim = new Konva.Animation((frame) => {
-            if (!frame) return;
-            const mobileOpacity =
-              element.opacity *
-              (0.5 + Math.abs(Math.sin(frame.time * 0.002)) * 0.5);
-            node.opacity(mobileOpacity);
-          }, node.getLayer());
-          anim.start();
-          break;
-      }
-    }
-
-    return () => {
-      if (anim) anim.stop();
-      if (tween) tween.destroy();
-      // Reset trạng thái khi cleanup
-      if (node) {
-        node.opacity(element.opacity);
-        node.scale({ x: 1, y: 1 });
-        node.rotation(element.rotation);
-        node.position(element.position);
-      }
-    };
-  }, [element.animation, element.position, element.rotation, element.opacity]);
+    return runElementAnimation(
+      node,
+      {
+        x: element.position.x,
+        y: element.position.y,
+        opacity: element.opacity,
+        rotation: element.rotation,
+        width: totalWidth,
+        height: totalHeight,
+      },
+      element.animation,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [element.animation?.enabled, element.animation?.continuous, element.animation?.type, element.animation?.delay, element.position.x, element.position.y, element.rotation, element.opacity, totalWidth, totalHeight]);
 
   return (
     <Group
@@ -716,6 +617,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
       onTap={handleClick}
       onDblClick={handleDblClick}
       onDblTap={handleDblClick}
+      onDragStart={onDragStart}
       onDragMove={onDragMove}
       onDragEnd={onDragEnd}
       onTransformEnd={onTransformEnd}

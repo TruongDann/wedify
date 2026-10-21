@@ -13,11 +13,20 @@ import {
 import { Html } from "react-konva-utils";
 import { Music, Disc3, Music2, Music3, Music4, Headphones } from "lucide-react";
 import Konva from "konva";
-import { useEditorStore } from "@/store/editorStore";
+import {
+  createImageElement,
+  createShapeElement,
+  createTextElement,
+  useEditorStore,
+} from "@/store/editorStore";
 import TextElementComponent from "./elements/TextElement";
 import ImageElementComponent from "./elements/ImageElement";
 import ShapeElementComponent from "./elements/ShapeElement";
+import WidgetElementComponent from "./elements/WidgetElement";
 import { EditorElement, TextElement } from "@/types/editor";
+import { loadGoogleFonts } from "@/utils/fontLoader";
+import { parseCssGradient } from "@/utils/gradient";
+import AmbientEffect from "./effects/AmbientEffect";
 import {
   useSnapLines,
   useMarqueeSelection,
@@ -112,10 +121,13 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     updateElement,
     moveElement,
     resizeElement,
+    addElement,
   } = useEditorStore();
 
   const effectiveHeight = canvasHeight || canvasSettings.height;
   const bgImage = useBackgroundImage(canvasSettings.backgroundImage);
+  const gridSize = canvasSettings.gridSize ?? 20;
+  const snapEnabled = canvasSettings.snapToGrid ?? true;
 
   const { getSnapLines } = useSnapLines({
     elements,
@@ -191,26 +203,162 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     }
   };
 
+  const snapToGrid = useCallback(
+    (value: number, bound: number, size: number) => {
+      if (!snapEnabled) return Math.min(Math.max(value, 0), bound - size);
+      const snapped = Math.round(value / gridSize) * gridSize;
+      return Math.min(Math.max(snapped, 0), Math.max(bound - size, 0));
+    },
+    [gridSize, snapEnabled],
+  );
+
+  const handleCanvasDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      const payload = event.dataTransfer.getData("application/wedify-element");
+      if (!payload) return;
+
+      try {
+        const raw = JSON.parse(payload) as {
+          type: "text" | "image" | "shape";
+          options?: Record<string, any>;
+          src?: string;
+          shapeType?: string;
+          size?: { width: number; height: number };
+        };
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        const dropX = Math.min(
+          Math.max(event.clientX - rect.left, 20),
+          canvasSettings.width - 40,
+        );
+        const dropY = Math.min(
+          Math.max(event.clientY - rect.top, 20),
+          effectiveHeight - 40,
+        );
+
+        const resolvedSize = raw.size ?? { width: 180, height: 180 };
+        const x = snapToGrid(dropX, canvasSettings.width, resolvedSize.width);
+        const y = snapToGrid(dropY, effectiveHeight, resolvedSize.height);
+
+        if (raw.type === "text") {
+          addElement(
+            createTextElement({
+              ...(raw.options ?? {}),
+              position: { x, y },
+              size: raw.options?.size ?? { width: 220, height: 80 },
+            }),
+          );
+          return;
+        }
+
+        if (raw.type === "image") {
+          addElement(
+            createImageElement(raw.src || "", {
+              ...(raw.options ?? {}),
+              position: { x, y },
+              size: resolvedSize,
+            }),
+          );
+          return;
+        }
+
+        if (raw.type === "shape") {
+          addElement(
+            createShapeElement(raw.shapeType as any, {
+              ...(raw.options ?? {}),
+              position: { x, y },
+              size: resolvedSize,
+            }),
+          );
+        }
+      } catch {
+        // Ignore invalid payloads.
+      }
+    },
+    [addElement, canvasSettings.width, effectiveHeight, gridSize, snapEnabled, snapToGrid],
+  );
+
+  const dragOriginRef = useRef<Record<string, { x: number; y: number }>>({});
+
+  const handleElementDragStart = useCallback(
+    (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
+      const ids = selectedElementIds.length > 0 ? selectedElementIds : [id];
+      const current = {} as Record<string, { x: number; y: number }>;
+
+      ids.forEach((selectedId) => {
+        const element = elements.find((item) => item.id === selectedId);
+        if (element) {
+          current[selectedId] = { x: element.position.x, y: element.position.y };
+        }
+      });
+
+      dragOriginRef.current = current;
+      isDragging.current = true;
+      const node = e.target;
+      node.x(node.x());
+      node.y(node.y());
+    },
+    [elements, selectedElementIds],
+  );
+
   const handleElementDragMove = useCallback(
     (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
       isDragging.current = true;
       const node = e.target;
+      const selectedIds = selectedElementIds.length > 0 ? selectedElementIds : [id];
+      const relevantIds = selectedIds.includes(id) ? selectedIds : [id];
+
+      const anchorStart = dragOriginRef.current[id] ?? {
+        x: node.x(),
+        y: node.y(),
+      };
+      const deltaX = node.x() - anchorStart.x;
+      const deltaY = node.y() - anchorStart.y;
+
+      relevantIds.forEach((selectedId) => {
+        const dragStart = dragOriginRef.current[selectedId] ?? {
+          x: elements.find((item) => item.id === selectedId)?.position.x ?? 0,
+          y: elements.find((item) => item.id === selectedId)?.position.y ?? 0,
+        };
+
+        moveElement(selectedId, {
+          x: dragStart.x + deltaX,
+          y: dragStart.y + deltaY,
+        });
+      });
+
+      const snappedX = snapEnabled
+        ? Math.round(node.x() / gridSize) * gridSize
+        : node.x();
+      const snappedY = snapEnabled
+        ? Math.round(node.y() / gridSize) * gridSize
+        : node.y();
+
+      node.x(Math.min(Math.max(snappedX, 0), Math.max(canvasSettings.width - node.width(), 0)));
+      node.y(Math.min(Math.max(snappedY, 0), Math.max(effectiveHeight - node.height(), 0)));
+
       const newGuides = getSnapLines(id, node);
       setGuides(newGuides);
     },
-    [getSnapLines],
+    [canvasSettings.width, effectiveHeight, elements, getSnapLines, gridSize, moveElement, selectedElementIds, snapEnabled],
   );
 
   const handleElementDragEnd = useCallback(
     (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
       isDragging.current = false;
       setGuides([]);
-      moveElement(id, {
-        x: e.target.x(),
-        y: e.target.y(),
+      const ids = selectedElementIds.length > 0 ? selectedElementIds : [id];
+      const currentIds = ids.includes(id) ? ids : [id];
+      currentIds.forEach((selectedId) => {
+        moveElement(selectedId, {
+          x: e.target.x(),
+          y: e.target.y(),
+        });
       });
+      dragOriginRef.current = {};
     },
-    [moveElement],
+    [moveElement, selectedElementIds],
   );
 
   const handleTransformEnd = (id: string, e: Konva.KonvaEventObject<Event>) => {
@@ -271,36 +419,32 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
 
   const sortedElements = [...elements].sort((a, b) => a.zIndex - b.zIndex);
 
-  const parseGradient = (gradientString: string) => {
-    if (!gradientString?.startsWith("linear-gradient")) return null;
-
-    const colorRegex = /#[A-Fa-f0-9]{6}|#[A-Fa-f0-9]{3}/g;
-    const colors = gradientString.match(colorRegex);
-
-    if (!colors || colors.length < 2) return null;
-
-    return {
-      fillLinearGradientStartPoint: { x: 0, y: 0 },
-      fillLinearGradientEndPoint: {
-        x: canvasSettings.width,
-        y: effectiveHeight,
-      },
-      fillLinearGradientColorStops: colors.flatMap((color, index) => [
-        index / (colors.length - 1),
-        color,
-      ]),
-    };
-  };
-
-  const gradientProps = parseGradient(canvasSettings.backgroundColor);
+  const gradientProps = parseCssGradient(canvasSettings.backgroundColor, canvasSettings.width, effectiveHeight);
 
   const renderElement = (element: EditorElement) => {
     const isSelected =
       selectedElementId === element.id ||
       selectedElementIds.includes(element.id);
+
+    const handleElementSelect = (e?: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
+      const modifierKey = e?.evt ? (e.evt as any)?.shiftKey || (e.evt as any)?.metaKey || (e.evt as any)?.ctrlKey : false;
+
+      if (modifierKey) {
+        const ids = selectedElementIds.includes(element.id)
+          ? selectedElementIds.filter((id) => id !== element.id)
+          : [...selectedElementIds, element.id];
+        selectElements(ids);
+        return;
+      }
+
+      selectElement(element.id);
+    };
+
     const commonProps = {
       isSelected,
-      onSelect: () => selectElement(element.id),
+      onSelect: handleElementSelect,
+      onDragStart: (e: Konva.KonvaEventObject<DragEvent>) =>
+        handleElementDragStart(element.id, e),
       onDragMove: (e: Konva.KonvaEventObject<DragEvent>) =>
         handleElementDragMove(element.id, e),
       onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) =>
@@ -334,6 +478,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
             element={element}
           />
         );
+      case "widget":
+        return (
+          <WidgetElementComponent
+            key={element.id}
+            {...commonProps}
+            element={element}
+          />
+        );
       default:
         return null;
     }
@@ -345,6 +497,22 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Đảm bảo font của mọi text (vd. thiệp/mẫu đã lưu) được tải rồi vẽ lại canvas.
+  const textFontKey = elements
+    .map((el) => (el.type === "text" ? (el as TextElement).fontFamily : el.type === "widget" ? String(el.props?.fontFamily ?? "") : ""))
+    .filter(Boolean)
+    .join("|");
+  useEffect(() => {
+    if (!textFontKey) return;
+    let cancelled = false;
+    loadGoogleFonts(textFontKey.split("|")).then(() => {
+      if (!cancelled) stageRef.current?.getLayers().forEach((layer) => layer.batchDraw());
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [textFontKey]);
 
   if (!isMounted) {
     return (
@@ -368,6 +536,11 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
           width: canvasSettings.width,
           height: effectiveHeight,
         }}
+        onDragOver={(event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "copy";
+        }}
+        onDrop={handleCanvasDrop}
       >
         <Stage
           ref={stageRef}
@@ -411,6 +584,28 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
                 fillPatternScaleX={canvasSettings.width / bgImage.width}
                 fillPatternScaleY={canvasSettings.width / bgImage.width}
               />
+            )}
+
+            {/* Grid Background */}
+            {canvasSettings.showGrid && (
+              <React.Fragment>
+                {Array.from({ length: Math.ceil(canvasSettings.width / gridSize) + 1 }).map((_, index) => (
+                  <Line
+                    key={`grid-v-${index}`}
+                    points={[index * gridSize, 0, index * gridSize, effectiveHeight]}
+                    stroke="rgba(148, 163, 184, 0.25)"
+                    strokeWidth={index % 5 === 0 ? 0.8 : 0.4}
+                  />
+                ))}
+                {Array.from({ length: Math.ceil(effectiveHeight / gridSize) + 1 }).map((_, index) => (
+                  <Line
+                    key={`grid-h-${index}`}
+                    points={[0, index * gridSize, canvasSettings.width, index * gridSize]}
+                    stroke="rgba(148, 163, 184, 0.25)"
+                    strokeWidth={index % 5 === 0 ? 0.8 : 0.4}
+                  />
+                ))}
+              </React.Fragment>
             )}
 
             {/* Elements */}
@@ -482,6 +677,19 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
             {/* Transformer */}
             <Transformer
               ref={transformerRef}
+              rotateEnabled
+              rotationSnaps={[0, 15, 30, 45, 60, 75, 90, 120, 135, 180]}
+              enabledAnchors={[
+                "top-left",
+                "top-center",
+                "top-right",
+                "middle-left",
+                "middle-right",
+                "bottom-left",
+                "bottom-center",
+                "bottom-right",
+                "rotater",
+              ]}
               boundBoxFunc={(oldBox, newBox) => {
                 if (newBox.width < 5) return oldBox;
                 if (newBox.height < 5 && oldBox.height >= 20) return oldBox;
@@ -489,6 +697,9 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               }}
               anchorStyleFunc={(anchor) => {
                 anchor.cornerRadius(10);
+                anchor.fill("#ffffff");
+                anchor.stroke("#FF6B9D");
+                anchor.strokeWidth(2);
                 if (anchor.hasName("rotater")) {
                   anchor.fill("#ff6b35");
                   anchor.stroke("#ff6b35");
@@ -496,6 +707,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
               }}
             />
           </Layer>
+          <AmbientEffect settings={canvasSettings.ambientEffect} width={canvasSettings.width} height={effectiveHeight} />
         </Stage>
       </div>
     </div>

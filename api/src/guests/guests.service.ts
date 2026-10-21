@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { GuestGroup } from '@prisma/client';
 import { InvitationsService } from '../invitations/invitations.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { BulkCreateGuestDto } from './dto/bulk-create-guest.dto';
@@ -25,10 +26,20 @@ export class GuestsService {
     return { created: result.count };
   }
 
-  async findAllByInvitation(invitationId: string, userId: string) {
+  async findAllByInvitation(
+    invitationId: string,
+    userId: string,
+    group?: string,
+  ) {
     await this.invitationsService.assertAccess(invitationId, userId);
+
+    const where: Record<string, unknown> = { invitationId };
+    if (group) {
+      where.group = group as GuestGroup;
+    }
+
     return this.prisma.guest.findMany({
-      where: { invitationId },
+      where: where as never,
       include: { rsvp: true },
       orderBy: { createdAt: 'asc' },
     });

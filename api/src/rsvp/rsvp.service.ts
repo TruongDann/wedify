@@ -2,6 +2,7 @@ import { NotFoundException, Injectable } from '@nestjs/common';
 import { RsvpStatus } from '@prisma/client';
 import { InvitationsService } from '../invitations/invitations.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { SubmitPublicRsvpDto } from './dto/submit-public-rsvp.dto';
 import { SubmitRsvpDto } from './dto/submit-rsvp.dto';
 
 @Injectable()
@@ -27,6 +28,29 @@ export class RsvpService {
         respondedAt: new Date(),
       },
       create: {
+        guestId: guest.id,
+        status: dto.status,
+        numberOfCompanions: dto.numberOfCompanions ?? 0,
+        note: dto.note,
+        respondedAt: new Date(),
+      },
+    });
+  }
+
+  // Guest-facing (PUBLIC) - khach mo thiep chung (khong co link ca nhan) van xac nhan tham du:
+  // tao Guest moi theo ten da nhap roi ghi Rsvp.
+  async submitBySlug(slug: string, dto: SubmitPublicRsvpDto) {
+    const invitation = await this.prisma.invitation.findUnique({
+      where: { slug },
+    });
+    if (!invitation) throw new NotFoundException('Không tìm thấy thiệp');
+
+    const guest = await this.prisma.guest.create({
+      data: { invitationId: invitation.id, name: dto.name.trim() },
+    });
+
+    return this.prisma.rsvp.create({
+      data: {
         guestId: guest.id,
         status: dto.status,
         numberOfCompanions: dto.numberOfCompanions ?? 0,

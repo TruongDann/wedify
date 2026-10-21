@@ -4,6 +4,8 @@
   "description": "Wedify API - NestJS + Prisma (MySQL)",
   "private": true,
   "scripts": {
+    "prestart": "prisma generate",
+    "prestart:dev": "prisma generate",
     "build": "nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",

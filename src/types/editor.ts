@@ -1,3 +1,8 @@
+import type { AnimationConfig } from "@/components/editor/animation/elementAnimation";
+import type { AmbientEffectSettings } from "@/components/editor/effects/AmbientEffect";
+
+export type { AnimationConfig, AmbientEffectSettings };
+
 export interface Position {
   x: number;
   y: number;
@@ -10,7 +15,7 @@ export interface Size {
 
 export interface BaseElement {
   id: string;
-  type: "text" | "image" | "shape" | "sticker";
+  type: "text" | "image" | "shape" | "sticker" | "widget";
   position: Position;
   size: Size;
   rotation: number;
@@ -64,11 +69,7 @@ export interface TextElement extends BaseElement {
   // Link
   hyperlink: string;
   // Animation
-  animation: {
-    enabled: boolean;
-    continuous: boolean;
-    type: "none" | "fadeIn" | "slideIn" | "bounce" | "pulse" | "shake" | "zoom";
-  };
+  animation: AnimationConfig;
   // Text Effects
   textEffect: {
     type:
@@ -132,11 +133,7 @@ export interface ImageElement extends BaseElement {
   // Link
   hyperlink: string;
   // Animation
-  animation: {
-    enabled: boolean;
-    continuous: boolean;
-    type: "none" | "fadeIn" | "slideIn" | "bounce" | "pulse" | "shake" | "zoom";
-  };
+  animation: AnimationConfig;
   // Image filters
   filters: {
     brightness: number;
@@ -167,6 +164,8 @@ export interface ShapeElement extends BaseElement {
   fill: string;
   stroke: string;
   strokeWidth: number;
+  // Animation
+  animation?: AnimationConfig;
   // Shadow
   shadow?: {
     enabled: boolean;
@@ -183,11 +182,32 @@ export interface StickerElement extends BaseElement {
   category: string;
 }
 
+export type WidgetKind =
+  | "calendar"
+  | "countdown"
+  | "button"
+  | "slideshow"
+  | "rsvpForm"
+  | "giftBox"
+  | "mapEmbed"
+  | "video"
+  | "contactCard"
+  | "guestbook";
+
+/** Tiện ích thiệp (lịch, đếm ngược, nút hành động, trình chiếu ảnh) — vẽ bằng Konva, cấu hình trong `props`. */
+export interface WidgetElement extends BaseElement {
+  type: "widget";
+  widget: WidgetKind;
+  props: Record<string, any>;
+  animation?: AnimationConfig;
+}
+
 export type EditorElement =
   | TextElement
   | ImageElement
   | ShapeElement
-  | StickerElement;
+  | StickerElement
+  | WidgetElement;
 
 export interface BackgroundMusic {
   name: string;
@@ -206,6 +226,12 @@ export interface CanvasSettings {
   backgroundSize: "cover" | "contain" | "fill";
   backgroundMusic: BackgroundMusic | null;
   isMusicPlaying: boolean;
+  showGrid?: boolean;
+  snapToGrid?: boolean;
+  gridSize?: number;
+  showRsvpFooter?: boolean;
+  /** Hiệu ứng nền chạy trên toàn trang (cánh hoa rơi, lấp lánh...). */
+  ambientEffect?: AmbientEffectSettings | null;
 }
 
 export interface Template {
@@ -213,6 +239,7 @@ export interface Template {
   name: string;
   thumbnail: string;
   category: string;
+  accent?: string;
   canvasSettings: CanvasSettings;
   elements: EditorElement[];
 }

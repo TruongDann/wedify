@@ -1,20 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PlanTier } from '@prisma/client';
-import { IsEnum, IsObject, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsEnum, IsObject, IsOptional, IsString, IsUrl, IsUUID } from 'class-validator';
 
 export class CreateTemplateDto {
   @ApiProperty({ example: 'Hoa hồng lãng mạn' })
   @IsString()
   name!: string;
 
-  @ApiProperty({ example: 'wedding' })
-  @IsString()
-  category!: string;
+  @ApiProperty({ description: 'ID danh mục mẫu' })
+  @IsUUID()
+  categoryId!: string;
 
-  @ApiProperty({ example: 'romantic', required: false })
+  @ApiProperty({ description: 'ID phong cách mẫu', required: false })
   @IsOptional()
-  @IsString()
-  style?: string;
+  @IsUUID()
+  styleId?: string;
 
   @ApiProperty({ enum: PlanTier, default: PlanTier.FREE })
   @IsEnum(PlanTier)

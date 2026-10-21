@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -53,8 +54,9 @@ export class GuestsController {
   findAll(
     @Param('invitationId') invitationId: string,
     @CurrentUser() user: JwtPayload,
+    @Query('group') group?: string,
   ) {
-    return this.guestsService.findAllByInvitation(invitationId, user.sub);
+    return this.guestsService.findAllByInvitation(invitationId, user.sub, group);
   }
 
   @ApiBearerAuth()

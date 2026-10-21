@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import type { JwtPayload } from '../auth/strategies/jwt.strategy';
+import { CreatePublicWishDto } from './dto/create-public-wish.dto';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { SetHiddenDto } from './dto/set-hidden.dto';
 import { WishesService } from './wishes.service';
@@ -16,6 +17,12 @@ export class WishesController {
   @Post('guest-links/:token/wishes')
   create(@Param('token') token: string, @Body() dto: CreateWishDto) {
     return this.wishesService.createByGuestToken(token, dto);
+  }
+
+  @Public()
+  @Post('invitations/by-slug/:slug/wishes')
+  createPublic(@Param('slug') slug: string, @Body() dto: CreatePublicWishDto) {
+    return this.wishesService.createBySlug(slug, dto);
   }
 
   @Public()

@@ -47,6 +47,13 @@ enum InvitationStatus {
   EXPIRED
 }
 
+enum GuestGroup {
+  FAMILY
+  FRIEND
+  COLLEAGUE
+  OTHER
+}
+
 enum RsvpStatus {
   PENDING
   ATTENDING
@@ -95,9 +102,10 @@ model User {
   accounts OAuthAccount[]
   sessions Session[]
 
-  invitations   Invitation[]              @relation("InvitationOwner")
+  invitations   Invitation[]             @relation("InvitationOwner")
   collaborates  InvitationCollaborator[]
   wallet        Wallet?
+  heartTopups   HeartTopup[]
   subscriptions Subscription[]
   affiliate     AffiliatePartner?
 
@@ -186,21 +194,72 @@ model Subscription {
 // =============================================================================
 
 model Template {
-  id           String   @id @default(uuid())
+  id           String           @id @default(uuid())
   name         String
-  category     String // "wedding" | "birthday" | "graduation" | ...
-  style        String? // "modern" | "traditional" | ...
-  tier         PlanTier @default(FREE)
+  categoryId   String
+  category     TemplateCategory @relation(fields: [categoryId], references: [id])
+  styleId      String?
+  style        TemplateStyle?   @relation(fields: [styleId], references: [id])
+  tier         PlanTier         @default(FREE)
   thumbnailUrl String
   // Snapshot canvasSettings + elements[] (dung chung shape voi types/editor.ts hien co)
   contentJson  Json
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isActive     Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
   invitations Invitation[]
 
+  @@index([categoryId])
+  @@index([styleId])
   @@map("templates")
+}
+
+model TemplateCategory {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  sortOrder   Int        @default(0)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  templates   Template[]
+
+  @@map("template_categories")
+}
+
+model TemplateStyle {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  sortOrder   Int        @default(0)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  templates   Template[]
+
+  @@map("template_styles")
+}
+
+model Component {
+  id           String   @id @default(uuid())
+  name         String
+  type         String
+  category     String
+  description  String?
+  tier         PlanTier @default(FREE)
+  thumbnailUrl String?
+  configJson   Json     @default("{}")
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([tier])
+  @@index([category])
+  @@map("components")
 }
 
 // =============================================================================
@@ -208,23 +267,24 @@ model Template {
 // =============================================================================
 
 model Invitation {
-  id         String            @id @default(uuid())
-  userId     String
-  user       User              @relation("InvitationOwner", fields: [userId], references: [id])
-  templateId String?
-  template   Template?         @relation(fields: [templateId], references: [id])
-  slug       String            @unique // link cong khai: /thiep/{slug}
-  title      String
-  eventDate  DateTime?
-  location   String?
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation("InvitationOwner", fields: [userId], references: [id])
+  templateId  String?
+  template    Template?        @relation(fields: [templateId], references: [id])
+  slug        String           @unique // link cong khai: /thiep/{slug}
+  title       String
+  eventDate   DateTime?
+  location    String?
+  profileJson Json             @default("{}")
   // Toan bo noi dung thiet ke: { canvasSettings, elements[] } - xem types/editor.ts
   // CanvasSettings/EditorElement hien co cua editor, TAI SU DUNG khong doi kieu du lieu.
   contentJson Json
-  status     InvitationStatus  @default(DRAFT)
-  viewCount  Int               @default(0)
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
-  expiresAt  DateTime? // tinh tu storageDurationMonths cua Plan luc publish
+  status      InvitationStatus @default(DRAFT)
+  viewCount   Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  expiresAt   DateTime? // tinh tu storageDurationMonths cua Plan luc publish
 
   collaborators InvitationCollaborator[]
   guests        Guest[]
@@ -254,18 +314,21 @@ model InvitationCollaborator {
 // =============================================================================
 
 model Guest {
-  id           String     @id @default(uuid())
-  invitationId String
-  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
-  name         String
-  honorific    String? // cach xung ho: "anh", "chi", "co", "bac"...
-  phone        String?
+  id                String     @id @default(uuid())
+  invitationId      String
+  invitation        Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  name              String
+  honorific         String? // cach xung ho: "anh", "chi", "co", "bac"...
+  phone             String?
+  email             String?
+  group             GuestGroup @default(OTHER)
+  note              String?    @db.Text
   // Token kho doan (UUID) - dung lam /thiep/{slug}?g={personalizedToken} hoac /t/{personalizedToken}
   // KHONG duoc de guest nay doan ra token cua guest khac (yeu cau bao mat 4.2).
-  personalizedToken String   @unique @default(uuid())
+  personalizedToken String     @unique @default(uuid())
   sentAt            DateTime?
-  viewedAt           DateTime?
-  createdAt          DateTime  @default(now())
+  viewedAt          DateTime?
+  createdAt         DateTime   @default(now())
 
   rsvp   Rsvp?
   wishes Wish[]
@@ -299,6 +362,7 @@ model Wish {
   guest        Guest?     @relation(fields: [guestId], references: [id], onDelete: SetNull)
   guestName    String // luu lai ten hien thi luc gui, phong khi Guest bi xoa
   message      String     @db.Text
+  giftCode     String? // co gia tri khi loi chuc di kem qua tang (GiftItem.code)
   isHidden     Boolean    @default(false) // Admin/Host an loi chuc phan cam
   createdAt    DateTime   @default(now())
 
@@ -319,18 +383,28 @@ model Gift {
   type          GiftType
   amount        Int // VND (quy doi neu la virtual_gift)
   animationType String? // kieu hieu ung hien thi tren thiep khi type = virtual_gift
+  // Qua tang bang TIM (virtual_gift): nguoi gui tra `hearts` tim, host nhan lai `hearts` tim nhan duoc
+  giftItemId    String?
+  giftItem      GiftItem?  @relation(fields: [giftItemId], references: [id], onDelete: SetNull)
+  hearts        Int        @default(0)
+  senderUserId  String?
+  senderName    String?
+  message       String?    @db.Text
   createdAt     DateTime   @default(now())
 
   @@index([invitationId])
+  @@index([senderUserId])
   @@map("gifts")
 }
 
 model Wallet {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id])
-  balance   Int      @default(0) // VND da quy doi, co the rut
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id])
+  balance        Int      @default(0) // VND da quy doi, co the rut
+  heartBalance   Int      @default(0) // tim DA MUA (nap tien), dung de tang qua - KHONG doi ra tien
+  receivedHearts Int      @default(0) // tim NHAN DUOC tu qua tang, doi ra VND vao `balance`
+  updatedAt      DateTime @updatedAt
 
   withdrawals Withdrawal[]
 
@@ -377,4 +451,65 @@ model AffiliateConversion {
   convertedAt      DateTime         @default(now())
 
   @@map("affiliate_conversions")
+}
+
+// =============================================================================
+// HEARTS - tien te ao: khach nap tien mua tim -> dung tim tang qua -> host doi tim ra tien
+// =============================================================================
+
+enum HeartTopupStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum HeartTransactionKind {
+  TOPUP // +heartBalance (nap tien mua tim)
+  GIFT_SENT // -heartBalance (tang qua)
+  GIFT_RECEIVED // +receivedHearts (host nhan qua)
+  EXCHANGE // -receivedHearts, +balance VND (host doi tim ra tien)
+}
+
+model GiftItem {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  name          String
+  emoji         String
+  heartPrice    Int
+  animationType String?
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  gifts Gift[]
+
+  @@map("gift_items")
+}
+
+model HeartTopup {
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  hearts      Int
+  amountVnd   Int
+  paymentCode String           @unique // noi dung chuyen khoan / ma doi soat voi cong thanh toan
+  status      HeartTopupStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  paidAt      DateTime?
+
+  @@index([userId])
+  @@map("heart_topups")
+}
+
+model HeartTransaction {
+  id        String               @id @default(uuid())
+  userId    String
+  kind      HeartTransactionKind
+  hearts    Int // luon duong; chieu tang/giam suy ra tu `kind`
+  vndAmount Int                  @default(0)
+  refId     String? // topup / gift / ... lien quan
+  createdAt DateTime             @default(now())
+
+  @@index([userId, createdAt])
+  @@map("heart_transactions")
 }

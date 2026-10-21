@@ -9,21 +9,23 @@ export class TemplatesService {
   constructor(private prisma: PrismaService) {}
 
   // Public - thu vien mau (muc 3.4), loc theo category/tier de FE dung cho /templates/{category}.
-  findAll(category?: string, tier?: PlanTier) {
-    return this.prisma.template.findMany({
+  async findAll(category?: string, tier?: PlanTier) {
+    const templates = await this.prisma.template.findMany({
       where: {
         isActive: true,
-        ...(category ? { category } : {}),
+        ...(category ? { category: { slug: category } } : {}),
         ...(tier ? { tier } : {}),
       },
+      include: { category: true, style: true },
       orderBy: { createdAt: 'desc' },
     });
+    return templates.map((template) => this.serialize(template));
   }
 
   async findOne(id: string) {
-    const template = await this.prisma.template.findUnique({ where: { id } });
+    const template = await this.prisma.template.findUnique({ where: { id }, include: { category: true, style: true } });
     if (!template) throw new NotFoundException('Không tìm thấy mẫu thiệp');
-    return template;
+    return this.serialize(template);
   }
 
   create(dto: CreateTemplateDto) {
@@ -44,5 +46,9 @@ export class TemplatesService {
       where: { id },
       data: { isActive: false },
     });
+  }
+
+  private serialize(template: Record<string, unknown> & { category: { name: string; slug: string }; style: { name: string; slug: string } | null }) {
+    return { ...template, category: template.category.name, categorySlug: template.category.slug, style: template.style?.name ?? null, styleSlug: template.style?.slug ?? null };
   }
 }

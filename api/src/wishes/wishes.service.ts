@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InvitationsService } from '../invitations/invitations.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreatePublicWishDto } from './dto/create-public-wish.dto';
 import { CreateWishDto } from './dto/create-wish.dto';
 
 @Injectable()
@@ -28,6 +29,23 @@ export class WishesService {
     });
   }
 
+  // Guest-facing (PUBLIC) - khach bat ky de lai loi chuc ngay tren trang thiep (nhap ten + loi chuc).
+  async createBySlug(slug: string, dto: CreatePublicWishDto) {
+    const invitation = await this.prisma.invitation.findUnique({
+      where: { slug },
+    });
+    if (!invitation) throw new NotFoundException('Không tìm thấy thiệp');
+
+    return this.prisma.wish.create({
+      data: {
+        invitationId: invitation.id,
+        guestName: dto.guestName.trim(),
+        message: dto.message.trim(),
+      },
+      select: { id: true, guestName: true, message: true, createdAt: true },
+    });
+  }
+
   // Guest-facing (PUBLIC) - hien danh sach loi chuc CONG KHAI tren trang thiep (bo qua da an).
   async findPublicBySlug(slug: string) {
     const invitation = await this.prisma.invitation.findUnique({
@@ -38,7 +56,7 @@ export class WishesService {
     return this.prisma.wish.findMany({
       where: { invitationId: invitation.id, isHidden: false },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, guestName: true, message: true, createdAt: true },
+      select: { id: true, guestName: true, message: true, giftCode: true, createdAt: true },
     });
   }
 

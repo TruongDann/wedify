@@ -20,6 +20,11 @@ export class WalletsController {
     return this.walletsService.getMyWallet(user.sub);
   }
 
+  @Get('wallet/withdrawals')
+  getMyWithdrawals(@CurrentUser() user: JwtPayload) {
+    return this.walletsService.getMyWithdrawals(user.sub);
+  }
+
   @Post('wallet/withdrawals')
   requestWithdrawal(
     @CurrentUser() user: JwtPayload,

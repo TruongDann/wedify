@@ -20,6 +20,28 @@ export const TextTab: React.FC = () => {
     addElement(createTextElement(options));
   };
 
+  const handleDragStart = (
+    event: React.DragEvent<HTMLDivElement>,
+    options: {
+      fontSize?: number;
+      fontWeight?: number;
+      fontFamily?: string;
+      content?: string;
+    } = {},
+  ) => {
+    event.dataTransfer.effectAllowed = "copy";
+    event.dataTransfer.setData(
+      "application/wedify-element",
+      JSON.stringify({
+        type: "text",
+        options: {
+          ...createTextElement(options),
+          position: { x: 80, y: 80 },
+        },
+      }),
+    );
+  };
+
   return (
     <div className="p-4 space-y-6">
       {/* Search Bar */}
@@ -52,7 +74,15 @@ export const TextTab: React.FC = () => {
         <div className="space-y-3">
           {/* Heading */}
           <div
+            draggable
             className="bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center group"
+            onDragStart={(event) =>
+              handleDragStart(event, {
+                content: "Thêm tiêu đề",
+                fontSize: 32,
+                fontWeight: 700,
+              })
+            }
             onClick={() =>
               handleAddText({
                 content: "Thêm tiêu đề",
@@ -68,7 +98,15 @@ export const TextTab: React.FC = () => {
 
           {/* Subheading */}
           <div
+            draggable
             className="bg-gray-50 hover:bg-gray-100 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center group"
+            onDragStart={(event) =>
+              handleDragStart(event, {
+                content: "Thêm tiêu đề phụ",
+                fontSize: 24,
+                fontWeight: 600,
+              })
+            }
             onClick={() =>
               handleAddText({
                 content: "Thêm tiêu đề phụ",
@@ -84,7 +122,15 @@ export const TextTab: React.FC = () => {
 
           {/* Body Text */}
           <div
+            draggable
             className="bg-gray-50 hover:bg-gray-100 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-300 transition-all flex items-center group"
+            onDragStart={(event) =>
+              handleDragStart(event, {
+                content: "Thêm văn bản nội dung",
+                fontSize: 16,
+                fontWeight: 400,
+              })
+            }
             onClick={() =>
               handleAddText({
                 content: "Thêm văn bản nội dung",
@@ -109,7 +155,16 @@ export const TextTab: React.FC = () => {
           {TEXT_TEMPLATES.map((template) => (
             <div
               key={template.id}
+              draggable
               className="bg-white border border-gray-200 hover:border-primary rounded-lg p-3 cursor-pointer transition-all hover:shadow-md aspect-square flex flex-col items-center justify-center overflow-hidden"
+              onDragStart={(event) =>
+                handleDragStart(event, {
+                  content: template.content,
+                  fontSize: template.fontSize,
+                  fontWeight: template.fontWeight,
+                  fontFamily: template.fontFamily,
+                })
+              }
               onClick={() =>
                 handleAddText({
                   content: template.content,

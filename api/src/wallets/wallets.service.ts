@@ -21,6 +21,22 @@ export class WalletsService {
     return wallet;
   }
 
+  async getMyWithdrawals(userId: string) {
+    const wallet = await this.prisma.wallet.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+
+    if (!wallet) {
+      return [];
+    }
+
+    return this.prisma.withdrawal.findMany({
+      where: { walletId: wallet.id },
+      orderBy: { requestedAt: 'desc' },
+    });
+  }
+
   // "Reserve" so tien ngay luc yeu cau (tru khoi balance kha dung) - tranh Host xin rut 2 lan
   // cung 1 khoan tien trong luc cho Admin duyet (muc 3.15: "duyet payout").
   async requestWithdrawal(userId: string, dto: RequestWithdrawalDto) {

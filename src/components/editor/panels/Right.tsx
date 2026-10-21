@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { Button } from "antd";
+import { App, Button } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useEditorStore } from "@/store/editorStore";
 import {
   TextElement,
   ImageElement,
   ShapeElement,
+  WidgetElement,
   EditorElement,
 } from "@/types/editor";
 
@@ -43,19 +44,29 @@ import {
   ShapeDeleteButton,
 } from "./right/ShapePropertySections";
 
+import { WidgetSettingsSection } from "./right/WidgetPropertySections";
 import { PageSettings } from "./right/PageSettingsSection";
 import { MusicPropertySection } from "./right/MusicPropertySection";
 import { CropModal } from "./right/CropModal";
 
 // ==================== Types ====================
 
+const getDefaultEventDate = () => {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  now.setDate(now.getDate() + 1);
+  return now.toISOString().slice(0, 10);
+};
+
 interface RightProps {
   activeTab?: string;
   cardTitle?: string;
+  cardEventDate?: string;
   cardCategory?: string;
   cardStatus?: string;
   previewImage?: string;
   onTitleChange?: (title: string) => void;
+  onEventDateChange?: (eventDate: string) => void;
   onCategoryChange?: (category: string) => void;
   onStatusChange?: (status: string) => void;
   onPreviewImageChange?: (image: string) => void;
@@ -67,15 +78,18 @@ interface RightProps {
 const Right: React.FC<RightProps> = ({
   activeTab,
   cardTitle = "Thiệp cưới của tôi",
+  cardEventDate = "",
   cardCategory = "wedding",
   cardStatus = "draft",
   previewImage = "",
   onTitleChange,
+  onEventDateChange,
   onCategoryChange,
   onStatusChange,
   onPreviewImageChange,
   onSwitchToImageTab,
 }) => {
+  const { message } = App.useApp();
   const { elements, selectedElementId, updateElement, deleteElement } =
     useEditorStore();
 
@@ -115,6 +129,15 @@ const Right: React.FC<RightProps> = ({
   const [cropImageSrc, setCropImageSrc] = useState<string>("");
 
   const selectedElement = elements.find((el) => el.id === selectedElementId);
+  const [defaultEventDate, setDefaultEventDate] = useState("2026-10-20");
+
+  React.useEffect(() => {
+    if (!cardEventDate) {
+      setDefaultEventDate(getDefaultEventDate());
+    }
+  }, [cardEventDate]);
+
+  const safeCardEventDate = cardEventDate || defaultEventDate;
 
   // ==================== Handlers ====================
 
@@ -420,13 +443,44 @@ const Right: React.FC<RightProps> = ({
     );
   };
 
+  const renderWidgetProperties = (element: WidgetElement) => {
+    const animation = element.animation || { enabled: false, continuous: false, type: "none" as const };
+    return (
+      <div className="p-3 space-y-3">
+        <WidgetSettingsSection element={element} onUpdate={handleUpdate as (u: Partial<WidgetElement>) => void} onError={(m) => message.error(m)} />
+
+        <AnimationSection
+          animation={animation}
+          isExpanded={expandedSections.includes("animation")}
+          onToggle={toggleSection}
+          onUpdate={handleUpdate}
+        />
+
+        <PositionSection
+          position={element.position}
+          size={element.size}
+          rotation={element.rotation}
+          isExpanded={expandedSections.includes("position")}
+          onToggle={toggleSection}
+          onPositionChange={handlePositionUpdate}
+          onSizeChange={handleSizeUpdate}
+          onRotationChange={(value) => handleUpdate({ rotation: value })}
+        />
+
+        <DeleteButton onDelete={() => selectedElement && deleteElement(selectedElement.id)} />
+      </div>
+    );
+  };
+
   const renderPageSettings = () => (
     <PageSettings
       cardTitle={cardTitle}
+      cardEventDate={cardEventDate}
       cardCategory={cardCategory}
       cardStatus={cardStatus}
       previewImage={previewImage}
       onTitleChange={onTitleChange}
+      onEventDateChange={onEventDateChange}
       onCategoryChange={onCategoryChange}
       onStatusChange={onStatusChange}
       onPreviewImageChange={onPreviewImageChange}
@@ -454,6 +508,8 @@ const Right: React.FC<RightProps> = ({
         return renderImageProperties(selectedElement as ImageElement);
       case "shape":
         return renderShapeProperties(selectedElement as ShapeElement);
+      case "widget":
+        return renderWidgetProperties(selectedElement as WidgetElement);
       default:
         return renderPageSettings();
     }

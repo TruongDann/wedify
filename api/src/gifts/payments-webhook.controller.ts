@@ -1,5 +1,7 @@
 import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ApiExcludeController } from '@nestjs/swagger';
+import { createHmac } from 'crypto';
 import { Public } from '../auth/decorators/public.decorator';
 import { GiftsService } from './gifts.service';
 
@@ -23,19 +25,51 @@ interface VirtualGiftWebhookPayload {
 @ApiExcludeController() // an khoi Swagger docs cong khai - day la endpoint noi bo cho cong thanh toan goi
 @Controller('webhooks/payments')
 export class PaymentsWebhookController {
-  constructor(private giftsService: GiftsService) {}
+  private readonly processed = new Set<string>();
+
+  constructor(
+    private readonly giftsService: GiftsService,
+    private readonly config: ConfigService,
+  ) {}
 
   private verifySignature(payload: VirtualGiftWebhookPayload): boolean {
-    // TODO: thay bang xac minh chu ky HMAC that cua cong thanh toan da chon.
-    return Boolean(payload.signature);
+    const secret = this.config.get<string>('PAYMENT_WEBHOOK_SECRET');
+    // Khong co secret thi tu choi han - truoc day chap nhan moi chu ky, ai cung co the tu cong tien vao vi.
+    if (!secret) {
+      return false;
+    }
+
+    const normalized = {
+      invitationId: payload.invitationId,
+      guestId: payload.guestId ?? null,
+      amount: payload.amount,
+      animationType: payload.animationType ?? null,
+    };
+
+    const expected = createHmac('sha256', secret)
+      .update(JSON.stringify(normalized))
+      .digest('hex');
+
+    return payload.signature === expected || payload.signature === expected.toLowerCase();
   }
 
   @Public()
   @Post('virtual-gift')
   async handleVirtualGift(@Body() payload: VirtualGiftWebhookPayload) {
+    if (!payload.signature) {
+      throw new UnauthorizedException('Thiếu chữ ký webhook');
+    }
+
     if (!this.verifySignature(payload)) {
       throw new UnauthorizedException('Chữ ký webhook không hợp lệ');
     }
+
+    const dedupeKey = `${payload.invitationId}:${payload.guestId ?? 'anonymous'}:${payload.amount}:${payload.animationType ?? ''}`;
+    if (this.processed.has(dedupeKey)) {
+      return { message: 'Webhook đã được xử lý trước đó', duplicate: true };
+    }
+
+    this.processed.add(dedupeKey);
 
     return this.giftsService.recordVirtualGiftFromWebhook(
       payload.invitationId,

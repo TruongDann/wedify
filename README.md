@@ -54,6 +54,8 @@ Mở [http://localhost:3000](http://localhost:3000).
 
 ```
 wedify/
+├── src/app/admin/           # Route Admin trong cùng Next.js frontend
+├── src/admin/               # Toàn bộ feature/component/lib/type riêng của Admin
 ├── api/                     # NestJS + Prisma + MySQL
 │   ├── prisma/schema.prisma # Toàn bộ data model: User, Plan, Invitation, Guest, Rsvp, Wish,
 │   │                        # Gift, Wallet, Withdrawal, AffiliatePartner...
@@ -71,6 +73,9 @@ wedify/
 │       └── prisma/           # PrismaService/PrismaModule dùng chung
 └── src/                      # Frontend Next.js (App Router) - editor Konva, gọi API qua lib/api.ts
 ```
+
+Admin dùng chung Next.js app và package với frontend, truy cập tại `http://localhost:3000/admin`.
+Code quản trị được cô lập trong `src/admin/`; `src/app/admin/page.tsx` chỉ làm nhiệm vụ khai báo route.
 
 ## Việc còn phải làm trước khi lên production
 

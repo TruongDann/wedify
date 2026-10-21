@@ -30,6 +30,18 @@ function slugify(text: string): string {
 export class InvitationsService {
   constructor(private prisma: PrismaService) {}
 
+  private async resolveTemplateId(templateId?: string): Promise<string | undefined> {
+    const value = templateId?.trim();
+    if (!value) return undefined;
+
+    const template = await this.prisma.template.findUnique({
+      where: { id: value },
+      select: { id: true },
+    });
+
+    return template ? value : undefined;
+  }
+
   private async generateUniqueSlug(title: string): Promise<string> {
     const base = slugify(title) || 'thiep';
     for (let attempt = 0; attempt < 20; attempt++) {
@@ -79,15 +91,17 @@ export class InvitationsService {
       );
     }
 
+    const validTemplateId = await this.resolveTemplateId(dto.templateId);
     const slug = await this.generateUniqueSlug(dto.title);
     return this.prisma.invitation.create({
       data: {
         userId,
         slug,
         title: dto.title,
-        templateId: dto.templateId,
+        templateId: validTemplateId,
         eventDate: dto.eventDate ? new Date(dto.eventDate) : undefined,
         location: dto.location,
+        profileJson: (dto.profileJson ?? {}) as never,
         contentJson: dto.contentJson as never,
         status: InvitationStatus.DRAFT,
       },
@@ -139,11 +153,15 @@ export class InvitationsService {
 
   async update(id: string, userId: string, dto: UpdateInvitationDto) {
     await this.assertAccess(id, userId);
+    const validTemplateId = await this.resolveTemplateId(dto.templateId);
+
     return this.prisma.invitation.update({
       where: { id },
       data: {
         ...dto,
+        templateId: validTemplateId,
         eventDate: dto.eventDate ? new Date(dto.eventDate) : undefined,
+        profileJson: dto.profileJson ? (dto.profileJson as never) : undefined,
         contentJson: dto.contentJson as never,
       },
     });

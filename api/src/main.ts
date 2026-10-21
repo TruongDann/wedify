@@ -1,17 +1,26 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Thiệp lưu cả danh sách phần tử (hàng trăm phần tử + ảnh SVG nhúng) nên vượt giới hạn mặc định 100KB.
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bodyParser: false });
+  app.useBodyParser('json', { limit: '5mb' });
+  app.useBodyParser('urlencoded', { extended: true, limit: '5mb' });
   const config = app.get(ConfigService);
 
   app.setGlobalPrefix('api/v1');
 
+  const corsOrigins = [
+    ...config.get('CORS_ORIGIN', 'http://localhost:3000').split(','),
+    ...config.get('ADMIN_CORS_ORIGIN', 'http://localhost:3001').split(','),
+  ].map((origin) => origin.trim()).filter(Boolean);
+
   app.enableCors({
-    origin: config.get('CORS_ORIGIN', 'http://localhost:3000'),
+    origin: corsOrigins,
     credentials: true,
   });
 
