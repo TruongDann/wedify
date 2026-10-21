@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Gift, Link as LinkIcon, Mail, MessageCircle, Phone, Send } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { vietQrUrl } from "@/utils/vietqr";
 import type { ViewerContextValue } from "../ViewerContext";
 
@@ -87,14 +89,19 @@ const postJson = async (url: string, body: unknown) => {
 
 // ------------------------------------------------------------ Liên hệ
 
-const CONTACT_META: Record<string, { icon: string; href: (value: string) => string; label: string }> = {
-  phone: { icon: "📞", label: "Điện thoại", href: (v) => `tel:${v.replace(/[^\d+]/g, "")}` },
-  zalo: { icon: "💬", label: "Zalo", href: (v) => `https://zalo.me/${v.replace(/[^\d]/g, "")}` },
-  messenger: { icon: "✉️", label: "Messenger", href: (v) => (v.startsWith("http") ? v : `https://m.me/${v}`) },
-  email: { icon: "📧", label: "Email", href: (v) => `mailto:${v}` },
-  link: { icon: "🔗", label: "Liên kết", href: (v) => v },
+const CONTACT_META: Record<string, { icon: LucideIcon; href: (value: string) => string; label: string }> = {
+  phone: { icon: Phone, label: "Điện thoại", href: (v) => `tel:${v.replace(/[^\d+]/g, "")}` },
+  zalo: { icon: MessageCircle, label: "Zalo", href: (v) => `https://zalo.me/${v.replace(/[^\d]/g, "")}` },
+  messenger: { icon: Send, label: "Messenger", href: (v) => (v.startsWith("http") ? v : `https://m.me/${v}`) },
+  email: { icon: Mail, label: "Email", href: (v) => `mailto:${v}` },
+  link: { icon: LinkIcon, label: "Liên kết", href: (v) => v },
 };
-export const CONTACT_TYPES = Object.entries(CONTACT_META).map(([value, meta]) => ({ value, label: `${meta.icon} ${meta.label}` }));
+export const CONTACT_TYPES = Object.entries(CONTACT_META).map(([value, meta]) => ({ value, label: (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+      <meta.icon size={14} /> {meta.label}
+    </span>
+  ),
+}));
 
 export const ContactWidget: React.FC<DomWidgetProps> = (props) => {
   const { p } = props;
@@ -116,7 +123,7 @@ export const ContactWidget: React.FC<DomWidgetProps> = (props) => {
               rel="noopener noreferrer"
               style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 14, border: `1.5px solid ${accent}44`, background: "#fff", textDecoration: "none", color: "inherit" }}
             >
-              <span style={{ fontSize: 22 }}>{meta.icon}</span>
+              <meta.icon size={22} style={{ color: accent, flexShrink: 0 }} />
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ display: "block", fontSize: 12, opacity: 0.65 }}>{item.label || meta.label}</span>
                 <span style={{ display: "block", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value || "—"}</span>
@@ -199,7 +206,7 @@ export const GuestbookWidget: React.FC<DomWidgetProps> = (props) => {
           {wishes.length === 0 ? <div style={{ textAlign: "center", opacity: 0.6, fontSize: 14, padding: 12 }}>Chưa có lời chúc nào. Hãy là người đầu tiên!</div> : null}
           {wishes.map((wish) => (
             <div key={wish.id} style={{ padding: "9px 12px", borderRadius: 14, background: `${accent}12`, border: `1px solid ${accent}22` }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: accent }}>{wish.giftCode ? "🎁 " : ""}{wish.guestName}</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: accent }}>{wish.giftCode ? <Gift size={13} style={{ display: "inline", marginRight: 4, verticalAlign: "-2px" }} /> : null}{wish.guestName}</div>
               <div style={{ fontSize: 14, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{wish.message}</div>
             </div>
           ))}
@@ -209,7 +216,7 @@ export const GuestbookWidget: React.FC<DomWidgetProps> = (props) => {
             {!data?.guestToken ? <input style={inputStyle(accent)} placeholder="Tên của bạn" value={name} disabled={!data} onChange={(e) => setName(e.target.value)} maxLength={80} /> : null}
             <div style={{ display: "flex", gap: 8 }}>
               <input style={inputStyle(accent)} placeholder="Gửi lời chúc…" value={text} disabled={!data} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !sending && send()} maxLength={1000} />
-              <button type="button" disabled={!data || sending} onClick={send} style={{ ...primaryButton(accent, !data || sending), width: 52, flexShrink: 0 }} aria-label="Gửi">➤</button>
+              <button type="button" disabled={!data || sending} onClick={send} style={{ ...primaryButton(accent, !data || sending), width: 52, flexShrink: 0 }} aria-label="Gửi"><Send size={18} style={{ display: "block", margin: "0 auto" }} /></button>
             </div>
             {error ? <div style={{ color: "#dc2626", fontSize: 12, textAlign: "center" }}>{error}</div> : null}
           </div>

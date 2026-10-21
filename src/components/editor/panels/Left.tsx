@@ -12,7 +12,6 @@ import {
   TemplateTab,
   EffectsTab,
   WidgetTab,
-  ToolTab,
   BlocksTab,
 } from "./left/index";
 
@@ -58,12 +57,7 @@ const Left: React.FC<LeftProps> = ({ activeTab, isOpen, onToggle }) => {
       case "music":
         return <MusicTab />;
       case "widget":
-        return (
-          <>
-            <WidgetTab />
-            <ToolTab />
-          </>
-        );
+        return <WidgetTab />;
       case "effect":
         return <EffectsTab />;
       default:

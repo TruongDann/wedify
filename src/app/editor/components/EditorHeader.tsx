@@ -172,9 +172,9 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
 
         <Button
           shape="round"
-          icon={<Eye size={16} />}
+          icon={<Eye size={16} className="block" />}
           onClick={onPreview}
-          className="h-9.5! px-4! text-sm!"
+          className="h-9.5! px-4! text-sm! inline-flex! items-center! justify-center! gap-1.5! leading-none!"
         >
           Xem trước
         </Button>
@@ -183,8 +183,8 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           <Button
             type="primary"
             shape="round"
-              icon={<Rocket size={16} />}
-            className="h-9.5! px-4! text-sm!"
+            icon={<Rocket size={16} className="block" />}
+            className="h-9.5! px-4! text-sm! inline-flex! items-center! justify-center! gap-1.5! leading-none!"
           >
             Xuất bản
           </Button>

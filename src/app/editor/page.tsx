@@ -18,7 +18,7 @@ import {
 import { useDraftAutosave } from "./useDraftAutosave";
 import { userAuth } from "@/lib/auth";
 import { FallingEffectLayer } from "@/components/card/FallingEffectLayer";
-import { Minus, Plus, RotateCcw } from "lucide-react";
+import { ZoomIn, ZoomOut } from "lucide-react";
 import ElementToolbar from "@/components/editor/ElementToolbar";
 
 // Dynamic import EditorCanvas vì Konva cần window
@@ -184,52 +184,48 @@ const EditorPage: React.FC = () => {
 
             {/* Canvas Area */}
             <div className="relative flex-1 min-w-0 flex flex-col bg-canvas overflow-hidden">
-                <div
-                  className="absolute top-3 right-4 z-40 flex items-center gap-1 rounded-full border border-line bg-white p-1 shadow-lg"
-                  role="group"
-                  aria-label="Thu phóng khung thiết kế"
+              <div className="relative flex-1 min-h-0">
+              <div className="pointer-events-none absolute inset-x-3 bottom-3 z-40 flex flex-col items-end gap-3">
+              <div
+                className="pointer-events-auto flex flex-col items-center gap-2 rounded-full bg-white px-1.5 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.18)]"
+                role="group"
+                aria-label="Thu phóng khung thiết kế"
+              >
+                <button
+                  type="button"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
+                  onClick={() => changeCanvasZoom(0.1)}
+                  disabled={canvasZoom >= 2}
+                  aria-label="Phóng to"
+                  title="Phóng to"
                 >
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-ink-2 transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={() => changeCanvasZoom(-0.1)}
-                    disabled={canvasZoom <= 0.25}
-                    aria-label="Thu nhỏ"
-                    title="Thu nhỏ"
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className="min-w-12 px-1 text-center text-xs font-medium tabular-nums text-ink-2"
-                    onClick={() => setCanvasZoom(1)}
-                    aria-label={`Thu phóng ${Math.round(canvasZoom * 100)} phần trăm, bấm để đặt lại`}
-                    title="Đặt lại về 100%"
-                  >
-                    {Math.round(canvasZoom * 100)}%
-                  </button>
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-ink-2 transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={() => changeCanvasZoom(0.1)}
-                    disabled={canvasZoom >= 2}
-                    aria-label="Phóng to"
-                    title="Phóng to"
-                  >
-                    <Plus size={16} />
-                  </button>
-                  <span className="mx-0.5 h-5 w-px bg-line" aria-hidden="true" />
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-ink-2 transition-colors hover:bg-surface-muted"
-                    onClick={() => setCanvasZoom(1)}
-                    aria-label="Đặt lại thu phóng"
-                    title="Đặt lại"
-                  >
-                    <RotateCcw size={14} />
-                  </button>
-                </div>
-              <div className="relative flex-1 overflow-auto px-6 pt-14 pb-12 flex flex-col items-center">
+                  <ZoomIn size={18} />
+                </button>
+                <button
+                  type="button"
+                  className="text-xs tabular-nums text-ink"
+                  onClick={() => setCanvasZoom(1)}
+                  aria-label={`Thu phóng ${Math.round(canvasZoom * 100)} phần trăm, bấm để đặt lại`}
+                  title="Đặt lại về 100%"
+                >
+                  {Math.round(canvasZoom * 100)}%
+                </button>
+                <button
+                  type="button"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
+                  onClick={() => changeCanvasZoom(-0.1)}
+                  disabled={canvasZoom <= 0.25}
+                  aria-label="Thu nhỏ"
+                  title="Thu nhỏ"
+                >
+                  <ZoomOut size={18} />
+                </button>
+              </div>
+              <div className="w-full flex justify-start">
+                <QuickReplaceBar elements={elements} />
+              </div>
+              </div>
+              <div className="absolute inset-0 overflow-auto px-6 pt-8 pb-44 flex flex-col items-center">
                 <div className="relative">
                   <div
                     style={{
@@ -261,9 +257,7 @@ const EditorPage: React.FC = () => {
                   onChange={(height) => setCanvasSettings({ height })}
                 />
               </div>
-
-              {/* Quick Replace Bar */}
-              <QuickReplaceBar elements={elements} />
+              </div>
             </div>
 
             {/* Right Panel - Settings */}

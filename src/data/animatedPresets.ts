@@ -1,3 +1,5 @@
+import type { LucideIcon } from "lucide-react";
+import { CircleDot, Frame, Gem, Heart, HeartPulse, PartyPopper, Sparkles, Sun } from "lucide-react";
 import type { EditorElement } from "@/types/editor";
 import { TemplateBuilder } from "./templateKit";
 
@@ -5,8 +7,8 @@ import { TemplateBuilder } from "./templateKit";
 export interface AnimatedPreset {
   id: string;
   label: string;
-  /** Emoji minh hoạ trong ô chọn. */
-  icon: string;
+  /** Icon minh hoạ trong ô chọn. */
+  icon: LucideIcon;
   build: (canvasWidth: number, top: number) => EditorElement[];
 }
 
@@ -22,7 +24,7 @@ export const ANIMATED_PRESETS: AnimatedPreset[] = [
   {
     id: "hearts",
     label: "Cụm tim bay",
-    icon: "💕",
+    icon: Heart,
     build: make("hearts", (b, cx, top) => {
       const hearts: Array<[number, number, number, string, number]> = [
         [-60, 40, 60, "#f43f5e", 0],
@@ -39,7 +41,7 @@ export const ANIMATED_PRESETS: AnimatedPreset[] = [
   {
     id: "heartbeat",
     label: "Tim đập có hào quang",
-    icon: "💗",
+    icon: HeartPulse,
     build: make("heartbeat", (b, cx, top) => {
       b.shape({ shape: "circle", x: cx - 110, y: top - 10, w: 220, h: 220, fill: radial("rgba(244,63,94,0.55)"), anim: ["pulse", 0, true] });
       b.shape({ shape: "heart", x: cx - 55, y: top + 40, w: 110, h: 100, fill: "#e11d48", anim: ["heartbeat", 0, true], shadow: { color: "rgba(225,29,72,0.6)", blur: 26 } });
@@ -48,7 +50,7 @@ export const ANIMATED_PRESETS: AnimatedPreset[] = [
   {
     id: "stars",
     label: "Chùm sao lấp lánh",
-    icon: "✨",
+    icon: Sparkles,
     build: make("stars", (b, cx, top) => {
       const stars: Array<[number, number, number, string]> = [
         [-90, 10, 30, "#fcd34d"],
@@ -64,7 +66,7 @@ export const ANIMATED_PRESETS: AnimatedPreset[] = [
   {
     id: "rings",
     label: "Đôi nhẫn",
-    icon: "💍",
+    icon: Gem,
     build: make("rings", (b, cx, top) => {
       b.shape({ shape: "ring", x: cx - 80, y: top + 20, w: 110, h: 110, fill: "#d4af37", anim: ["sway", 0, true], shadow: { color: "rgba(212,175,55,0.5)", blur: 16 } });
       b.shape({ shape: "ring", x: cx - 30, y: top + 20, w: 110, h: 110, fill: "#f5d77a", anim: ["sway", 0.6, true], shadow: { color: "rgba(212,175,55,0.5)", blur: 16 } });
@@ -75,7 +77,7 @@ export const ANIMATED_PRESETS: AnimatedPreset[] = [
   {
     id: "bokeh",
     label: "Vầng sáng bokeh",
-    icon: "🔆",
+    icon: Sun,
     build: make("bokeh", (b, cx, top) => {
       const orbs: Array<[number, number, number, string]> = [
         [-100, 0, 130, "rgba(251,191,36,0.55)"],
@@ -89,7 +91,7 @@ export const ANIMATED_PRESETS: AnimatedPreset[] = [
   {
     id: "bubbles",
     label: "Bong bóng",
-    icon: "🫧",
+    icon: CircleDot,
     build: make("bubbles", (b, cx, top) => {
       const bubbles: Array<[number, number, number]> = [[-70, 70, 56], [10, 0, 80], [80, 80, 40], [-20, 120, 34], [60, 140, 24]];
       bubbles.forEach(([dx, dy, size], i) => b.shape({ shape: "circle", x: cx + dx, y: top + dy, w: size, h: size, fill: "rgba(186,230,253,0.28)", stroke: "rgba(255,255,255,0.9)", sw: 2, anim: ["float", i * 0.4, true] }));
@@ -98,7 +100,7 @@ export const ANIMATED_PRESETS: AnimatedPreset[] = [
   {
     id: "confetti",
     label: "Dải confetti",
-    icon: "🎊",
+    icon: PartyPopper,
     build: make("confetti", (b, cx, top) => {
       const colors = ["#f43f5e", "#f59e0b", "#10b981", "#3b82f6", "#a855f7", "#ec4899"];
       for (let i = 0; i < 14; i += 1) {
@@ -112,7 +114,7 @@ export const ANIMATED_PRESETS: AnimatedPreset[] = [
   {
     id: "frame",
     label: "Khung viền lấp lánh",
-    icon: "🖼️",
+    icon: Frame,
     build: make("frame", (b, cx, top) => {
       b.shape({ shape: "rectangle", x: cx - 150, y: top, w: 300, h: 190, stroke: "#d4af37", sw: 2.5, anim: ["fadeIn", 0] });
       b.shape({ shape: "rectangle", x: cx - 140, y: top + 10, w: 280, h: 170, stroke: "#f5d77a", sw: 1, opacity: 0.7, anim: ["fadeIn", 0.2] });

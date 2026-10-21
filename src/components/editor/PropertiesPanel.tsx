@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Pencil } from "lucide-react";
 import {
   Input,
   Slider,
@@ -41,7 +42,7 @@ const PropertiesPanel: React.FC = () => {
       <div className="editor-properties">
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center gap-2 text-gray-600">
-            <span className="text-sm">✏️</span>
+            <Pencil size={14} />
             <span className="text-sm font-medium">Tuỳ chỉnh</span>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Col, Form, Input, InputNumber, Row, Space, Table, Tag, Typography } from "antd";
+import { Heart } from "lucide-react";
 import { userAuth } from "@/lib/auth";
 
 type WithdrawalRow = {
@@ -173,7 +174,7 @@ export default function WalletPage() {
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} md={8}>
             <div className="text-sm text-slate-500">Tim có thể đổi</div>
-            <div className="mt-2 text-3xl font-bold text-rose-500">{new Intl.NumberFormat("vi-VN").format(hearts.receivedHearts)} ♥</div>
+            <div className="mt-2 text-3xl font-bold text-rose-500">{new Intl.NumberFormat("vi-VN").format(hearts.receivedHearts)} <Heart size={24} className="inline fill-rose-500 align-[-3px]" /></div>
             <div className="mt-1 text-xs text-slate-400">1 tim = {new Intl.NumberFormat("vi-VN").format(hearts.cashoutRateVnd)}đ</div>
           </Col>
           <Col xs={24} md={16}>
@@ -185,7 +186,7 @@ export default function WalletPage() {
                 onChange={(value) => setExchangeAmount(value ? Math.floor(Number(value)) : null)}
                 placeholder="Số tim muốn đổi"
                 style={{ width: "100%" }}
-                addonAfter={exchangeAmount ? `= ${new Intl.NumberFormat("vi-VN").format(exchangeAmount * hearts.cashoutRateVnd)}đ` : "♥"}
+                addonAfter={exchangeAmount ? `= ${new Intl.NumberFormat("vi-VN").format(exchangeAmount * hearts.cashoutRateVnd)}đ` : <Heart size={14} className="fill-current" />}
               />
               <Button type="primary" loading={exchanging} disabled={!exchangeAmount || exchangeAmount > hearts.receivedHearts} onClick={exchangeHearts}>
                 Đổi sang tiền
