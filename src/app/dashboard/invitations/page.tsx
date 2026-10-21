@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { userAuth } from "@/lib/auth";
+import { InvitationActivityDrawer } from "@/components/dashboard/InvitationActivityDrawer";
 
 type InvitationItem = {
   id: string;
@@ -31,6 +32,7 @@ const statusLabel: Record<string, string> = {
 };
 
 export default function InvitationManagementPage() {
+  const [activityTarget, setActivityTarget] = useState<{ id: string; title: string } | null>(null);
   const router = useRouter();
   const [items, setItems] = useState<InvitationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -221,6 +223,7 @@ export default function InvitationManagementPage() {
                       <Button block onClick={() => router.push(`/editor?id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`)}>Chỉnh sửa</Button>
                     )}
                   </div>
+                  <Button block onClick={() => setActivityTarget({ id: item.id, title: item.title })}>Hoạt động &amp; quà tặng</Button>
                   {item.profileJson?.guided ? null : (
                       <Button type="default" block onClick={() => openProfileEditor(item.id, (item as any).profileJson ?? undefined)}>Hồ sơ cưới</Button>
                     )}
@@ -280,6 +283,12 @@ export default function InvitationManagementPage() {
           </Row>
         </Form>
       </Modal>
+
+      <InvitationActivityDrawer
+        invitationId={activityTarget?.id ?? null}
+        title={activityTarget?.title}
+        onClose={() => setActivityTarget(null)}
+      />
     </div>
   );
 }

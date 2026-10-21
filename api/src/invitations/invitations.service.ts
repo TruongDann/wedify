@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CollaboratorRole, InvitationStatus } from '@prisma/client';
+import { CollaboratorRole, GiftType, InvitationStatus, RsvpStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddCollaboratorDto } from './dto/add-collaborator.dto';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
@@ -193,6 +193,99 @@ export class InvitationsService {
       throw new ForbiddenException('Chỉ chủ thiệp mới có thể xóa thiệp');
     }
     return this.prisma.invitation.delete({ where: { id } });
+  }
+
+  // Tong hop moi tuong tac khach da de lai tren thiep (host xem): qua nhan duoc tu ai, ai tham du,
+  // loi chuc, khach moi... Chi chu thiep / nguoi duoc chia se quyen moi xem duoc.
+  async getActivity(id: string, userId: string) {
+    await this.assertAccess(id, userId);
+
+    const [invitation, gifts, guests, wishes, giftItems] = await Promise.all([
+      this.prisma.invitation.findUniqueOrThrow({
+        where: { id },
+        select: { id: true, title: true, slug: true, status: true, viewCount: true, eventDate: true },
+      }),
+      this.prisma.gift.findMany({
+        where: { invitationId: id },
+        orderBy: { createdAt: 'desc' },
+        include: { giftItem: { select: { name: true, emoji: true } }, guest: { select: { name: true } } },
+      }),
+      this.prisma.guest.findMany({
+        where: { invitationId: id },
+        orderBy: { createdAt: 'desc' },
+        include: { rsvp: true },
+      }),
+      this.prisma.wish.findMany({ where: { invitationId: id }, orderBy: { createdAt: 'desc' } }),
+      this.prisma.giftItem.findMany({ select: { code: true, name: true, emoji: true } }),
+    ]);
+
+    const itemByCode = new Map(giftItems.map((item) => [item.code, item]));
+
+    const virtualGifts = gifts.filter((g) => g.type === GiftType.VIRTUAL_GIFT);
+    const bankGifts = gifts.filter((g) => g.type === GiftType.BANK_QR);
+
+    const answered = guests.filter((g) => g.rsvp && g.rsvp.status !== RsvpStatus.PENDING);
+    const attending = answered.filter((g) => g.rsvp!.status === RsvpStatus.ATTENDING);
+    const companions = attending.reduce((sum, g) => sum + (g.rsvp!.numberOfCompanions ?? 0), 0);
+
+    return {
+      invitation,
+      summary: {
+        views: invitation.viewCount,
+        wishes: wishes.length,
+        guests: guests.length,
+        guestsViewed: guests.filter((g) => g.viewedAt).length,
+        gifts: virtualGifts.length,
+        giftHearts: virtualGifts.reduce((sum, g) => sum + g.hearts, 0),
+        giftValueVnd: virtualGifts.reduce((sum, g) => sum + g.amount, 0),
+        bankTransfers: bankGifts.length,
+        bankTransferVnd: bankGifts.reduce((sum, g) => sum + g.amount, 0),
+        rsvpAttending: attending.length,
+        rsvpNotAttending: answered.length - attending.length,
+        rsvpCompanions: companions,
+        // Tong so nguoi du kien den (nguoi xac nhan + nguoi di cung)
+        expectedPeople: attending.length + companions,
+      },
+      gifts: gifts.map((g) => ({
+        id: g.id,
+        type: g.type,
+        senderName: g.senderName ?? g.guest?.name ?? 'Ẩn danh',
+        giftName: g.giftItem?.name ?? (g.type === GiftType.BANK_QR ? 'Chuyển khoản' : 'Quà tặng'),
+        emoji: g.giftItem?.emoji ?? (g.type === GiftType.BANK_QR ? '💵' : '🎁'),
+        hearts: g.hearts,
+        amount: g.amount,
+        message: g.message,
+        createdAt: g.createdAt,
+      })),
+      rsvps: answered
+        .sort((a, b) => (b.rsvp!.respondedAt?.getTime() ?? 0) - (a.rsvp!.respondedAt?.getTime() ?? 0))
+        .map((g) => ({
+          id: g.id,
+          name: g.name,
+          honorific: g.honorific,
+          status: g.rsvp!.status,
+          companions: g.rsvp!.numberOfCompanions,
+          note: g.rsvp!.note,
+          respondedAt: g.rsvp!.respondedAt,
+        })),
+      wishes: wishes.map((w) => ({
+        id: w.id,
+        guestName: w.guestName,
+        message: w.message,
+        isHidden: w.isHidden,
+        createdAt: w.createdAt,
+        gift: w.giftCode ? (itemByCode.get(w.giftCode) ?? { code: w.giftCode, name: 'Quà tặng', emoji: '🎁' }) : null,
+      })),
+      guests: guests.map((g) => ({
+        id: g.id,
+        name: g.name,
+        honorific: g.honorific,
+        group: g.group,
+        sentAt: g.sentAt,
+        viewedAt: g.viewedAt,
+        rsvpStatus: g.rsvp?.status ?? RsvpStatus.PENDING,
+      })),
+    };
   }
 
   // ---- Collaboration (muc 3.11) ----

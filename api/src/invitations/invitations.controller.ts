@@ -44,6 +44,12 @@ export class InvitationsController {
     return this.invitationsService.findOne(id, user.sub);
   }
 
+  // Tong hop tuong tac cua khach (qua tang, tham du, loi chuc, khach moi) - chi host/collaborator
+  @Get(':id/activity')
+  activity(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.invitationsService.getActivity(id, user.sub);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,
