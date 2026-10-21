@@ -304,19 +304,11 @@ export interface WidgetElement extends BaseElement {
   gift?: GiftSettings;
 }
 
-export type ToolKind =
-  | "button"
-  | "slideshow"
-  | "rsvpForm"
-  | "giftBox"
-  | "mapEmbed"
-  | "video"
-  | "contactCard"
-  | "guestbook";
+export type ToolKind = "contactCard" | "guestbook";
 
 /**
- * Tiện ích mở rộng của Wedify (form tham dự kết nối API, hộp quà QR + tim, bản đồ nhúng, video,
- * liên hệ, sổ lưu bút, trình chiếu ảnh, nút hành động). Cấu hình nằm trong `props`.
+ * Tiện ích mở rộng của Wedify mà nhánh dev chưa có (thẻ liên hệ nhiều kênh, sổ lưu bút kết nối API).
+ * Cấu hình nằm trong `props`.
  * Tách khỏi `WidgetElement` (tiện ích gốc của nhánh dev) để hai hệ cùng tồn tại.
  */
 export interface ToolElement extends BaseElement {

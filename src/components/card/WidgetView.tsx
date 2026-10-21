@@ -145,14 +145,20 @@ const RsvpView: React.FC<Props> = ({ element }) => {
     e.preventDefault();
     if (!values.name?.trim() || !values.attend) return;
     setStatus("sending");
-    await submitRsvp({
-      name: values.name.trim(),
-      attend: values.attend,
-      guests: values.guests ? Number(values.guests) : undefined,
-      side: values.side,
-      message: values.message?.trim() || undefined,
-    });
-    setStatus("done");
+    try {
+      await submitRsvp({
+        name: values.name.trim(),
+        attend: values.attend,
+        attending: values.attend === rsvp.attendYesText,
+        guests: values.guests ? Number(values.guests) : undefined,
+        side: values.side,
+        message: values.message?.trim() || undefined,
+      });
+      setStatus("done");
+    } catch (error) {
+      setStatus("idle");
+      window.alert(error instanceof Error ? error.message : "Không thể gửi xác nhận");
+    }
   };
 
   const inputStyle: React.CSSProperties = {

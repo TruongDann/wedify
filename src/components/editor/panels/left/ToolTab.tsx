@@ -50,7 +50,7 @@ export const ToolTab: React.FC = () => {
         </div>
 
         <p className="text-[11px] leading-relaxed text-gray-400">
-          Form tham dự, Hộp quà QR, Bản đồ, Sổ lưu bút… hiển thị đúng tính năng ngay trên thiệp. Khi khách mở thiệp đã xuất bản, các form hoạt động thật (gửi xác nhận, gửi lời chúc, sao chép số tài khoản…).
+          Thẻ liên hệ nhiều kênh (gọi, Zalo, Messenger, email) và Sổ lưu bút kết nối API. Khi khách mở thiệp đã xuất bản, sổ lưu bút gửi/nhận lời chúc thật.
         </p>
       </div>
     </Section>

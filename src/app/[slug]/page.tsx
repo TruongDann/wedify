@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 
 import { NOTO_ANIMATED_ATTRIBUTION, isNotoAnimatedSrc } from "@/constants/animatedStock";
+import { setViewerRuntime } from "@/lib/viewerRuntime";
+import { IntroOverlay } from "@/components/card/IntroOverlay";
 import InvitationCover from "@/components/invitation/InvitationCover";
 import GiftModal, { type GiftCatalogItem } from "@/components/invitation/GiftModal";
 
@@ -202,6 +204,13 @@ export default function PublicInvitationPage() {
     () => ({ slug: slug ?? "", guestToken, guestName: guestLink?.name ?? "", title: invitation?.title ?? "", apiBase: API_BASE_URL, profile }),
     [slug, guestToken, guestLink?.name, invitation?.title, profile],
   );
+  // Cho các tiện ích gốc của editor (form tham dự...) biết đang ở thiệp nào để gửi về API
+  useEffect(() => {
+    if (!slug) return;
+    setViewerRuntime({ slug, guestToken, guestName: guestLink?.name ?? "", apiBase: API_BASE_URL });
+    return () => setViewerRuntime(null);
+  }, [slug, guestToken, guestLink?.name]);
+
   const canvasSettings = useMemo<Record<string, any>>(
     () => ({ width: 600, height: 3200, backgroundColor: "#ffffff", ...(invitation?.contentJson?.canvasSettings ?? {}) }),
     [invitation],
@@ -557,7 +566,17 @@ export default function PublicInvitationPage() {
   return (
     <div className="min-h-screen bg-white text-slate-800 lg:h-screen lg:overflow-hidden">
       {msgHolder}
-      {!coverOpen ? (
+      {!coverOpen && canvasSettings.intro ? (
+        // Thiệp đã cấu hình màn hình mở đầu (phong bì / rèm) trong editor: dùng đúng cấu hình đó
+        <IntroOverlay
+          intro={canvasSettings.intro}
+          onDone={() => {
+            handleCoverOpen();
+            setCoverOpen(true);
+          }}
+        />
+      ) : null}
+      {!coverOpen && !canvasSettings.intro ? (
         <InvitationCover
           names={coverNames}
           dateText={coverDateText}

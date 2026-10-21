@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "prestart": "prisma generate",
-    "prestart:dev": "prisma generate",
+    "prestart:dev": "prisma generate && npm run db:setup",
     "build": "nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -14,7 +14,9 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:push": "prisma db push --skip-generate",
+    "db:setup": "prisma db push --skip-generate && tsx prisma/ensure-db.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",
