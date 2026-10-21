@@ -35,4 +35,4 @@ When the user asks to "up", "đẩy", "push", "ship" or "tạo PR" for a change,
 ## CI/CD
 
 - `.github/workflows/ci.yml` – on PR/push to `dev` and `main`: `npm ci`, lint (non-blocking for now), typecheck, build.
-- `.github/workflows/deploy.yml` – on push to `main`: deploys to Vercel if `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` secrets exist; otherwise skipped.
+- Deploy: Vercel Git integration (no workflow). Push to `main` = production (`wedify-ruby.vercel.app`); other branches/PRs get Preview URLs. `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_REQUIRE_PREMIUM` are set in Vercel project env vars.
