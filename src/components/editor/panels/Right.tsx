@@ -56,6 +56,7 @@ import {
 import { PageSettings } from "./right/PageSettingsSection";
 import { MusicPropertySection } from "./right/MusicPropertySection";
 import { CropModal } from "./right/CropModal";
+import { removeBackground } from "@/lib/removeBackground";
 
 // ==================== Types ====================
 
@@ -180,6 +181,31 @@ const Right: React.FC<RightProps> = ({
     },
     [selectedElement, updateElement],
   );
+
+  // Xóa nền ảnh (AI, chạy trên trình duyệt); giữ ảnh gốc để khôi phục
+  const [removingBgId, setRemovingBgId] = useState<string | null>(null);
+
+  const handleRemoveBackground = async (element: ImageElement) => {
+    setRemovingBgId(element.id);
+    const hide = message.loading(
+      "Đang xóa nền… lần đầu cần tải mô hình AI nên có thể mất một lúc",
+      0,
+    );
+    try {
+      const src = await removeBackground(element.src);
+      updateElement(element.id, {
+        src,
+        originalSrc: element.originalSrc ?? element.src,
+      });
+      message.success("Đã xóa nền ảnh");
+    } catch (error) {
+      console.error(error);
+      message.error("Không xóa được nền ảnh, vui lòng thử lại");
+    } finally {
+      hide();
+      setRemovingBgId(null);
+    }
+  };
 
   // ==================== Render Functions ====================
 
@@ -324,6 +350,14 @@ const Right: React.FC<RightProps> = ({
           onObjectFitChange={(objectFit) => handleUpdate({ objectFit })}
           onCropImage={() => openCropModal(element.src)}
           onSwitchToImageTab={onSwitchToImageTab || (() => {})}
+          removingBackground={removingBgId === element.id}
+          onRemoveBackground={() => handleRemoveBackground(element)}
+          onRestoreOriginal={
+            element.originalSrc
+              ? () =>
+                  handleUpdate({ src: element.originalSrc, originalSrc: undefined })
+              : undefined
+          }
         />
 
         <ImageFilterSection

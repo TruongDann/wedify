@@ -127,6 +127,8 @@ export interface TextElement extends BaseElement {
 export interface ImageElement extends BaseElement {
   type: "image";
   src: string;
+  /** Ảnh trước khi xóa nền — để khôi phục lại */
+  originalSrc?: string;
   alt: string;
   objectFit: "cover" | "contain" | "fill";
   // Padding

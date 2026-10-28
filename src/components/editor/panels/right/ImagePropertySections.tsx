@@ -98,6 +98,10 @@ interface ImageActionSectionProps {
   onObjectFitChange: (objectFit: ImageElement["objectFit"]) => void;
   onCropImage: () => void;
   onSwitchToImageTab: () => void;
+  removingBackground: boolean;
+  onRemoveBackground: () => void;
+  /** Chỉ có khi ảnh đã được xóa nền */
+  onRestoreOriginal?: () => void;
 }
 
 export const ImageActionSection: React.FC<ImageActionSectionProps> = ({
@@ -105,6 +109,9 @@ export const ImageActionSection: React.FC<ImageActionSectionProps> = ({
   onObjectFitChange,
   onCropImage,
   onSwitchToImageTab,
+  removingBackground,
+  onRemoveBackground,
+  onRestoreOriginal,
 }) => (
   <div className="bg-white border border-line rounded-2xl overflow-hidden">
     <div className="px-4 py-3 font-medium text-sm border-b border-gray-100">
@@ -133,10 +140,25 @@ export const ImageActionSection: React.FC<ImageActionSectionProps> = ({
       </div>
       <Button
         block
+        loading={removingBackground}
+        onClick={onRemoveBackground}
         className="bg-linear-to-r from-primary to-accent text-white border-0 hover:from-primary-dark hover:to-primary"
       >
-        <ThunderboltOutlined /> Xóa nền (AI)
+        {!removingBackground && <ThunderboltOutlined />}
+        {removingBackground ? "Đang xóa nền…" : "Xóa nền (AI)"}
       </Button>
+      {onRestoreOriginal && (
+        <Button
+          block
+          type="text"
+          size="small"
+          className="mt-1 text-gray-500"
+          disabled={removingBackground}
+          onClick={onRestoreOriginal}
+        >
+          Khôi phục ảnh gốc
+        </Button>
+      )}
       <div className="flex items-center gap-3 mt-3">
         <span className="text-sm text-gray-600 shrink-0">Hiển thị</span>
         <Segmented
