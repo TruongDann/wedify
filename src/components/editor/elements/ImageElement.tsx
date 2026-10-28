@@ -36,7 +36,7 @@ export const fitImage = (
 interface ImageElementProps {
   element: ImageElement;
   isSelected: boolean;
-  onSelect: () => void;
+  onSelect: (e?: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => void;
   onDragMove?: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onTransformEnd: (e: Konva.KonvaEventObject<Event>) => void;
@@ -240,17 +240,20 @@ const ImageElementComponent: React.FC<ImageElementProps> = ({
       )}
 
       {/* Image with shadow */}
+      {/* Lật bằng scale âm quanh tâm ảnh; bóng đổ đảo dấu để vẫn rơi đúng hướng */}
       <Image
-        x={padding.left + fit.x}
-        y={padding.top + fit.y}
+        x={padding.left + fit.x + (element.flipX ? fit.width : 0)}
+        y={padding.top + fit.y + (element.flipY ? fit.height : 0)}
+        scaleX={element.flipX ? -1 : 1}
+        scaleY={element.flipY ? -1 : 1}
         image={filteredImage || image}
         width={fit.width}
         height={fit.height}
         crop={fit.crop}
         shadowColor={shadow.enabled ? shadow.color : undefined}
         shadowBlur={shadow.enabled ? shadow.blur : 0}
-        shadowOffsetX={shadow.enabled ? shadow.x : 0}
-        shadowOffsetY={shadow.enabled ? shadow.y : 0}
+        shadowOffsetX={shadow.enabled ? shadow.x * (element.flipX ? -1 : 1) : 0}
+        shadowOffsetY={shadow.enabled ? shadow.y * (element.flipY ? -1 : 1) : 0}
         shadowEnabled={shadow.enabled}
       />
 

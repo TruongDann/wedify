@@ -112,6 +112,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     selectedElementIds,
     selectElement,
     selectElements,
+    toggleSelection,
     updateElement,
     moveElement,
     resizeElement,
@@ -227,6 +228,38 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
     }
   };
 
+  // Nhấn vào phần tử thuộc nhóm chưa được chọn: chọn cả nhóm ngay lúc nhấn,
+  // để Transformer gắn đủ các phần tử trước khi bắt đầu kéo
+  const handleStageMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    handleMouseDown(e);
+    if (e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey) return;
+    let node: Konva.Node | null = e.target;
+    while (node && !elements.some((el) => el.id === node!.id())) {
+      node = node.getParent();
+    }
+    const element = node && elements.find((el) => el.id === node!.id());
+    if (!element?.groupId) return;
+    const selected = selectedElementIds.length
+      ? selectedElementIds
+      : selectedElementId
+        ? [selectedElementId]
+        : [];
+    if (!selected.includes(element.id)) selectElement(element.id);
+  };
+
+  // Shift/Ctrl + bấm: thêm hoặc bỏ phần tử khỏi vùng chọn
+  const handleElementSelect = (
+    id: string,
+    e?: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => {
+    const evt = e?.evt as MouseEvent | undefined;
+    if (evt && (evt.shiftKey || evt.ctrlKey || evt.metaKey)) {
+      toggleSelection(id);
+    } else {
+      selectElement(id);
+    }
+  };
+
   const handleElementDragMove = useCallback(
     (id: string, e: Konva.KonvaEventObject<DragEvent>) => {
       isDragging.current = true;
@@ -336,7 +369,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
       selectedElementIds.includes(element.id);
     const commonProps = {
       isSelected,
-      onSelect: () => selectElement(element.id),
+      onSelect: (e?: Konva.KonvaEventObject<MouseEvent | TouchEvent>) =>
+        handleElementSelect(element.id, e),
       onDragMove: (e: Konva.KonvaEventObject<DragEvent>) =>
         handleElementDragMove(element.id, e),
       onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) =>
@@ -427,7 +461,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
           height={effectiveHeight}
           onClick={handleStageClick}
           onTap={handleStageClick}
-          onMouseDown={handleMouseDown}
+          onMouseDown={handleStageMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}

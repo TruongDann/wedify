@@ -10,9 +10,13 @@ import {
   ArrowUp,
   Copy,
   Ellipsis,
+  FlipHorizontal2,
+  FlipVertical2,
+  Group,
   Lock,
   LockOpen,
   Trash2,
+  Ungroup,
   Layers,
   RotateCw,
 } from "lucide-react";
@@ -29,6 +33,94 @@ const ROTATE_GAP = 36;
 const btn =
   "w-9 h-9 rounded-full flex items-center justify-center text-ink hover:bg-surface-muted transition-colors";
 
+/** Thanh công cụ khi chọn nhiều phần tử: nhóm / bỏ nhóm, nhân đôi, xóa */
+const MultiSelectionToolbar: React.FC<Props> = ({ zoom }) => {
+  const {
+    elements,
+    selectedElementIds,
+    groupSelection,
+    ungroupSelection,
+    duplicateSelection,
+    deleteSelection,
+  } = useEditorStore();
+
+  const selected = elements.filter((e) => selectedElementIds.includes(e.id));
+  if (selected.length < 2) return null;
+
+  // Cả vùng chọn là đúng một nhóm thì hiện "Bỏ nhóm"
+  const groupId = selected[0].groupId;
+  const isGroup = !!groupId && selected.every((e) => e.groupId === groupId);
+
+  const corners = selected.flatMap((e) => {
+    const rad = (e.rotation * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    const { width: w, height: h } = e.size;
+    return [
+      [0, 0],
+      [w, 0],
+      [w, h],
+      [0, h],
+    ].map(([lx, ly]) => ({
+      x: e.position.x + lx * cos - ly * sin,
+      y: e.position.y + lx * sin + ly * cos,
+    }));
+  });
+  const minX = Math.min(...corners.map((c) => c.x));
+  const maxX = Math.max(...corners.map((c) => c.x));
+  const minY = Math.min(...corners.map((c) => c.y));
+  const maxY = Math.max(...corners.map((c) => c.y));
+
+  const rawTop = minY * zoom - TOOLBAR_HEIGHT - GAP;
+  const top = rawTop < 0 ? maxY * zoom + GAP : rawTop;
+
+  return (
+    <div className="absolute inset-0 z-30 pointer-events-none">
+      <div
+        className="pointer-events-auto absolute flex items-center gap-1 px-2 rounded-full bg-white shadow-[0_4px_16px_rgba(0,0,0,0.18)]"
+        style={{
+          left: ((minX + maxX) / 2) * zoom,
+          top,
+          height: TOOLBAR_HEIGHT,
+          transform: "translateX(-50%)",
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <Tooltip title={isGroup ? "Bỏ nhóm (Ctrl+Shift+G)" : "Nhóm (Ctrl+G)"}>
+          <button
+            type="button"
+            className={`${btn} w-auto! px-3 gap-1.5 text-[13px] font-medium`}
+            onClick={isGroup ? ungroupSelection : groupSelection}
+          >
+            {isGroup ? <Ungroup size={16} /> : <Group size={16} />}
+            {isGroup ? "Bỏ nhóm" : "Nhóm"}
+          </button>
+        </Tooltip>
+        <Tooltip title="Nhân đôi (Ctrl+D)">
+          <button
+            type="button"
+            className={btn}
+            onClick={duplicateSelection}
+            aria-label="Nhân đôi"
+          >
+            <Copy size={16} />
+          </button>
+        </Tooltip>
+        <Tooltip title="Xóa (Delete)">
+          <button
+            type="button"
+            className={btn}
+            onClick={deleteSelection}
+            aria-label="Xóa các phần tử đã chọn"
+          >
+            <Trash2 size={16} />
+          </button>
+        </Tooltip>
+      </div>
+    </div>
+  );
+};
+
 const ElementToolbar: React.FC<Props> = ({ zoom }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const {
@@ -38,18 +130,19 @@ const ElementToolbar: React.FC<Props> = ({ zoom }) => {
     elements,
     selectedElementId,
     selectedElementIds,
-    deleteElement,
-    duplicateElement,
     updateElement,
     bringToFront,
     sendToBack,
     bringForward,
     sendBackward,
-    selectElement,
+    duplicateSelection,
+    deleteSelection,
   } = useEditorStore();
 
+  if (selectedElementIds.length > 1) return <MultiSelectionToolbar zoom={zoom} />;
+
   const element = elements.find((e) => e.id === selectedElementId);
-  if (!element || selectedElementIds.length > 1) return null;
+  if (!element) return null;
 
   const layer = [...elements]
     .sort((a, b) => a.zIndex - b.zIndex)
@@ -209,24 +302,51 @@ const ElementToolbar: React.FC<Props> = ({ zoom }) => {
       }}
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <Tooltip title="Nhân đôi">
+      {element.type === "image" && (
+        <>
+          <Tooltip title="Lật ngang">
+            <button
+              type="button"
+              className={btn}
+              onClick={() =>
+                updateElement(element.id, { flipX: !element.flipX })
+              }
+              aria-label="Lật ngang"
+              aria-pressed={!!element.flipX}
+            >
+              <FlipHorizontal2 size={16} />
+            </button>
+          </Tooltip>
+          <Tooltip title="Lật dọc">
+            <button
+              type="button"
+              className={btn}
+              onClick={() =>
+                updateElement(element.id, { flipY: !element.flipY })
+              }
+              aria-label="Lật dọc"
+              aria-pressed={!!element.flipY}
+            >
+              <FlipVertical2 size={16} />
+            </button>
+          </Tooltip>
+        </>
+      )}
+      <Tooltip title="Nhân đôi (Ctrl+D)">
         <button
           type="button"
           className={btn}
-          onClick={() => duplicateElement(element.id)}
+          onClick={duplicateSelection}
           aria-label="Nhân đôi"
         >
           <Copy size={16} />
         </button>
       </Tooltip>
-      <Tooltip title="Xóa phần tử">
+      <Tooltip title="Xóa phần tử (Delete)">
         <button
           type="button"
           className={btn}
-          onClick={() => {
-            deleteElement(element.id);
-            selectElement(null);
-          }}
+          onClick={deleteSelection}
           aria-label="Xóa phần tử"
         >
           <Trash2 size={16} />

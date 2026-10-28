@@ -6,6 +6,7 @@ import {
   CalendarDays,
   CircleHelp,
   Image as ImageIcon,
+  Layers,
   LayoutTemplate,
   Music,
   PanelsTopLeft,
@@ -25,7 +26,8 @@ export type TabKey =
   | "widget"
   | "blocks"
   | "template"
-  | "effect";
+  | "effect"
+  | "layers";
 
 interface TabConfig {
   key: TabKey;
@@ -63,6 +65,12 @@ const tabs: TabConfig[] = [
     icon: Sparkles,
     label: "Hiệu ứng",
     tooltip: "Hiệu ứng động, hiệu ứng rơi, màn mở thiệp",
+  },
+  {
+    key: "layers",
+    icon: Layers,
+    label: "Lớp",
+    tooltip: "Danh sách phần tử, đổi thứ tự lớp, khóa vị trí",
   },
 ];
 
