@@ -14,7 +14,7 @@ import { useElementAnimation } from "../hooks/useElementAnimation";
 interface TextElementProps {
   element: TextElement;
   isSelected: boolean;
-  onSelect: () => void;
+  onSelect: (e?: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => void;
   onDragMove?: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => void;
   onTransformEnd: (e: Konva.KonvaEventObject<Event>) => void;
@@ -111,7 +111,7 @@ const TextElementComponent: React.FC<TextElementProps> = ({
       window.open(element.hyperlink, "_blank");
       return;
     }
-    onSelect();
+    onSelect(e);
   };
 
   /**

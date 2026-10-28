@@ -13,6 +13,7 @@ import {
   EffectsTab,
   WidgetTab,
   BlocksTab,
+  LayersTab,
 } from "./left/index";
 
 interface LeftProps {
@@ -32,6 +33,10 @@ const PANEL_META: Record<string, { title: string; description?: string }> = {
   blocks: { title: "Khối mẫu", description: "Bấm để thêm phần dựng sẵn vào cuối thiệp." },
   template: { title: "Mẫu", description: "Xem trước và bắt đầu nhanh từ mẫu có sẵn." },
   effect: { title: "Hiệu ứng", description: "Chọn loại hiệu ứng cho thiệp." },
+  layers: {
+    title: "Lớp",
+    description: "Bấm để chọn, kéo để đổi thứ tự. Lớp trên cùng nằm đầu danh sách.",
+  },
 };
 
 const Left: React.FC<LeftProps> = ({ activeTab, isOpen, onToggle }) => {
@@ -60,6 +65,8 @@ const Left: React.FC<LeftProps> = ({ activeTab, isOpen, onToggle }) => {
         return <WidgetTab />;
       case "effect":
         return <EffectsTab />;
+      case "layers":
+        return <LayersTab />;
       default:
         return null;
     }

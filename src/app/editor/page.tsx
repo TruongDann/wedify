@@ -6,7 +6,7 @@ import { ConfigProvider, Spin, App } from "antd";
 import viVN from "antd/locale/vi_VN";
 import Left from "@/components/editor/panels/Left";
 import Right from "@/components/editor/panels/Right";
-import { useEditorStore } from "@/store/editorStore";
+import { useEditorStore, createImageElement } from "@/store/editorStore";
 import {
   EditorHeader,
   EditorSidebar,
@@ -43,12 +43,6 @@ const EditorPage: React.FC = () => {
 
   const {
     saveHistory,
-    selectElement,
-    deleteElement,
-    selectedElementId,
-    selectedElementIds,
-    undo,
-    redo,
     elements,
     canvasSettings,
     setCanvasSettings,
@@ -105,54 +99,131 @@ const EditorPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts — đọc store trực tiếp để không phải gắn lại listener mỗi lần chọn
   useEffect(() => {
+    // Đang gõ trong ô nhập (kể cả khi sửa chữ trên thiệp) thì để trình duyệt tự xử lý
+    const isTyping = (target: EventTarget | null) => {
+      const el = target as HTMLElement | null;
+      return (
+        !!el &&
+        (el.tagName === "INPUT" ||
+          el.tagName === "TEXTAREA" ||
+          el.tagName === "SELECT" ||
+          el.isContentEditable)
+      );
+    };
+    let nudged = false;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Handle delete for multi-selection
-      if (
-        (e.key === "Delete" || e.key === "Backspace") &&
-        (selectedElementId || selectedElementIds.length > 0)
-      ) {
-        if (
-          (e.target as HTMLElement).tagName === "INPUT" ||
-          (e.target as HTMLElement).tagName === "TEXTAREA"
-        ) {
-          return;
-        }
-        // Delete all selected elements
-        if (selectedElementIds.length > 0) {
-          selectedElementIds.forEach((id) => deleteElement(id));
-        } else if (selectedElementId) {
-          deleteElement(selectedElementId);
-        }
+      if (isTyping(e.target)) return;
+      const store = useEditorStore.getState();
+      const hasSelection =
+        !!store.selectedElementId || store.selectedElementIds.length > 0;
+      const key = e.key.toLowerCase();
+
+      if ((e.key === "Delete" || e.key === "Backspace") && hasSelection) {
+        e.preventDefault();
+        store.deleteSelection();
+        return;
       }
 
       if (e.key === "Escape") {
-        selectElement(null);
+        store.selectElement(null);
+        return;
       }
 
-      if (e.ctrlKey || e.metaKey) {
-        if (e.key === "z") {
-          e.preventDefault();
-          undo();
-        }
-        if (e.key === "y") {
-          e.preventDefault();
-          redo();
-        }
+      // Mũi tên: dịch 1px, giữ Shift dịch 10px
+      const arrows: Record<string, [number, number]> = {
+        ArrowUp: [0, -1],
+        ArrowDown: [0, 1],
+        ArrowLeft: [-1, 0],
+        ArrowRight: [1, 0],
+      };
+      if (arrows[e.key] && hasSelection) {
+        e.preventDefault();
+        const step = e.shiftKey ? 10 : 1;
+        store.nudgeSelection(arrows[e.key][0] * step, arrows[e.key][1] * step);
+        nudged = true;
+        return;
+      }
+
+      if (!(e.ctrlKey || e.metaKey)) return;
+
+      if (key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        store.undo();
+      } else if (key === "y" || (key === "z" && e.shiftKey)) {
+        e.preventDefault();
+        store.redo();
+      } else if (key === "c" && hasSelection) {
+        store.copySelection();
+      } else if (key === "x" && hasSelection) {
+        e.preventDefault();
+        store.cutSelection();
+      } else if (key === "d" && hasSelection) {
+        e.preventDefault();
+        store.duplicateSelection();
+      } else if (key === "a") {
+        e.preventDefault();
+        store.selectAll();
+      } else if (key === "g" && hasSelection) {
+        e.preventDefault();
+        if (e.shiftKey) store.ungroupSelection();
+        else store.groupSelection();
+      }
+      // Ctrl+V xử lý ở sự kiện "paste" để dán được cả ảnh chụp màn hình
+    };
+
+    // Một lần nhấn giữ mũi tên chỉ ghi một bước hoàn tác
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (nudged && e.key.startsWith("Arrow")) {
+        nudged = false;
+        useEditorStore.getState().saveHistory();
       }
     };
 
+    const handlePaste = (e: ClipboardEvent) => {
+      if (isTyping(e.target)) return;
+      const file = Array.from(e.clipboardData?.files ?? []).find((f) =>
+        f.type.startsWith("image/"),
+      );
+      if (!file) {
+        useEditorStore.getState().paste();
+        return;
+      }
+      e.preventDefault();
+      const reader = new FileReader();
+      reader.onload = () => {
+        const src = reader.result as string;
+        const img = new Image();
+        img.onload = () => {
+          const { canvasSettings: canvas } = useEditorStore.getState();
+          const width = Math.min(img.width, canvas.width * 0.8);
+          const height = (width * img.height) / img.width;
+          useEditorStore.getState().addElement(
+            createImageElement(src, {
+              size: { width, height },
+              position: {
+                x: (canvas.width - width) / 2,
+                y: Math.max(0, (canvas.height - height) / 2),
+              },
+            }),
+          );
+        };
+        img.src = src;
+      };
+      reader.readAsDataURL(file);
+    };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    selectedElementId,
-    selectedElementIds,
-    deleteElement,
-    selectElement,
-    undo,
-    redo,
-  ]);
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("paste", handlePaste);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("paste", handlePaste);
+    };
+  }, []);
 
   return (
     <ConfigProvider locale={viVN}>

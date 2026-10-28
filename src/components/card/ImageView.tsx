@@ -28,8 +28,14 @@ const ImageView: React.FC<{ element: ImageElement }> = ({ element }) => {
     f.saturation !== 100 && `saturate(${f.saturation}%)`,
     blur > 0 && `blur(${blur}px)`,
     f.grayscale > 0 && `grayscale(${f.grayscale}%)`,
-    shadow.enabled && `drop-shadow(${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.color})`,
+    // Ảnh lật bằng transform nên bóng cũng bị lật theo — đảo dấu trước để bóng rơi đúng hướng
+    shadow.enabled &&
+      `drop-shadow(${shadow.x * (element.flipX ? -1 : 1)}px ${shadow.y * (element.flipY ? -1 : 1)}px ${shadow.blur}px ${shadow.color})`,
   ].filter(Boolean);
+  const flip =
+    element.flipX || element.flipY
+      ? `scale(${element.flipX ? -1 : 1}, ${element.flipY ? -1 : 1})`
+      : undefined;
 
   return (
     <ElementFrame element={element} width={width} height={height}>
@@ -59,6 +65,7 @@ const ImageView: React.FC<{ element: ImageElement }> = ({ element }) => {
             maxWidth: "none",
             objectFit: element.objectFit || "fill", // giống fitImage() trong ImageElement.tsx
             filter: filters.length ? filters.join(" ") : undefined,
+            transform: flip,
           }}
         />
 

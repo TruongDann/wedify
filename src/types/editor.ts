@@ -41,6 +41,8 @@ export interface BaseElement {
   opacity: number;
   zIndex: number;
   locked: boolean;
+  /** Các phần tử cùng groupId được chọn, kéo, nhân đôi và xóa cùng nhau trong editor */
+  groupId?: string;
   /** Việc xảy ra khi khách bấm vào phần tử ở trang xem thiệp */
   clickAction?: ClickAction;
 }
@@ -130,6 +132,9 @@ export interface ImageElement extends BaseElement {
   /** Ảnh trước khi xóa nền — để khôi phục lại */
   originalSrc?: string;
   alt: string;
+  /** Lật ảnh ngang / dọc (chỉ lật nội dung ảnh, khung giữ nguyên) */
+  flipX?: boolean;
+  flipY?: boolean;
   objectFit: "cover" | "contain" | "fill";
   // Padding
   padding: {

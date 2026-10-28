@@ -7,3 +7,4 @@ export * from "./TemplateTab";
 export * from "./EffectsTab";
 export * from "./WidgetTab";
 export * from "./BlocksTab";
+export * from "./LayersTab";
