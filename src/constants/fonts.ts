@@ -66,7 +66,7 @@ export const FONTS: FontConfig[] = [
     name: "Great Vibes",
     label: "Great Vibes",
     category: "script",
-    supportsVietnamese: false,
+    supportsVietnamese: true,
   },
   {
     name: "Parisienne",
@@ -78,7 +78,7 @@ export const FONTS: FontConfig[] = [
     name: "Allura",
     label: "Allura",
     category: "script",
-    supportsVietnamese: false,
+    supportsVietnamese: true,
   },
   {
     name: "Sacramento",
@@ -90,19 +90,19 @@ export const FONTS: FontConfig[] = [
     name: "Alex Brush",
     label: "Alex Brush",
     category: "script",
-    supportsVietnamese: false,
+    supportsVietnamese: true,
   },
   {
     name: "Tangerine",
     label: "Tangerine",
     category: "script",
-    supportsVietnamese: true,
+    supportsVietnamese: false,
   },
   {
     name: "Pinyon Script",
     label: "Pinyon Script",
     category: "script",
-    supportsVietnamese: false,
+    supportsVietnamese: true,
   },
   {
     name: "Satisfy",
@@ -177,7 +177,7 @@ export const FONTS: FontConfig[] = [
     name: "Libre Baskerville",
     label: "Libre Baskerville",
     category: "serif",
-    supportsVietnamese: true,
+    supportsVietnamese: false,
   },
   {
     name: "EB Garamond",
@@ -195,13 +195,13 @@ export const FONTS: FontConfig[] = [
     name: "Cinzel",
     label: "Cinzel",
     category: "serif",
-    supportsVietnamese: true,
+    supportsVietnamese: false,
   },
   {
     name: "Cardo",
     label: "Cardo",
     category: "serif",
-    supportsVietnamese: true,
+    supportsVietnamese: false,
   },
 
   // Modern Sans-Serif - Font hiện đại
@@ -221,7 +221,7 @@ export const FONTS: FontConfig[] = [
     name: "Poppins",
     label: "Poppins",
     category: "sans-serif",
-    supportsVietnamese: true,
+    supportsVietnamese: false,
   },
   {
     name: "Open Sans",
@@ -265,13 +265,13 @@ export const FONTS: FontConfig[] = [
     name: "Righteous",
     label: "Righteous",
     category: "decorative",
-    supportsVietnamese: true,
+    supportsVietnamese: false,
   },
   {
     name: "Abril Fatface",
     label: "Abril Fatface",
     category: "decorative",
-    supportsVietnamese: true,
+    supportsVietnamese: false,
   },
 
   // Vietnamese Fonts - Font tiếng Việt
@@ -309,7 +309,7 @@ export const FONTS: FontConfig[] = [
   },
 
   // ---- Bổ sung từ nhánh Wedify API: font Google Fonts có tiếng Việt, thư pháp Trung Hoa, chữ ký ----
-  { name: "Lobster Two", label: "Lobster Two", category: "script", supportsVietnamese: true },
+  { name: "Lobster Two", label: "Lobster Two", category: "script", supportsVietnamese: false },
   { name: "Mali", label: "Mali", category: "script", supportsVietnamese: true },
   { name: "Pangolin", label: "Pangolin", category: "script", supportsVietnamese: true },
   { name: "Patrick Hand", label: "Patrick Hand", category: "script", supportsVietnamese: true },
@@ -347,8 +347,8 @@ export const FONTS: FontConfig[] = [
   { name: "Space Grotesk", label: "Space Grotesk", category: "sans-serif", supportsVietnamese: true },
   { name: "Baloo 2", label: "Baloo 2", category: "sans-serif", supportsVietnamese: true },
   { name: "Bangers", label: "Bangers", category: "decorative", supportsVietnamese: true },
-  { name: "Fredoka", label: "Fredoka", category: "decorative", supportsVietnamese: true },
-  { name: "Noto Serif SC", label: "Noto Serif SC", category: "chinese", supportsVietnamese: false },
+  { name: "Fredoka", label: "Fredoka", category: "decorative", supportsVietnamese: false },
+  { name: "Noto Serif SC", label: "Noto Serif SC", category: "chinese", supportsVietnamese: true },
   { name: "Ma Shan Zheng", label: "Ma Shan Zheng", category: "chinese", supportsVietnamese: false },
   { name: "Zhi Mang Xing", label: "Zhi Mang Xing", category: "chinese", supportsVietnamese: false },
   { name: "Liu Jian Mao Cao", label: "Liu Jian Mao Cao", category: "chinese", supportsVietnamese: false },

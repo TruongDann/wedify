@@ -3,7 +3,7 @@ import Konva from "konva";
 import type { ElementAnimation, Position } from "@/types/editor";
 import { DEFAULT_APPEAR_DURATION } from "@/constants/animation";
 
-const SLIDE_DISTANCE = 50;
+const SLIDE_DISTANCE = 40; // khớp wc-slide-* trong card.css
 
 interface AnimatedElement {
   animation?: ElementAnimation;
@@ -80,9 +80,11 @@ export const useElementAnimation = (
           Object.assign(to, { x: position.x, opacity });
           break;
         case "zoom":
-          node.scale({ x: 0, y: 0 });
-          Object.assign(to, { scaleX: 1, scaleY: 1 });
-          easing = Konva.Easings.BackEaseOut;
+          // Khớp wc-zoom-in trên trang xem thiệp: từ 60% + mờ, dừng êm
+          node.scale({ x: 0.6, y: 0.6 });
+          node.opacity(0);
+          Object.assign(to, { scaleX: 1, scaleY: 1, opacity });
+          easing = Konva.Easings.StrongEaseOut;
           break;
         case "bounce":
           node.y(position.y - 30);

@@ -10,17 +10,18 @@ type Animation = ElementAnimation | undefined;
 const BACK_EASE_OUT = "cubic-bezier(0.175, 0.885, 0.32, 1.275)";
 const SINE_IN_OUT = "cubic-bezier(0.37, 0, 0.63, 1)";
 const SINE_OUT = "cubic-bezier(0.61, 1, 0.88, 1)";
-const EASE_OUT = "cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+// Expo-out: vào nhanh, dừng lại rất êm
+const EASE_OUT = "cubic-bezier(0.16, 1, 0.3, 1)";
 
 /** keyframes + easing của hiệu ứng xuất hiện (xem useElementAnimation trong editor). */
 const APPEAR: Partial<Record<AnimationType, [keyframes: string, easing: string]>> = {
-  fadeIn: ["wc-fade-in", "ease-in-out"],
+  fadeIn: ["wc-fade-in", "ease-out"],
   slideIn: ["wc-slide-up", BACK_EASE_OUT],
   slideUp: ["wc-slide-up", EASE_OUT],
   slideDown: ["wc-slide-down", EASE_OUT],
   slideLeft: ["wc-slide-left", EASE_OUT],
   slideRight: ["wc-slide-right", EASE_OUT],
-  zoom: ["wc-zoom-in", BACK_EASE_OUT],
+  zoom: ["wc-zoom-in", EASE_OUT],
   bounce: ["wc-bounce-in", "linear"],
 };
 
