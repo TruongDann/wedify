@@ -183,7 +183,14 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ canvasHeight }) => {
         return;
       }
 
-      const selectedNodes = validIds
+      // Transformer kéo mọi node nó gắn, kể cả node không draggable:
+      // khi chọn nhiều thì bỏ phần tử đã khóa ra để chúng đứng yên
+      const unlockedIds = validIds.filter(
+        (id) => !elements.find((el) => el.id === id)?.locked,
+      );
+      const selectedNodes = (
+        validIds.length > 1 && unlockedIds.length > 0 ? unlockedIds : validIds
+      )
         .map((id) => stage.findOne(`#${id}`))
         .filter((node): node is Konva.Node => node !== null);
 

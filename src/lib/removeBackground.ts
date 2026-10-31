@@ -1,52 +1,100 @@
-import type { PreTrainedModel, Processor } from "@huggingface/transformers";
+import type {
+  RemoveBackgroundRequest,
+  RemoveBackgroundResponse,
+} from "./removeBackground.worker";
 
-// MODNet: mô hình tách người khỏi nền (Apache-2.0), tải từ Hugging Face lần đầu rồi trình duyệt tự lưu cache
-const MODEL_ID = "Xenova/modnet";
+/** Lỗi có thông báo dành cho người dùng */
+export class RemoveBackgroundError extends Error {}
 
-let loading: Promise<{ model: PreTrainedModel; processor: Processor }> | null = null;
+// MODNet cần ảnh đủ lớn: ảnh nhỏ hơn mức này thường bị nhận nhầm là toàn nền
+const MIN_SIDE = 320;
+// Ít hơn 1% điểm ảnh là chủ thể thì coi như không tìm thấy người trong ảnh
+const MIN_FOREGROUND = 0.01;
 
-const loadModel = () => {
-  loading ??= (async () => {
-    const { AutoModel, AutoProcessor } = await import("@huggingface/transformers");
-    const [model, processor] = await Promise.all([
-      AutoModel.from_pretrained(MODEL_ID, { dtype: "fp32" }),
-      AutoProcessor.from_pretrained(MODEL_ID),
-    ]);
-    return { model, processor };
-  })().catch((error) => {
-    // Lỗi mạng thì lần bấm sau tải lại từ đầu
-    loading = null;
-    throw error;
-  });
-  return loading;
+let worker: Worker | null = null;
+let nextId = 0;
+const pending = new Map<
+  number,
+  { resolve: (r: RemoveBackgroundResponse) => void }
+>();
+
+const getWorker = () => {
+  if (!worker) {
+    worker = new Worker(new URL("./removeBackground.worker.ts", import.meta.url), {
+      type: "module",
+    });
+    worker.onmessage = (event: MessageEvent<RemoveBackgroundResponse>) => {
+      pending.get(event.data.id)?.resolve(event.data);
+      pending.delete(event.data.id);
+    };
+    worker.onerror = () => {
+      pending.forEach(({ resolve }, id) =>
+        resolve({ id, ok: false, error: "worker crashed" }),
+      );
+      pending.clear();
+      worker?.terminate();
+      worker = null;
+    };
+  }
+  return worker;
 };
 
-/** Tách người khỏi nền ảnh, trả về ảnh PNG nền trong suốt dạng data URL. Chạy hoàn toàn trên máy khách. */
-export const removeBackground = async (src: string): Promise<string> => {
-  const [{ model, processor }, { RawImage }] = await Promise.all([
-    loadModel(),
-    import("@huggingface/transformers"),
-  ]);
+const runModel = (src: string) =>
+  new Promise<RemoveBackgroundResponse>((resolve) => {
+    const id = nextId++;
+    pending.set(id, { resolve });
+    getWorker().postMessage({ id, src } satisfies RemoveBackgroundRequest);
+  });
 
-  const image = await RawImage.fromURL(src);
-  const { pixel_values } = await processor(image);
-  const { output } = await model({ input: pixel_values });
-  const mask = await RawImage.fromTensor(output[0].mul(255).to("uint8")).resize(
-    image.width,
-    image.height,
-  );
+const loadImage = (src: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () =>
+      reject(new RemoveBackgroundError("Không tải được ảnh để xóa nền"));
+    img.src = src;
+  });
+
+/**
+ * Tách người khỏi nền ảnh, trả về ảnh PNG nền trong suốt dạng data URL.
+ * Chạy hoàn toàn trên máy khách (Web Worker).
+ */
+export const removeBackground = async (original: string): Promise<string> => {
+  // Ảnh thư viện Unsplash trong thiệp cũ là bản nhỏ 200px: lấy bản lớn để tách cho chuẩn
+  const src = original.includes("images.unsplash.com")
+    ? original.replace(/w=\d+/, "w=1600")
+    : original;
+  const image = await loadImage(src);
+  if (Math.min(image.naturalWidth, image.naturalHeight) < MIN_SIDE) {
+    throw new RemoveBackgroundError(
+      `Ảnh quá nhỏ để xóa nền (cần cạnh ngắn từ ${MIN_SIDE}px), hãy dùng ảnh rõ nét hơn`,
+    );
+  }
+
+  const result = await runModel(src);
+  if (!result.ok) throw new Error(result.error);
+  const { mask, width, height } = result;
+
+  let foreground = 0;
+  for (let i = 0; i < mask.length; i++) if (mask[i] > 128) foreground++;
+  if (foreground / mask.length < MIN_FOREGROUND) {
+    throw new RemoveBackgroundError(
+      "Không tìm thấy người trong ảnh. Xóa nền AI hoạt động tốt nhất với ảnh chân dung, cô dâu chú rể",
+    );
+  }
 
   const canvas = document.createElement("canvas");
-  canvas.width = image.width;
-  canvas.height = image.height;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Trình duyệt không hỗ trợ canvas");
 
-  ctx.drawImage(image.toCanvas(), 0, 0);
-  const pixels = ctx.getImageData(0, 0, image.width, image.height);
-  for (let i = 0; i < mask.data.length; i++) {
+  ctx.drawImage(image, 0, 0, width, height);
+  const pixels = ctx.getImageData(0, 0, width, height);
+  for (let i = 0; i < mask.length; i++) {
     // Giữ phần vốn đã trong suốt của ảnh gốc (PNG)
-    pixels.data[4 * i + 3] = Math.min(pixels.data[4 * i + 3], mask.data[i]);
+    pixels.data[4 * i + 3] = Math.min(pixels.data[4 * i + 3], mask[i]);
   }
   ctx.putImageData(pixels, 0, 0);
   return canvas.toDataURL("image/png");

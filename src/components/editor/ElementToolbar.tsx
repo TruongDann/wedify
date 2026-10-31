@@ -4,6 +4,14 @@ import React, { useRef } from "react";
 import { Dropdown, Tooltip, InputNumber } from "antd";
 import type { MenuProps } from "antd";
 import {
+  AlignCenterHorizontal,
+  AlignCenterVertical,
+  AlignEndHorizontal,
+  AlignEndVertical,
+  AlignHorizontalDistributeCenter,
+  AlignStartHorizontal,
+  AlignStartVertical,
+  AlignVerticalDistributeCenter,
   ChevronsDown,
   ChevronsUp,
   ArrowDown,
@@ -42,10 +50,40 @@ const MultiSelectionToolbar: React.FC<Props> = ({ zoom }) => {
     ungroupSelection,
     duplicateSelection,
     deleteSelection,
+    alignSelection,
+    distributeSelection,
   } = useEditorStore();
 
   const selected = elements.filter((e) => selectedElementIds.includes(e.id));
   if (selected.length < 2) return null;
+
+  const alignItems: MenuProps["items"] = [
+    { key: "left", icon: <AlignStartVertical size={16} />, label: "Căn trái" },
+    { key: "centerX", icon: <AlignCenterVertical size={16} />, label: "Căn giữa ngang" },
+    { key: "right", icon: <AlignEndVertical size={16} />, label: "Căn phải" },
+    { type: "divider" },
+    { key: "top", icon: <AlignStartHorizontal size={16} />, label: "Căn trên" },
+    { key: "centerY", icon: <AlignCenterHorizontal size={16} />, label: "Căn giữa dọc" },
+    { key: "bottom", icon: <AlignEndHorizontal size={16} />, label: "Căn dưới" },
+    { type: "divider" },
+    {
+      key: "distributeX",
+      icon: <AlignHorizontalDistributeCenter size={16} />,
+      label: "Giãn đều ngang",
+      disabled: selected.length < 3,
+    },
+    {
+      key: "distributeY",
+      icon: <AlignVerticalDistributeCenter size={16} />,
+      label: "Giãn đều dọc",
+      disabled: selected.length < 3,
+    },
+  ];
+  const onAlign: MenuProps["onClick"] = ({ key }) => {
+    if (key === "distributeX") distributeSelection("x");
+    else if (key === "distributeY") distributeSelection("y");
+    else alignSelection(key as Parameters<typeof alignSelection>[0]);
+  };
 
   // Cả vùng chọn là đúng một nhóm thì hiện "Bỏ nhóm"
   const groupId = selected[0].groupId;
@@ -96,6 +134,13 @@ const MultiSelectionToolbar: React.FC<Props> = ({ zoom }) => {
             {isGroup ? "Bỏ nhóm" : "Nhóm"}
           </button>
         </Tooltip>
+        <Dropdown menu={{ items: alignItems, onClick: onAlign }} trigger={["click"]}>
+          <Tooltip title="Căn chỉnh">
+            <button type="button" className={btn} aria-label="Căn chỉnh">
+              <AlignCenterVertical size={16} />
+            </button>
+          </Tooltip>
+        </Dropdown>
         <Tooltip title="Nhân đôi (Ctrl+D)">
           <button
             type="button"

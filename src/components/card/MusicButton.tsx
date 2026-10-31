@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Music, Disc3, Music2, Music3, Music4, Headphones } from "lucide-react";
 import { BackgroundMusic } from "@/types/editor";
+import { bindMusicTrim } from "./musicTrim";
 
 const MUSIC_ICONS: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
   music: Music,
@@ -53,15 +54,18 @@ export const MusicButton: React.FC<MusicButtonProps> = ({ music, scale, style })
     audio.addEventListener("pause", onPause);
     document.addEventListener("visibilitychange", onVisibility);
     KICK_EVENTS.forEach((t) => document.addEventListener(t, kick, { capture: true, passive: true }));
+    const unbindTrim = bindMusicTrim(audio, music);
     kick();
 
     return () => {
+      unbindTrim();
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
       document.removeEventListener("visibilitychange", onVisibility);
       KICK_EVENTS.forEach((t) => document.removeEventListener(t, kick, true));
     };
-  }, [music.src]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- chỉ cần đoạn phát, không phải cả object nhạc
+  }, [music.src, music.startTime, music.endTime]);
 
   if (!music.src || broken) return null;
 

@@ -1,10 +1,11 @@
 "use client";
 
-import { Alert, Button, Card, Col, Form, Input, Modal, Row, Select, Space, Tag, Typography } from "antd";
+import { Alert, Button, Card, Checkbox, Col, Form, Input, Modal, Row, Select, Space, Tag, Typography, message } from "antd";
 import { useParams } from "next/navigation";
 import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { userAuth } from "@/lib/auth";
+import { INVITE_TEMPLATES, fillInviteMessage, templateForGroup } from "@/lib/inviteMessage";
 
 type GuestGroup = "FAMILY" | "FRIEND" | "COLLEAGUE" | "OTHER";
 
@@ -141,6 +142,60 @@ export default function GuestManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [groupFilter, setGroupFilter] = useState<"ALL" | GuestGroup>("ALL");
   const [invitation, setInvitation] = useState<InvitationInfo | null>(null);
+  const [toast, toastHolder] = message.useMessage();
+
+  // Mẫu lời mời: sửa được, lưu trên trình duyệt theo từng thiệp
+  const storageKey = `wedify:invite-templates:${invitationId}`;
+  const [templates, setTemplates] = useState<Record<string, string>>(() =>
+    Object.fromEntries(INVITE_TEMPLATES.map((t) => [t.key, t.text])),
+  );
+  const [editingKey, setEditingKey] = useState(INVITE_TEMPLATES[0].key);
+  const [autoByGroup, setAutoByGroup] = useState(true);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) ?? "null");
+      if (saved?.templates) setTemplates((prev) => ({ ...prev, ...saved.templates }));
+      if (typeof saved?.autoByGroup === "boolean") setAutoByGroup(saved.autoByGroup);
+    } catch {
+      // bộ nhớ trình duyệt bị chặn: dùng mẫu mặc định
+    }
+  }, [storageKey]);
+
+  const saveTemplates = (next: Record<string, string>, nextAuto = autoByGroup) => {
+    setTemplates(next);
+    setAutoByGroup(nextAuto);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ templates: next, autoByGroup: nextAuto }));
+    } catch {
+      // không lưu được thì vẫn dùng trong phiên này
+    }
+  };
+
+  const guestLink = (guest: GuestRow) =>
+    `${window.location.origin}${invitation ? `/invitation/${invitation.slug}` : ""}?g=${guest.personalizedToken}`;
+
+  // Sao chép lời mời đã điền tên + link, rồi đánh dấu khách là đã gửi
+  const copyInvite = async (guest: GuestRow) => {
+    const key = autoByGroup ? templateForGroup(guest.group) : editingKey;
+    const text = fillInviteMessage(templates[key], guest, guestLink(guest));
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      toast.error("Trình duyệt không cho sao chép, hãy thử lại");
+      return;
+    }
+    toast.success(`Đã sao chép lời mời cho ${guest.name}`);
+    if (guest.sentAt) return;
+    try {
+      await userAuth.apiFetch(`/guests/${guest.id}/mark-sent`, { method: "POST" });
+      const sentAt = new Date().toISOString();
+      setGuests((prev) => prev.map((g) => (g.id === guest.id ? { ...g, sentAt } : g)));
+      setStats((prev) => (prev ? { ...prev, sent: prev.sent + 1 } : prev));
+    } catch {
+      // Đánh dấu thất bại không ảnh hưởng việc gửi
+    }
+  };
 
   const loadGuests = async () => {
     if (!invitationId) return;
@@ -239,6 +294,7 @@ export default function GuestManagementPage() {
 
   return (
     <div className="space-y-6">
+      {toastHolder}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <Typography.Title level={3} className="!mb-1">Khách mời theo nhóm</Typography.Title>
         <Typography.Text type="secondary">{invitation?.title ?? "Thiệp cưới"}</Typography.Text>
@@ -333,6 +389,42 @@ export default function GuestManagementPage() {
         </Col>
       </Row>
 
+      <Card title="Mẫu lời mời gửi khách" className="shadow-sm">
+        <div className="space-y-3">
+          <Typography.Text type="secondary">
+            Bấm &quot;Sao chép lời mời&quot; ở từng khách để có tin nhắn đã điền sẵn tên và link riêng, dán vào Zalo / Messenger là gửi được.
+            Khách sẽ được đánh dấu là đã gửi. Dùng {"{xung_ho}"}, {"{ten}"}, {"{link}"} để chèn xưng hô, tên và link thiệp.
+          </Typography.Text>
+          <div className="flex flex-wrap items-center gap-3">
+            <Select
+              value={editingKey}
+              onChange={setEditingKey}
+              options={INVITE_TEMPLATES.map((t) => ({ value: t.key, label: t.label }))}
+              className="min-w-72"
+            />
+            <Checkbox checked={autoByGroup} onChange={(e) => saveTemplates(templates, e.target.checked)}>
+              Tự chọn mẫu theo nhóm khách (gia đình → trang trọng, bạn bè → thân mật)
+            </Checkbox>
+          </div>
+          <Input.TextArea
+            rows={5}
+            value={templates[editingKey]}
+            onChange={(e) => saveTemplates({ ...templates, [editingKey]: e.target.value })}
+          />
+          <Button
+            size="small"
+            onClick={() =>
+              saveTemplates({
+                ...templates,
+                [editingKey]: INVITE_TEMPLATES.find((t) => t.key === editingKey)!.text,
+              })
+            }
+          >
+            Khôi phục mẫu gốc
+          </Button>
+        </div>
+      </Card>
+
       <Card title="Danh sách khách mời" className="shadow-sm">
         <div className="mb-4 flex flex-wrap gap-2">
           {groupOptions.map((option) => (
@@ -351,7 +443,7 @@ export default function GuestManagementPage() {
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Chưa có khách nào trong nhóm này.</div>
           ) : (
             filteredGuests.map((guest) => {
-              const publicLink = `http://localhost:3000${invitation ? `/invitation/${invitation.slug}?g=${guest.personalizedToken}` : `?g=${guest.personalizedToken}`}`;
+              const publicLink = guestLink(guest);
               return (
                 <div key={guest.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -372,14 +464,26 @@ export default function GuestManagementPage() {
                           {guest.rsvp?.status ? statusLabelMap[guest.rsvp.status] ?? guest.rsvp.status : "Chưa xác nhận"}
                         </Tag>
                         {guest.rsvp?.numberOfCompanions ? <Tag>Plus one: {guest.rsvp.numberOfCompanions}</Tag> : null}
+                        {guest.viewedAt ? (
+                          <Tag color="cyan">Đã xem thiệp</Tag>
+                        ) : guest.sentAt ? (
+                          <Tag color="blue">Đã gửi</Tag>
+                        ) : (
+                          <Tag>Chưa gửi</Tag>
+                        )}
                       </div>
 
                       <div className="flex flex-wrap gap-2">
+                        <Button size="small" type="primary" onClick={() => copyInvite(guest)}>
+                          Sao chép lời mời
+                        </Button>
                         <Button
                           size="small"
                           onClick={() => {
-                            const fullLink = publicLink;
-                            navigator.clipboard?.writeText(fullLink).catch(() => undefined);
+                            navigator.clipboard
+                              ?.writeText(publicLink)
+                              .then(() => toast.success("Đã sao chép link"))
+                              .catch(() => undefined);
                           }}
                         >
                           Copy link

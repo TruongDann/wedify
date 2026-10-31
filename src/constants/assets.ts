@@ -52,16 +52,20 @@ export const STICKERS: Sticker[] = [
   },
 ];
 
-// Stock images from Unsplash
+// Stock images from Unsplash — bản đủ nét để chèn vào thiệp; ô xem trước dùng stockThumb()
 export const STOCK_IMAGES: string[] = [
   "/assets/images/stock/nhan-vat-01.webp",
-  "https://images.unsplash.com/photo-1519741497674-611481863552?w=200",
-  "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=200",
-  "https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=200",
-  "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=200",
-  "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=200",
-  "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=200",
+  "https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=80",
+  "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=1600&q=80",
+  "https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=1600&q=80",
+  "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1600&q=80",
+  "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1600&q=80",
+  "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=1600&q=80",
 ];
+
+/** Ảnh thu nhỏ cho ô thư viện (Unsplash tự đổi kích thước theo tham số w) */
+export const stockThumb = (src: string) =>
+  src.includes("images.unsplash.com") ? src.replace(/w=\d+/, "w=240") : src;
 
 export interface Decoration {
   id: string;

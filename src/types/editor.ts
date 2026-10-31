@@ -340,6 +340,9 @@ export interface BackgroundMusic {
   src?: string;
   icon?: string;
   iconColor?: string;
+  /** Đoạn được phát (giây); bỏ trống = từ đầu / tới hết bài. Phát lặp trong đoạn này */
+  startTime?: number;
+  endTime?: number;
 }
 
 export interface CanvasSettings {

@@ -56,7 +56,10 @@ import {
 import { PageSettings } from "./right/PageSettingsSection";
 import { MusicPropertySection } from "./right/MusicPropertySection";
 import { CropModal } from "./right/CropModal";
-import { removeBackground } from "@/lib/removeBackground";
+import {
+  removeBackground,
+  RemoveBackgroundError,
+} from "@/lib/removeBackground";
 
 // ==================== Types ====================
 
@@ -200,7 +203,11 @@ const Right: React.FC<RightProps> = ({
       message.success("Đã xóa nền ảnh");
     } catch (error) {
       console.error(error);
-      message.error("Không xóa được nền ảnh, vui lòng thử lại");
+      message.error(
+        error instanceof RemoveBackgroundError
+          ? error.message
+          : "Không xóa được nền ảnh, vui lòng thử lại",
+      );
     } finally {
       hide();
       setRemovingBgId(null);

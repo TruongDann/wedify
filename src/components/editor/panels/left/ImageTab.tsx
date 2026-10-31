@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Upload as UploadIcon } from "lucide-react";
 import { Upload } from "antd";
 import { createImageElement, useEditorStore } from "@/store/editorStore";
-import { STOCK_IMAGES } from "@/constants/assets";
+import { STOCK_IMAGES, stockThumb } from "@/constants/assets";
 import { SectionTitle } from "./ui";
 
 const MAX_UPLOAD = 15;
@@ -49,7 +49,7 @@ export const ImageTab: React.FC = () => {
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={src}
+        src={stockThumb(src)}
         alt={alt}
         loading="lazy"
         className="w-full h-full object-cover"
