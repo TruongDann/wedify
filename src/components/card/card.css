@@ -1,34 +1,37 @@
 /* Hiệu ứng cho trang xem thiệp — tương ứng với Konva.Tween / Konva.Animation trong editor.
    Mọi hiệu ứng lấy gốc ở góc trên-trái phần tử, giống Konva. */
 
+/* Xuất hiện: kèm nhòe → rõ cho mềm mại, giống ảnh lấy nét dần */
 @keyframes wc-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; filter: blur(8px); }
+  60% { filter: blur(0); }
+  to { opacity: 1; filter: none; }
 }
 
 @keyframes wc-slide-up {
-  from { opacity: 0; transform: translateY(50px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateY(40px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
 }
 
 @keyframes wc-slide-down {
-  from { opacity: 0; transform: translateY(-50px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateY(-40px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
 }
 
 @keyframes wc-slide-left {
-  from { opacity: 0; transform: translateX(50px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateX(40px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
 }
 
 @keyframes wc-slide-right {
-  from { opacity: 0; transform: translateX(-50px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateX(-40px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
 }
 
 @keyframes wc-zoom-in {
-  from { transform: scale(0); }
-  to { transform: none; }
+  from { opacity: 0; transform: scale(0.6); filter: blur(4px); }
+  60% { opacity: 1; }
+  to { opacity: 1; transform: none; filter: none; }
 }
 
 /* Konva.Easings.BounceEaseOut từ y - 30 */
@@ -67,8 +70,33 @@
   to { transform: rotate(360deg); }
 }
 
+/* Màn mở thiệp (IntroOverlay) */
+@keyframes wc-intro-rise {
+  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes wc-intro-float {
+  0%, 100% { transform: translateY(0) rotate(-0.4deg); }
+  50% { transform: translateY(-8px) rotate(0.4deg); }
+}
+
+@keyframes wc-intro-seal-glow {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3)); }
+  50% { transform: scale(1.06); filter: drop-shadow(0 0 10px rgba(212, 84, 92, 0.6)); }
+}
+
+.wc-intro-seal:not(:disabled) svg {
+  animation: wc-intro-seal-glow 2.2s ease-in-out infinite;
+}
+
+.wc-intro-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .wc-anim {
+  .wc-anim,
+  .wc-intro-seal svg {
     animation: none !important;
   }
 }

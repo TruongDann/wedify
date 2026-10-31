@@ -137,11 +137,12 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
     id: "blessing",
     name: "Lời chúc phúc",
     content: "Chúc mừng hạnh phúc",
-    fontSize: 26,
-    fontWeight: 600,
-    fontFamily: "Parisienne",
+    fontSize: 30,
+    fontWeight: 400,
+    // Parisienne không có dấu tiếng Việt (chữ "ừ" bị lấy từ font khác)
+    fontFamily: "Pinyon Script",
     previewStyle: {
-      fontFamily: "Parisienne, cursive",
+      fontFamily: "Pinyon Script, cursive",
     },
   },
   {
@@ -174,9 +175,10 @@ export const TEXT_TEMPLATES: TextTemplate[] = [
     content: "LỄ THÀNH HÔN",
     fontSize: 34,
     fontWeight: 600,
-    fontFamily: "Cinzel",
+    // Cinzel không có dấu tiếng Việt
+    fontFamily: "Playfair Display SC",
     previewStyle: {
-      fontFamily: "Cinzel, serif",
+      fontFamily: "Playfair Display SC, serif",
       letterSpacing: "0.5px",
     },
   },
