@@ -6,7 +6,7 @@ import { Popover, Upload } from "antd";
 import { HexColorPicker, HexColorInput } from "react-colorful";
 import { useEditorStore } from "@/store/editorStore";
 import { COLOR_PALETTE, GRADIENT_PALETTE } from "@/constants/colors";
-import { STOCK_IMAGES } from "@/constants/assets";
+import { STOCK_IMAGES, stockThumb } from "@/constants/assets";
 import { PanelTabs, SectionTitle, Tile } from "./ui";
 
 const CHECKER =
@@ -228,7 +228,7 @@ export const BackgroundTab: React.FC = () => {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={src}
+                  src={stockThumb(src)}
                   alt={`Hình nền ${index + 1}`}
                   className="w-full h-full object-cover rounded-[9px]"
                 />

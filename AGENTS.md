@@ -8,6 +8,13 @@ Next.js 16 / React 19 wedding-card editor. Node 22, npm.
 - `npm run build` – must pass
 - `npm run lint` – has known pre-existing errors; do not add new ones
 
+## UI / design system
+
+Before building or changing any UI in `src/`, read [`DESIGN.md`](DESIGN.md) and follow it:
+use the design tokens (`text-ink`, `border-line`, `bg-primary`…) instead of hex or `slate/gray-*`,
+reuse the editor components it lists, `lucide-react` icons, Vietnamese sentence-case copy.
+Content rendered on the card itself (user-chosen fonts/colors) is out of scope.
+
 ## "Ship" workflow
 
 When the user asks to "up", "đẩy", "push", "ship" or "tạo PR" for a change, do the **whole** flow without asking again:

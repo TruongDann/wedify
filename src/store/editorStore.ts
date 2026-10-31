@@ -52,6 +52,12 @@ interface EditorStore {
   ungroupSelection: () => void;
   /** Bấm Shift/Ctrl: thêm hoặc bỏ phần tử (cả nhóm của nó) khỏi vùng chọn */
   toggleSelection: (id: string) => void;
+  /** Căn các phần tử đang chọn theo cạnh / tâm của cả vùng chọn */
+  alignSelection: (
+    mode: "left" | "centerX" | "right" | "top" | "centerY" | "bottom",
+  ) => void;
+  /** Giãn đều khoảng cách giữa các phần tử đang chọn (cần từ 3 phần tử) */
+  distributeSelection: (axis: "x" | "y") => void;
 
   // Layer actions
   bringToFront: (id: string) => void;
@@ -112,6 +118,85 @@ const expandGroups = (elements: EditorElement[], ids: string[]) => {
     )
     .map((el) => el.id);
   return [...ids, ...extra];
+};
+
+interface AlignUnit {
+  ids: string[];
+  locked: boolean;
+  box: { left: number; top: number; right: number; bottom: number };
+}
+
+/** Khung bao (theo trục) của phần tử đã xoay */
+const elementBox = (el: EditorElement) => {
+  const rad = (el.rotation * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const { width: w, height: h } = el.size;
+  const pts = [
+    [0, 0],
+    [w, 0],
+    [w, h],
+    [0, h],
+  ].map(([lx, ly]) => ({
+    x: el.position.x + lx * cos - ly * sin,
+    y: el.position.y + lx * sin + ly * cos,
+  }));
+  return {
+    left: Math.min(...pts.map((p) => p.x)),
+    top: Math.min(...pts.map((p) => p.y)),
+    right: Math.max(...pts.map((p) => p.x)),
+    bottom: Math.max(...pts.map((p) => p.y)),
+  };
+};
+
+/**
+ * Đơn vị để căn: mỗi nhóm nằm trọn trong vùng chọn là một khối, phần tử lẻ là một khối.
+ * Nếu cả vùng chọn chỉ là một nhóm thì căn từng phần tử bên trong nhóm.
+ */
+const alignUnits = (elements: EditorElement[], ids: string[]): AlignUnit[] => {
+  const selected = elements.filter((el) => ids.includes(el.id));
+  const singleGroup =
+    !!selected[0]?.groupId &&
+    selected.every((el) => el.groupId === selected[0].groupId);
+  const buckets = new Map<string, EditorElement[]>();
+  selected.forEach((el) => {
+    const key = !singleGroup && el.groupId ? `g:${el.groupId}` : el.id;
+    buckets.set(key, [...(buckets.get(key) ?? []), el]);
+  });
+  return [...buckets.values()].map((members) => {
+    const boxes = members.map(elementBox);
+    return {
+      ids: members.map((el) => el.id),
+      locked: members.some((el) => el.locked),
+      box: {
+        left: Math.min(...boxes.map((b) => b.left)),
+        top: Math.min(...boxes.map((b) => b.top)),
+        right: Math.max(...boxes.map((b) => b.right)),
+        bottom: Math.max(...boxes.map((b) => b.bottom)),
+      },
+    };
+  });
+};
+
+/** Dịch từng khối theo độ lệch tương ứng; khối có phần tử khóa thì giữ nguyên */
+const shiftUnits = (
+  elements: EditorElement[],
+  shifts: { unit: AlignUnit; dx: number; dy: number }[],
+) => {
+  const delta = new Map<string, { dx: number; dy: number }>();
+  shifts.forEach(({ unit, dx, dy }) => {
+    if (unit.locked) return;
+    unit.ids.forEach((id) => delta.set(id, { dx, dy }));
+  });
+  return elements.map((el) => {
+    const d = delta.get(el.id);
+    return d
+      ? {
+          ...el,
+          position: { x: el.position.x + d.dx, y: el.position.y + d.dy },
+        }
+      : el;
+  });
 };
 
 /** Bản sao có id mới, lệch một chút để không đè lên bản gốc; nhóm được sao thành nhóm mới */
@@ -413,6 +498,66 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
         groupId: ids.includes(el.id) ? groupId : el.groupId,
       })),
     }));
+    get().saveHistory();
+  },
+
+  alignSelection: (mode) => {
+    const units = alignUnits(get().elements, getSelectedIds(get()));
+    if (units.length < 2) return;
+    const left = Math.min(...units.map((u) => u.box.left));
+    const right = Math.max(...units.map((u) => u.box.right));
+    const top = Math.min(...units.map((u) => u.box.top));
+    const bottom = Math.max(...units.map((u) => u.box.bottom));
+    const shifts = units.map((unit) => {
+      const { box } = unit;
+      const w = box.right - box.left;
+      const h = box.bottom - box.top;
+      const dx =
+        mode === "left"
+          ? left - box.left
+          : mode === "right"
+            ? right - box.right
+            : mode === "centerX"
+              ? (left + right) / 2 - (box.left + w / 2)
+              : 0;
+      const dy =
+        mode === "top"
+          ? top - box.top
+          : mode === "bottom"
+            ? bottom - box.bottom
+            : mode === "centerY"
+              ? (top + bottom) / 2 - (box.top + h / 2)
+              : 0;
+      return { unit, dx, dy };
+    });
+    set((state) => ({ elements: shiftUnits(state.elements, shifts) }));
+    get().saveHistory();
+  },
+
+  distributeSelection: (axis) => {
+    const units = alignUnits(get().elements, getSelectedIds(get()));
+    if (units.length < 3) return;
+    const startKey = axis === "x" ? "left" : "top";
+    const endKey = axis === "x" ? "right" : "bottom";
+    const sorted = [...units].sort(
+      (a, b) => a.box[startKey] - b.box[startKey],
+    );
+    // Khoảng trống bằng nhau giữa các khối, hai khối ngoài cùng giữ nguyên
+    const span = sorted[sorted.length - 1].box[endKey] - sorted[0].box[startKey];
+    const sizes = sorted.reduce(
+      (sum, u) => sum + (u.box[endKey] - u.box[startKey]),
+      0,
+    );
+    const gap = (span - sizes) / (sorted.length - 1);
+    let cursor = sorted[0].box[startKey];
+    const shifts = sorted.map((unit) => {
+      const delta = cursor - unit.box[startKey];
+      cursor += unit.box[endKey] - unit.box[startKey] + gap;
+      return axis === "x"
+        ? { unit, dx: delta, dy: 0 }
+        : { unit, dx: 0, dy: delta };
+    });
+    set((state) => ({ elements: shiftUnits(state.elements, shifts) }));
     get().saveHistory();
   },
 

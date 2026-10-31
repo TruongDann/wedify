@@ -22,6 +22,7 @@ import {
 import { NOTO_ANIMATED_ATTRIBUTION, isNotoAnimatedSrc } from "@/constants/animatedStock";
 import { setViewerRuntime } from "@/lib/viewerRuntime";
 import { IntroOverlay } from "@/components/card/IntroOverlay";
+import { bindMusicTrim } from "@/components/card/musicTrim";
 import InvitationCover from "@/components/invitation/InvitationCover";
 import GiftModal, { type GiftCatalogItem } from "@/components/invitation/GiftModal";
 
@@ -245,12 +246,15 @@ export default function PublicInvitationPage() {
 
   // Nhạc nền: trình duyệt chặn autoplay nên thử phát ở lần tương tác đầu tiên.
   const musicSrc: string | undefined = canvasSettings.backgroundMusic?.src;
+  const musicStart: number | undefined = canvasSettings.backgroundMusic?.startTime;
+  const musicEnd: number | undefined = canvasSettings.backgroundMusic?.endTime;
   useEffect(() => {
     if (!musicSrc) return;
     const audio = new Audio(musicSrc);
     audio.loop = true;
     audio.volume = 0.4;
     audioRef.current = audio;
+    const unbindTrim = bindMusicTrim(audio, { startTime: musicStart, endTime: musicEnd });
 
     const start = () => {
       audio.play().then(() => setMusicOn(true)).catch(() => undefined);
@@ -260,11 +264,12 @@ export default function PublicInvitationPage() {
       audio.play().then(() => setMusicOn(true)).catch(() => window.addEventListener("pointerdown", start, { once: true }));
     }
     return () => {
+      unbindTrim();
       window.removeEventListener("pointerdown", start);
       audio.pause();
       audioRef.current = null;
     };
-  }, [musicSrc, canvasSettings.isMusicPlaying]);
+  }, [musicSrc, musicStart, musicEnd, canvasSettings.isMusicPlaying]);
 
   const toggleMusic = () => {
     const audio = audioRef.current;
