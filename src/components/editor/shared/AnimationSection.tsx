@@ -67,7 +67,7 @@ export const AnimationSection: React.FC<AnimationSectionProps> = ({
       {isExpanded && (
         <div className="px-4 pt-3 pb-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Bật hiệu ứng</span>
+            <span className="text-sm font-medium text-ink-2">Bật hiệu ứng</span>
             <Switch
               checked={animation.enabled}
               onChange={(enabled) =>
@@ -82,7 +82,7 @@ export const AnimationSection: React.FC<AnimationSectionProps> = ({
           {animation.enabled && (
             <>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Lặp liên tục</span>
+                <span className="text-sm font-medium text-ink-2">Lặp liên tục</span>
                 <Switch
                   checked={animation.continuous}
                   onChange={(continuous) =>

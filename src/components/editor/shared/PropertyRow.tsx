@@ -12,7 +12,7 @@ export const PropertyRow: React.FC<PropertyRowProps> = ({
   labelWidth = "w-24",
 }) => (
   <div className="flex items-center gap-3 mb-3">
-    <span className={`text-sm text-gray-600 ${labelWidth} shrink-0`}>
+    <span className={`text-sm font-medium text-ink-2 ${labelWidth} shrink-0`}>
       {label}
     </span>
     <div className="flex-1 flex items-center gap-2">{children}</div>

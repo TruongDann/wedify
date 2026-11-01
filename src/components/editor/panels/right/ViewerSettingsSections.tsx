@@ -21,7 +21,7 @@ const Toggle: React.FC<{ label: string; checked: boolean; onChange: (v: boolean)
 }) => (
   <div className="mb-3">
     <div className="flex items-center justify-between">
-      <span className="text-sm text-gray-600">{label}</span>
+      <span className="text-sm font-medium text-ink-2">{label}</span>
       <Switch size="small" checked={checked} onChange={onChange} />
     </div>
     {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
@@ -53,7 +53,7 @@ export const ViewerDisplaySection: React.FC<Props> = ({ expandedSections, onTogg
               <span className="text-xs text-gray-400">Nhanh</span>
             </PropertyRow>
           )}
-          <div className="text-sm text-gray-600 mb-2">Giao diện trên máy tính</div>
+          <div className="text-sm font-medium text-ink-2 mb-2">Giao diện trên máy tính</div>
           <Segmented
             block
             className="mb-2"
@@ -113,7 +113,7 @@ export const ViewerInteractionSection: React.FC<Props> = ({ expandedSections, on
               />
               {interaction.wishes && (
                 <>
-                  <div className="text-sm text-gray-600 mb-2">Hiển thị lời chúc</div>
+                  <div className="text-sm font-medium text-ink-2 mb-2">Hiển thị lời chúc</div>
                   <Segmented
                     block
                     className="mb-3"

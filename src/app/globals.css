@@ -23,7 +23,7 @@
   --color-canvas: #ECE8FA;
   --color-link: #4F5BEF;
 
-  --font-ui: 'SN Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-ui: 'SN Pro Variable', 'SN Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --width-sidebar: 85px;
 }

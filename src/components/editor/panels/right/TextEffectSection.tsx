@@ -66,7 +66,7 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
         <div className="px-4 pt-3 pb-4">
           {/* Style section */}
           <div className="mb-4">
-            <span className="text-xs text-gray-500 mb-2 block">Kiểu</span>
+            <span className="text-sm font-medium text-ink-2 mb-2 block">Kiểu</span>
             <div className="grid grid-cols-3 gap-2">
               {TEXT_EFFECT_STYLES.map((effect) => (
                 <button
@@ -354,7 +354,7 @@ export const TextEffectSection: React.FC<TextEffectSectionProps> = ({
 
           {/* Shape section */}
           <div>
-            <span className="text-xs text-gray-500 mb-2 block">Hình dạng</span>
+            <span className="text-sm font-medium text-ink-2 mb-2 block">Hình dạng</span>
             <div className="grid grid-cols-2 gap-2">
               <button
                 className={`h-14 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${

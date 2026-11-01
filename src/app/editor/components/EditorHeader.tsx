@@ -173,7 +173,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           }
         >
           <div
-            className={`h-9.5 px-3.5 mr-1 rounded-full flex items-center gap-1.5 text-[13px] font-medium cursor-default select-none transition-colors ${status.tone}`}
+            className={`h-9.5 px-3.5 mr-1 rounded-full flex items-center gap-1.5 text-sm font-semibold cursor-default select-none transition-colors ${status.tone}`}
           >
             <StatusIcon
               size={15}

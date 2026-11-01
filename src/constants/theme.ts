@@ -14,7 +14,7 @@ export const appTheme: ThemeConfig = {
     colorBorderSecondary: "#F1EEF9",
     colorBgLayout: "#FFFFFF",
     colorFillTertiary: "#F3F0FF",
-    fontFamily: "'SN Pro', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    fontFamily: "'SN Pro Variable', 'SN Pro', system-ui, -apple-system, 'Segoe UI', sans-serif",
     borderRadius: 10,
     borderRadiusSM: 8,
     borderRadiusLG: 16,
@@ -30,6 +30,16 @@ export const appTheme: ThemeConfig = {
       dangerShadow: "none",
       defaultBorderColor: "#D6D0EC",
       fontWeight: 600,
+    },
+    // Chữ trong ô nhập/chọn 15px như CineLove (nhãn bên cạnh 14px)
+    Input: {
+      inputFontSize: 15,
+    },
+    InputNumber: {
+      inputFontSize: 15,
+    },
+    Select: {
+      fontSize: 15,
     },
     Segmented: {
       itemSelectedColor: "#4F5BEF",

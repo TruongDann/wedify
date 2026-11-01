@@ -64,7 +64,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
 
 const PropertyRow: React.FC<PropertyRowProps> = ({ label, children }) => (
   <div className="flex items-center gap-3 mb-3">
-    <span className="text-sm text-gray-600 w-24 shrink-0">{label}</span>
+    <span className="text-sm font-medium text-ink-2 w-24 shrink-0">{label}</span>
     {children}
   </div>
 );
@@ -143,7 +143,7 @@ export const CardInfoSection: React.FC<CardInfoSectionProps> = ({
           </PropertyRow>
 
           <div className="mt-3 pt-3 border-t border-gray-100">
-            <span className="text-sm text-gray-600 block mb-2">
+            <span className="text-sm font-medium text-ink-2 block mb-2">
               Ảnh preview
             </span>
             {previewImage ? (
@@ -235,7 +235,7 @@ export const CanvasSizeSection: React.FC<CanvasSizeSectionProps> = ({
       {expandedSections.includes("canvasSize") && (
         <div className="px-4 pt-3 pb-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-gray-500">Kích thước (px)</span>
+            <span className="text-sm font-medium text-ink-2">Kích thước (px)</span>
             <button
               className={`p-1.5 rounded transition-colors ${
                 sizeLinked
@@ -275,7 +275,7 @@ export const CanvasSizeSection: React.FC<CanvasSizeSectionProps> = ({
           </div>
 
           <div>
-            <span className="text-xs text-gray-500 block mb-2">
+            <span className="text-sm font-medium text-ink-2 block mb-2">
               Kích thước có sẵn
             </span>
             <div className="grid grid-cols-2 gap-2">
@@ -381,7 +381,7 @@ export const BackgroundSection: React.FC<BackgroundSectionProps> = ({
 
           {/* Ảnh nền */}
           <div className="pt-3 border-t border-gray-100">
-            <span className="text-sm text-gray-600 block mb-2">Ảnh nền</span>
+            <span className="text-sm font-medium text-ink-2 block mb-2">Ảnh nền</span>
 
             {backgroundImage ? (
               <div className="space-y-3">

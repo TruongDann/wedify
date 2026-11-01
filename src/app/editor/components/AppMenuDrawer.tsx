@@ -69,7 +69,9 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
   },
 ];
 
-const rowClass = "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors";
+// Kích thước theo menu của CineLove: mục cao 42px, bo tròn, chữ 14.5px/500, icon 19px
+const rowClass =
+  "flex h-10.5 items-center gap-3 rounded-full px-3 text-[14.5px] font-medium transition-colors";
 
 /** Menu điều hướng mở từ nút ☰ ở header editor. */
 export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({ open, onClose }) => (
@@ -77,15 +79,15 @@ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({ open, onClose }) =
     open={open}
     onClose={onClose}
     placement="left"
-    size={280}
+    size={260}
     closable={false}
     styles={{
       body: { padding: 0 },
-      mask: { backdropFilter: "blur(4px)" },
+      mask: { backgroundColor: "rgba(24, 24, 27, 0.44)", backdropFilter: "blur(3px)" },
     }}
   >
-    <nav aria-label="Điều hướng" className="flex h-full flex-col overflow-y-auto px-4 pt-6 pb-4">
-      <Link href="/" onClick={onClose} className="mb-4 flex items-center px-3">
+    <nav aria-label="Điều hướng" className="flex h-full flex-col overflow-y-auto px-9 pt-9 pb-6">
+      <Link href="/" onClick={onClose} className="flex h-13 shrink-0 items-center">
         <Image
           src="/assets/images/brand/logo-web.png"
           alt="Wedify"
@@ -95,36 +97,36 @@ export const AppMenuDrawer: React.FC<AppMenuDrawerProps> = ({ open, onClose }) =
         />
       </Link>
 
-      {SECTIONS.map((section) => (
-        <div key={section.title} className="mt-3">
-          <div className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-3">
+      {SECTIONS.map((section, i) => (
+        <div key={section.title} className={i === 0 ? "" : "mt-4.5"}>
+          <div className="mb-1.5 px-3 text-[11.5px] font-semibold uppercase leading-4 tracking-[0.08em] text-ink-3">
             {section.title}
           </div>
-          {section.items.map(({ label, icon: Icon, href }) =>
-            href ? (
-              <Link
-                key={label}
-                href={href}
-                onClick={onClose}
-                className={`${rowClass} text-ink! hover:bg-surface-muted`}
-              >
-                <Icon size={18} strokeWidth={1.6} className="text-ink-2" />
-                {label}
-              </Link>
-            ) : (
-              <div
-                key={label}
-                aria-disabled="true"
-                className={`${rowClass} cursor-not-allowed text-ink-4`}
-              >
-                <Icon size={18} strokeWidth={1.6} />
-                <span className="flex-1">{label}</span>
-                <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[11px] font-semibold text-ink-3">
-                  Sắp có
-                </span>
-              </div>
-            ),
-          )}
+          <div className="space-y-0.5">
+            {section.items.map(({ label, icon: Icon, href }) =>
+              href ? (
+                <Link
+                  key={label}
+                  href={href}
+                  onClick={onClose}
+                  className={`${rowClass} text-ink-2! hover:bg-surface-muted hover:text-ink!`}
+                >
+                  <Icon size={19} strokeWidth={1.6} className="shrink-0 text-ink-3" />
+                  <span className="truncate">{label}</span>
+                </Link>
+              ) : (
+                <div
+                  key={label}
+                  aria-disabled="true"
+                  title="Sắp có"
+                  className={`${rowClass} cursor-not-allowed text-ink-4`}
+                >
+                  <Icon size={19} strokeWidth={1.6} className="shrink-0" />
+                  <span className="truncate">{label}</span>
+                </div>
+              ),
+            )}
+          </div>
         </div>
       ))}
     </nav>
