@@ -77,8 +77,10 @@ const GUEST_LINKS: MenuLink[] = [
   { href: "/register", label: "Tạo tài khoản", icon: UserPlus },
 ];
 
+// Kích thước theo menu tài khoản của CineLove: mục cao 38px, chữ 14px/500, icon 16px
 const rowClass =
-  "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-ink! hover:bg-surface-muted transition-colors";
+  "flex h-9.5 w-full items-center gap-2.5 rounded-xl px-2.5 text-sm font-medium text-ink! hover:bg-surface-muted transition-colors";
+const divider = <div className="mx-1 my-1.5 border-t border-line" />;
 
 /** Avatar ở góc phải header editor, bấm mở menu tài khoản. */
 export const UserMenu: React.FC = () => {
@@ -117,14 +119,18 @@ export const UserMenu: React.FC = () => {
   );
 
   const panel = (
-    <div className="w-65 rounded-2xl border border-line bg-white p-2 shadow-[0_4px_16px_rgba(0,0,0,0.12)]">
+    <div className="w-60 rounded-2xl border border-line bg-white p-1.5 shadow-[0_20px_48px_-12px_rgba(24,24,27,0.24),0_6px_12px_-6px_rgba(24,24,27,0.1)]">
       {profile ? (
         <>
-          <div className="px-3 pt-2 pb-3">
-            <div className="text-[15px] font-semibold text-ink truncate">{profile.name}</div>
-            {profile.email && <div className="text-[13px] text-ink-3 truncate">{profile.email}</div>}
-            <div className="mt-3 flex items-center justify-between">
-              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${PLAN_TONE[profile.tier]}`}>
+          <div className="px-2.5 pt-2.5 pb-2">
+            <div className="text-[14.5px] font-semibold leading-5 text-ink truncate">{profile.name}</div>
+            {profile.email && (
+              <div className="text-[13px] leading-4.5 text-ink-3 truncate">{profile.email}</div>
+            )}
+            <div className="mt-2.5 flex items-center justify-between">
+              <span
+                className={`flex h-5 items-center rounded-full px-2 text-[11.5px] font-semibold ${PLAN_TONE[profile.tier]}`}
+              >
                 {PLAN_LABEL[profile.tier]}
               </span>
               {profile.tier !== "PREMIUM" && (
@@ -139,26 +145,27 @@ export const UserMenu: React.FC = () => {
             </div>
           </div>
           {NAV_GROUPS.map((group, i) => (
-            <div key={i} className="border-t border-line-subtle py-1">
+            <React.Fragment key={i}>
+              {divider}
               {group.map(renderLink)}
-            </div>
+            </React.Fragment>
           ))}
-          <div className="border-t border-line-subtle pt-1">
-            <button type="button" className={rowClass} onClick={handleLogout}>
-              <LogOut size={16} className="text-ink-2" />
-              Đăng xuất
-            </button>
-          </div>
+          {divider}
+          <button type="button" className={rowClass} onClick={handleLogout}>
+            <LogOut size={16} className="text-ink-2" />
+            Đăng xuất
+          </button>
         </>
       ) : (
         <>
-          <div className="px-3 pt-2 pb-3">
-            <div className="text-[15px] font-semibold text-ink">Bạn chưa đăng nhập</div>
+          <div className="px-2.5 pt-2.5 pb-2">
+            <div className="text-[14.5px] font-semibold leading-5 text-ink">Bạn chưa đăng nhập</div>
             <div className="text-[13px] leading-5 text-ink-3">
               Đăng nhập để lưu và xuất bản thiệp lên Wedify.
             </div>
           </div>
-          <div className="border-t border-line-subtle pt-1">{GUEST_LINKS.map(renderLink)}</div>
+          {divider}
+          {GUEST_LINKS.map(renderLink)}
         </>
       )}
     </div>

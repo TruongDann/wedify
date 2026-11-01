@@ -376,7 +376,7 @@ export const BorderSection: React.FC<BorderSectionProps> = ({
         {/* Bo góc */}
         <div className="pt-2 border-t border-gray-100">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">Bo góc</span>
+            <span className="text-sm font-medium text-ink-2">Bo góc</span>
             <button
               className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
                 borderRadiusLinked
@@ -482,7 +482,7 @@ export const ShadowSection: React.FC<ShadowSectionProps> = ({
     {isExpanded && (
       <div className="px-4 pt-3 pb-4 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Đổ bóng</span>
+          <span className="text-sm font-medium text-ink-2">Đổ bóng</span>
           <Switch
             checked={shadow.enabled}
             onChange={(checked) =>

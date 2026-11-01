@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+// Font giao diện SN Pro (bản variable, có bộ chữ tiếng Việt)
+import "@fontsource-variable/sn-pro";
 import "./globals.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";

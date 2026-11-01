@@ -86,7 +86,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
 
 const PropertyRow: React.FC<PropertyRowProps> = ({ label, children }) => (
   <div className="flex items-center gap-3 mb-3">
-    <span className="text-sm text-gray-600 w-24 shrink-0">{label}</span>
+    <span className="text-sm font-medium text-ink-2 w-24 shrink-0">{label}</span>
     {children}
   </div>
 );
@@ -160,7 +160,7 @@ export const ImageActionSection: React.FC<ImageActionSectionProps> = ({
         </Button>
       )}
       <div className="flex items-center gap-3 mt-3">
-        <span className="text-sm text-gray-600 shrink-0">Hiển thị</span>
+        <span className="text-sm font-medium text-ink-2 shrink-0">Hiển thị</span>
         <Segmented
           size="small"
           block
@@ -509,7 +509,7 @@ export const ImageBorderSection: React.FC<ImageBorderSectionProps> = ({
         {/* Bo góc */}
         <div className="pt-2 border-t border-gray-100">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">Bo góc</span>
+            <span className="text-sm font-medium text-ink-2">Bo góc</span>
             <button
               className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
                 borderRadiusLinked
@@ -611,7 +611,7 @@ export const ImageShadowSection: React.FC<ImageShadowSectionProps> = ({
     {expandedSections.includes("imageShadow") && (
       <div className="px-4 pt-3 pb-4 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Đổ bóng</span>
+          <span className="text-sm font-medium text-ink-2">Đổ bóng</span>
           <Switch
             checked={shadow.enabled}
             onChange={(checked) =>

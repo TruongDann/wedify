@@ -142,7 +142,7 @@ export const WidgetRsvpSection: React.FC<SectionProps> = ({
   );
   const toggle = (label: string, key: keyof RsvpSettings) => (
     <div className="flex items-center justify-between mb-3">
-      <span className="text-sm text-gray-600">{label}</span>
+      <span className="text-sm font-medium text-ink-2">{label}</span>
       <Switch checked={rsvp[key] as boolean} onChange={(checked) => set({ [key]: checked })} />
     </div>
   );

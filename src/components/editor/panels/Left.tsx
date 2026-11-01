@@ -85,11 +85,11 @@ const Left: React.FC<LeftProps> = ({ activeTab, isOpen, onToggle }) => {
         <div className="flex-1 overflow-y-auto w-[294px] flex flex-col">
           {meta && (
             <header className="px-4 pt-4.5 pb-1 shrink-0">
-              <h2 className="text-lg font-semibold text-ink leading-6">
+              <h2 className="text-base font-semibold text-ink leading-6">
                 {meta.title}
               </h2>
               {meta.description && (
-                <p className="text-[13px] leading-5 text-ink-3 mt-0.5">
+                <p className="text-sm leading-5 text-ink-3 mt-0.5">
                   {meta.description}
                 </p>
               )}

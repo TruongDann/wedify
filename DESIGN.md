@@ -46,20 +46,23 @@ Màu trạng thái (thành công / cảnh báo / lỗi): dùng của antd (`mess
 
 ## 3. Chữ
 
-- Font giao diện: **SN Pro** (`--font-ui`, đã gán cho `body` và antd). Không đặt `font-family` riêng cho UI.
+- Font giao diện: **SN Pro** (`--font-ui`, đã gán cho `body` và antd), nạp từ gói `@fontsource-variable/sn-pro` trong `src/app/layout.tsx`. Không đặt `font-family` riêng cho UI.
 - Các font khác trong `globals.css` (Dancing Script, Playfair, Montserrat…) chỉ dành cho **nội dung thiệp**.
 
 | Vai trò | Class | Ví dụ |
 |---|---|---|
-| Tiêu đề panel / trang | `text-lg font-semibold text-ink` (18px) | "Văn bản", "Lớp" ở đầu panel trái |
+| Tiêu đề panel / trang | `text-base font-semibold leading-6 text-ink` (16px) | "Văn bản", "Lớp" ở đầu panel trái, "Cài đặt thiệp" ở panel phải |
 | Tiêu đề mục | `text-[15px] font-semibold leading-[22px] text-ink` | "Đoạn phát", "Biểu tượng nhạc" |
 | Tiêu đề section gập / nút | `text-sm font-semibold` (14px) | `SectionHeader`, nút antd |
 | Chữ thường | `text-sm text-ink` | Nội dung panel phải |
-| Mô tả, nhãn phụ | `text-[13px] leading-5 text-ink-3` | Dòng mô tả dưới tiêu đề |
+| Nhãn ô nhập | `text-sm font-medium text-ink-2` (14px/500) | "Danh mục", "Cỡ chữ" (`PropertyRow`) |
+| Chữ trong ô nhập / chọn | 15px (đặt trong `appTheme`) | `Input`, `InputNumber`, `Select` |
+| Mô tả | `text-sm leading-5 text-ink-3` | Dòng mô tả dưới tiêu đề panel |
+| Nhãn phụ | `text-[13px] leading-5 text-ink-3` | Dòng nhỏ phía trên tiêu đề ("Thiết lập chung") |
 | Tiêu đề nhóm nhỏ | `text-[13px] font-semibold text-ink-2` | `SectionTitle` |
 | Chú thích | `text-xs text-ink-3` | Ghi chú dưới ô, số đếm |
 
-Độ đậm: 400 thường, 500 nhãn tab chưa chọn, 600 tiêu đề / nút / mục đang chọn. Không dùng 700+ trong UI.
+Độ đậm: 400 thường, 500 nhãn ô nhập / nhãn tab chưa chọn, 600 tiêu đề / nút / mục đang chọn. Không dùng 700+ trong UI.
 
 ## 4. Bo góc, viền, bóng
 
