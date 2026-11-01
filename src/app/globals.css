@@ -147,6 +147,28 @@ body {
   animation: wedifyBounce 1.3s ease-in-out both;
 }
 
+/* Editor: chuyển giữa chỉnh sửa và xem trước */
+@keyframes editorStageIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.editor-stage-in {
+  animation: editorStageIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-stage-in {
+    animation: none;
+  }
+}
+
 /* Custom components that need specific styling */
 .canvas-wrapper {
   @apply bg-white shadow-lg rounded-sm;
