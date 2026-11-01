@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button, Tooltip, Dropdown } from "antd";
@@ -20,6 +20,7 @@ import { useEditorStore } from "@/store/editorStore";
 import { message } from "antd";
 import type { SaveStatus } from "../useDraftAutosave";
 import { UserMenu } from "./UserMenu";
+import { AppMenuDrawer } from "./AppMenuDrawer";
 
 interface EditorHeaderProps {
   /** Đang ở chế độ xem trước (ẩn panel, thiệp chạy thật). */
@@ -75,6 +76,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   saveStatus = "saved",
 }) => {
   const { undo, redo, history, historyIndex } = useEditorStore();
+  const [menuOpen, setMenuOpen] = useState(false);
   const status = SAVE_STATUS[saveStatus];
   const StatusIcon = status.icon;
 
@@ -111,9 +113,15 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
     <header className="h-16 bg-white border-b border-line-subtle flex items-center gap-4 px-6 z-50 fixed top-0 left-0 right-0">
       {/* Left: menu, logo, undo/redo */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <button type="button" className={`${iconBtn} -ml-2`} aria-label="Menu">
+        <button
+          type="button"
+          className={`${iconBtn} -ml-2`}
+          aria-label="Mở menu"
+          onClick={() => setMenuOpen(true)}
+        >
           <Menu size={18} />
         </button>
+        <AppMenuDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />
 
         <Link href="/" className="flex items-center">
           <Image

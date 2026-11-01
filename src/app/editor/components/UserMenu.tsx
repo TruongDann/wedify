@@ -78,7 +78,7 @@ const GUEST_LINKS: MenuLink[] = [
 ];
 
 const rowClass =
-  "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-ink hover:bg-surface-muted transition-colors";
+  "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-ink! hover:bg-surface-muted transition-colors";
 
 /** Avatar ở góc phải header editor, bấm mở menu tài khoản. */
 export const UserMenu: React.FC = () => {
@@ -131,7 +131,7 @@ export const UserMenu: React.FC = () => {
                 <Link
                   href="/dashboard/profile"
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-0.5 text-[13px] font-semibold text-link hover:text-primary-dark transition-colors"
+                  className="flex items-center gap-0.5 text-[13px] font-semibold text-link! hover:text-primary-dark! transition-colors"
                 >
                   Nâng cấp <ArrowUpRight size={14} />
                 </Link>
