@@ -25,13 +25,13 @@ export default function PreviewPage() {
     return onDraftChanged(refresh);
   }, []);
 
-  if (doc === undefined) return <main className="min-h-screen bg-neutral-100" />;
+  if (doc === undefined) return <main className="min-h-screen bg-renderer-gray" />;
 
   if (doc === null || doc.elements.length === 0) {
     return (
-      <main className="min-h-screen bg-neutral-100 flex flex-col items-center justify-center gap-4 px-4 text-center">
-        <p className="text-neutral-600">Chưa có thiệp nào để xem trước.</p>
-        <Link href="/editor" className="rounded-md bg-[#ff8599] px-4 py-2 text-white">
+      <main className="min-h-screen bg-renderer-gray flex flex-col items-center justify-center gap-3 px-4 text-center">
+        <p className="text-sm text-ink-3">Thiệp chưa có phần tử nào. Hãy thêm chữ, ảnh trong trình thiết kế rồi xem lại.</p>
+        <Link href="/editor" target="_top" className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-accent transition-colors">
           Mở trình thiết kế
         </Link>
       </main>
@@ -39,7 +39,7 @@ export default function PreviewPage() {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-100 sm:py-6">
+    <main className="min-h-screen bg-renderer-gray sm:py-6">
       <CardViewer canvasSettings={doc.canvasSettings} elements={doc.elements} />
     </main>
   );

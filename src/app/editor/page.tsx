@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { ConfigProvider, Spin, App } from "antd";
 import viVN from "antd/locale/vi_VN";
@@ -11,6 +11,7 @@ import {
   EditorHeader,
   EditorSidebar,
   PublishModal,
+  PreviewStage,
   QuickReplaceBar,
   CanvasHeightControl,
   type TabKey,
@@ -87,10 +88,16 @@ const EditorPage: React.FC = () => {
       .catch(() => undefined);
   }, []);
 
-  // Lưu ngay rồi mở trang xem thiệp ở tab riêng (tab đó tự cập nhật khi thiệp thay đổi)
+  // Chế độ xem trước: ẩn 2 panel, thay khung thiết kế bằng thiệp chạy thật (trang /preview).
+  // Lưu bản nháp trước để /preview đọc được bản mới nhất.
+  const [previewMode, setPreviewMode] = useState(false);
+  const previewModeRef = useRef(false);
+  useEffect(() => {
+    previewModeRef.current = previewMode;
+  }, [previewMode]);
   const handlePreview = () => {
-    const tab = window.open("/preview", "wedify-preview");
-    flush().finally(() => tab?.focus());
+    useEditorStore.getState().selectElement(null);
+    flush().finally(() => setPreviewMode(true));
   };
 
   // Initialize history
@@ -116,6 +123,13 @@ const EditorPage: React.FC = () => {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTyping(e.target)) return;
+      // Đang xem trước: Esc quay lại chỉnh sửa, các phím tắt khác không tác động lên thiệp
+      if (previewModeRef.current) {
+        if (e.key === "Escape") setPreviewMode(false);
+        return;
+      }
+      // Đang mở hộp thoại (xuất bản…) thì không thao tác lên thiệp
+      if (document.querySelector('[aria-modal="true"]')) return;
       const store = useEditorStore.getState();
       const hasSelection =
         !!store.selectedElementId || store.selectedElementIds.length > 0;
@@ -183,7 +197,7 @@ const EditorPage: React.FC = () => {
     };
 
     const handlePaste = (e: ClipboardEvent) => {
-      if (isTyping(e.target)) return;
+      if (isTyping(e.target) || previewModeRef.current) return;
       const file = Array.from(e.clipboardData?.files ?? []).find((f) =>
         f.type.startsWith("image/"),
       );
@@ -225,12 +239,60 @@ const EditorPage: React.FC = () => {
     };
   }, []);
 
+  // Panel trái/phải trượt gọn lại khi xem trước
+  const panelSlide =
+    "flex shrink-0 overflow-hidden transition-[max-width,opacity] duration-300 ease-out motion-reduce:transition-none";
+
+  const zoomControl = (
+    <div
+      className="pointer-events-auto flex flex-col items-center gap-2 rounded-full bg-white px-1.5 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.18)]"
+      role="group"
+      aria-label="Thu phóng khung thiết kế"
+    >
+      <button
+        type="button"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
+        onClick={() => changeCanvasZoom(0.1)}
+        disabled={canvasZoom >= 2}
+        aria-label="Phóng to"
+        title="Phóng to"
+      >
+        <ZoomIn size={18} />
+      </button>
+      <button
+        type="button"
+        className="text-xs tabular-nums text-ink"
+        onClick={() => setCanvasZoom(1)}
+        aria-label={`Thu phóng ${Math.round(canvasZoom * 100)} phần trăm, bấm để đặt lại`}
+        title="Đặt lại về 100%"
+      >
+        {Math.round(canvasZoom * 100)}%
+      </button>
+      <button
+        type="button"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
+        onClick={() => changeCanvasZoom(-0.1)}
+        disabled={canvasZoom <= 0.25}
+        aria-label="Thu nhỏ"
+        title="Thu nhỏ"
+      >
+        <ZoomOut size={18} />
+      </button>
+    </div>
+  );
+
   return (
     <ConfigProvider locale={viVN}>
       <App>
         <div className="flex flex-col h-screen overflow-hidden bg-white text-ink">
           {/* Header */}
-          <EditorHeader onPreview={handlePreview} onPublish={() => setPublishOpen(true)} saveStatus={saveStatus} />
+          <EditorHeader
+            previewMode={previewMode}
+            onPreview={handlePreview}
+            onExitPreview={() => setPreviewMode(false)}
+            onPublish={() => setPublishOpen(true)}
+            saveStatus={saveStatus}
+          />
           <PublishModal
             open={publishOpen}
             onClose={() => setPublishOpen(false)}
@@ -243,60 +305,38 @@ const EditorPage: React.FC = () => {
 
           {/* Body */}
           <div className="flex flex-1 mt-16 overflow-hidden">
-            {/* Left Sidebar - Toolbox with vertical tabs */}
-            <EditorSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+            {/* Xem trước thì thu gọn (không gỡ) các panel để giữ nguyên trạng thái khi quay lại */}
+            <div inert={previewMode} className={`${panelSlide} ${previewMode ? "max-w-0 opacity-0" : "max-w-100 opacity-100"}`}>
+              {/* Left Sidebar - Toolbox with vertical tabs */}
+              <EditorSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 
-            {/* Left Panel - Content */}
-            <Left
-              activeTab={activeTab}
-              isOpen={isLeftPanelOpen}
-              onToggle={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
-            />
+              {/* Left Panel - Content */}
+              <Left
+                activeTab={activeTab}
+                isOpen={isLeftPanelOpen}
+                onToggle={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+              />
+            </div>
 
             {/* Canvas Area */}
-            <div className="relative flex-1 min-w-0 flex flex-col bg-canvas overflow-hidden">
+            <div
+              className="relative flex-1 min-w-0 flex flex-col overflow-hidden bg-canvas"
+            >
               <div className="relative flex-1 min-h-0">
-              <div className="pointer-events-none absolute inset-x-3 bottom-3 z-40 flex flex-col items-end gap-3">
+              {/* Xem trước: khung điện thoại, nút thu phóng nằm sát cạnh khung */}
+              {previewMode ? (
+                <PreviewStage zoom={canvasZoom} zoomControl={zoomControl} />
+              ) : (
+                <div className="pointer-events-none absolute inset-x-3 bottom-3 z-40 flex flex-col items-end gap-3">
+                  {zoomControl}
+                  <div className="w-full flex justify-start">
+                    <QuickReplaceBar elements={elements} />
+                  </div>
+                </div>
+              )}
               <div
-                className="pointer-events-auto flex flex-col items-center gap-2 rounded-full bg-white px-1.5 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.18)]"
-                role="group"
-                aria-label="Thu phóng khung thiết kế"
+                className={`absolute inset-0 overflow-auto px-6 pt-8 pb-44 flex flex-col items-center ${previewMode ? "hidden" : "editor-stage-in"}`}
               >
-                <button
-                  type="button"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
-                  onClick={() => changeCanvasZoom(0.1)}
-                  disabled={canvasZoom >= 2}
-                  aria-label="Phóng to"
-                  title="Phóng to"
-                >
-                  <ZoomIn size={18} />
-                </button>
-                <button
-                  type="button"
-                  className="text-xs tabular-nums text-ink"
-                  onClick={() => setCanvasZoom(1)}
-                  aria-label={`Thu phóng ${Math.round(canvasZoom * 100)} phần trăm, bấm để đặt lại`}
-                  title="Đặt lại về 100%"
-                >
-                  {Math.round(canvasZoom * 100)}%
-                </button>
-                <button
-                  type="button"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
-                  onClick={() => changeCanvasZoom(-0.1)}
-                  disabled={canvasZoom <= 0.25}
-                  aria-label="Thu nhỏ"
-                  title="Thu nhỏ"
-                >
-                  <ZoomOut size={18} />
-                </button>
-              </div>
-              <div className="w-full flex justify-start">
-                <QuickReplaceBar elements={elements} />
-              </div>
-              </div>
-              <div className="absolute inset-0 overflow-auto px-6 pt-8 pb-44 flex flex-col items-center">
                 <div className="relative">
                   <div
                     style={{
@@ -332,16 +372,18 @@ const EditorPage: React.FC = () => {
             </div>
 
             {/* Right Panel - Settings */}
-            <Right
-              activeTab={activeTab}
-              cardTitle={cardTitle}
-              cardCategory={cardCategory}
-              cardStatus={cardStatus}
-              onTitleChange={setCardTitle}
-              onCategoryChange={setCardCategory}
-              onStatusChange={setCardStatus}
-              onSwitchToImageTab={() => setActiveTab("image")}
-            />
+            <div inert={previewMode} className={`${panelSlide} justify-end ${previewMode ? "max-w-0 opacity-0" : "max-w-[350px] opacity-100"}`}>
+              <Right
+                activeTab={activeTab}
+                cardTitle={cardTitle}
+                cardCategory={cardCategory}
+                cardStatus={cardStatus}
+                onTitleChange={setCardTitle}
+                onCategoryChange={setCardCategory}
+                onStatusChange={setCardStatus}
+                onSwitchToImageTab={() => setActiveTab("image")}
+              />
+            </div>
           </div>
         </div>
       </App>

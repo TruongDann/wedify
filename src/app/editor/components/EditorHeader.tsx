@@ -5,12 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button, Tooltip, Dropdown } from "antd";
 import {
-  ChevronDown,
   CloudAlert,
   CloudCheck,
   Eye,
   LoaderCircle,
   Menu,
+  Pencil,
   Redo2,
   Rocket,
   Undo2,
@@ -19,9 +19,13 @@ import {
 import { useEditorStore } from "@/store/editorStore";
 import { message } from "antd";
 import type { SaveStatus } from "../useDraftAutosave";
+import { UserMenu } from "./UserMenu";
 
 interface EditorHeaderProps {
+  /** Đang ở chế độ xem trước (ẩn panel, thiệp chạy thật). */
+  previewMode?: boolean;
   onPreview?: () => void;
+  onExitPreview?: () => void;
   /** Mở hộp thoại lưu/xuất bản thiệp lên tài khoản Wedify (API). */
   onPublish?: () => void;
   saveStatus?: SaveStatus;
@@ -64,7 +68,9 @@ const iconBtn =
   "w-9.5 h-9.5 rounded-full flex items-center justify-center text-ink-2 hover:bg-surface-muted transition-colors disabled:text-ink-4 disabled:hover:bg-transparent disabled:cursor-not-allowed";
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
+  previewMode = false,
   onPreview,
+  onExitPreview,
   onPublish,
   saveStatus = "saved",
 }) => {
@@ -120,7 +126,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           />
         </Link>
 
-        <div className="flex items-center gap-0.5 ml-3">
+        <div className={`flex items-center gap-0.5 ml-3 transition-opacity duration-300 ${previewMode ? "opacity-0 pointer-events-none" : ""}`}>
           <Tooltip title="Hoàn tác (Ctrl+Z)">
             <button
               type="button"
@@ -170,14 +176,22 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           </div>
         </Tooltip>
 
-        <Button
-          shape="round"
-          icon={<Eye size={16} className="block" />}
-          onClick={onPreview}
-          className="h-9.5! px-4! text-sm! inline-flex! items-center! justify-center! gap-1.5! leading-none!"
-        >
-          Xem trước
-        </Button>
+        <Tooltip title={previewMode ? "Quay lại chỉnh sửa (Esc)" : undefined}>
+          <Button
+            shape="round"
+            icon={
+              previewMode ? (
+                <Pencil size={16} className="block" />
+              ) : (
+                <Eye size={16} className="block" />
+              )
+            }
+            onClick={previewMode ? onExitPreview : onPreview}
+            className="h-9.5! px-4! text-sm! inline-flex! items-center! justify-center! gap-1.5! leading-none!"
+          >
+            {previewMode ? "Chỉnh sửa" : "Xem trước"}
+          </Button>
+        </Tooltip>
 
         <Dropdown menu={{ items: exportMenuItems }}>
           <Button
@@ -190,20 +204,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           </Button>
         </Dropdown>
 
-        {/* User avatar */}
-        <button
-          type="button"
-          className="ml-1 flex items-center gap-1 p-0.5 pr-2 rounded-full border border-line hover:bg-surface-muted transition-colors"
-        >
-          <Image
-            src="/assets/images/brand/avatar.jpg"
-            alt="Avatar"
-            width={32}
-            height={32}
-            className="w-8 h-8 rounded-full object-cover"
-          />
-          <ChevronDown size={14} className="text-ink-3" />
-        </button>
+        <UserMenu />
       </div>
     </header>
   );
